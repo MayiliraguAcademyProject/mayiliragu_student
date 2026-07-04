@@ -12,7 +12,7 @@ plugins {
 }
 
 android {
-    namespace = "com.learning.education_app.education_app"
+    namespace = "com.learning.Mayiliragu.Mayiliragu"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 

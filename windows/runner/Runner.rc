@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.learning.education_app" "\0"
-            VALUE "FileDescription", "education_app" "\0"
+            VALUE "CompanyName", "com.learning.Mayiliragu" "\0"
+            VALUE "FileDescription", "Mayiliragu" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "education_app" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.learning.education_app. All rights reserved." "\0"
-            VALUE "OriginalFilename", "education_app.exe" "\0"
-            VALUE "ProductName", "education_app" "\0"
+            VALUE "InternalName", "Mayiliragu" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 com.learning.Mayiliragu. All rights reserved." "\0"
+            VALUE "OriginalFilename", "Mayiliragu.exe" "\0"
+            VALUE "ProductName", "Mayiliragu" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

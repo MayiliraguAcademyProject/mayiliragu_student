@@ -1,4 +1,4 @@
-# education_app
+# Mayiliragu
 
 A new Flutter project.
 

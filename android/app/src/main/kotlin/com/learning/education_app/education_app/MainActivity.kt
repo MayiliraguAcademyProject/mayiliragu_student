@@ -1,4 +1,4 @@
-package com.learning.education_app.education_app
+package com.learning.Mayiliragu.Mayiliragu
 
 import io.flutter.embedding.android.FlutterActivity
 

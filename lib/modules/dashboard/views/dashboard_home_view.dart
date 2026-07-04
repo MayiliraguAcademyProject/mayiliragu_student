@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:education_app/core/services/notification_service.dart';
+import 'package:Mayiliragu/core/services/notification_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/constants/app_colors.dart';
@@ -721,18 +721,19 @@ class _BannerCarouselState extends State<BannerCarousel> {
                                     ),
                                   );
                                 },
-                                loadingBuilder: (context, child, loadingProgress) {
-                                  if (loadingProgress == null) return child;
-                                  return Container(
-                                    color: const Color(0xFFF5F5F5),
-                                    child: const Center(
-                                      child: CircularProgressIndicator(
-                                        color: AppColors.brandPurple,
-                                        strokeWidth: 2,
-                                      ),
-                                    ),
-                                  );
-                                },
+                                loadingBuilder:
+                                    (context, child, loadingProgress) {
+                                      if (loadingProgress == null) return child;
+                                      return Container(
+                                        color: const Color(0xFFF5F5F5),
+                                        child: const Center(
+                                          child: CircularProgressIndicator(
+                                            color: AppColors.brandPurple,
+                                            strokeWidth: 2,
+                                          ),
+                                        ),
+                                      );
+                                    },
                               ),
                         // Dark Gradient Overlay for title readability
                         Container(
