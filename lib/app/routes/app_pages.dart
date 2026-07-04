@@ -11,6 +11,7 @@ import '../../modules/lessons/bindings/lesson_binding.dart';
 import '../../modules/lessons/views/lesson_detail_view.dart';
 import '../../modules/profile/bindings/profile_binding.dart';
 import '../../modules/profile/views/profile_view.dart';
+import '../../modules/profile/views/profile_onboarding_view.dart';
 import '../../modules/tests/bindings/test_runner_binding.dart';
 import '../../modules/tests/views/test_runner_view.dart';
 import '../../modules/tests/bindings/test_results_binding.dart';
@@ -62,6 +63,11 @@ class AppPages {
     GetPage(
       name: Routes.PROFILE,
       page: () => const ProfileView(),
+      binding: ProfileBinding(),
+    ),
+    GetPage(
+      name: Routes.PROFILE_ONBOARDING,
+      page: () => const ProfileOnboardingView(),
       binding: ProfileBinding(),
     ),
     GetPage(

@@ -37,6 +37,20 @@ class SecureStorageService extends GetxService {
     await _storage.write(key: _userRoleKey, value: role);
   }
 
+  static const _themeModeKey = 'theme_mode';
+  static const _isOnboardingCompletedKey = 'onboarding_completed';
+
+  Future<String?> getThemeMode() async => await _storage.read(key: _themeModeKey);
+  Future<void> setThemeMode(String mode) async => await _storage.write(key: _themeModeKey, value: mode);
+
+  Future<bool> isOnboardingCompleted() async {
+    final val = await _storage.read(key: _isOnboardingCompletedKey);
+    return val == 'true';
+  }
+  Future<void> setIsOnboardingCompleted(bool completed) async {
+    await _storage.write(key: _isOnboardingCompletedKey, value: completed.toString());
+  }
+
   Future<String?> getAccessToken() async => await _storage.read(key: _accessTokenKey);
   Future<String?> getRefreshToken() async => await _storage.read(key: _refreshTokenKey);
   Future<String?> getUserRole() async => await _storage.read(key: _userRoleKey);
@@ -46,5 +60,7 @@ class SecureStorageService extends GetxService {
     await _storage.delete(key: _refreshTokenKey);
     await _storage.delete(key: _userRoleKey);
     await _storage.delete(key: _downloadDirPathKey);
+    await _storage.delete(key: _themeModeKey);
+    await _storage.delete(key: _isOnboardingCompletedKey);
   }
 }

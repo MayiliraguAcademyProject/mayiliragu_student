@@ -632,9 +632,8 @@ class _BannerCarouselState extends State<BannerCarousel> {
   Widget build(BuildContext context) {
     if (widget.banners.isEmpty) return const SizedBox.shrink();
 
-    return SizedBox(
-      height: 160,
-      width: double.infinity,
+    return AspectRatio(
+      aspectRatio: 1.1,
       child: Stack(
         children: [
           PageView.builder(
@@ -699,7 +698,7 @@ class _BannerCarouselState extends State<BannerCarousel> {
                               )
                             : Image.network(
                                 banner.imageUrl,
-                                fit: BoxFit.cover,
+                                fit: BoxFit.fill,
                                 errorBuilder: (context, error, stackTrace) {
                                   return Container(
                                     decoration: const BoxDecoration(
@@ -751,28 +750,28 @@ class _BannerCarouselState extends State<BannerCarousel> {
                         ),
 
                         // Text Title
-                        // Positioned(
-                        //   left: 16,
-                        //   bottom: 16,
-                        //   right: 16,
-                        //   child: Text(
-                        //     banner.title,
-                        //     maxLines: 2,
-                        //     overflow: TextOverflow.ellipsis,
-                        //     style: const TextStyle(
-                        //       color: Colors.white,
-                        //       fontSize: 16,
-                        //       fontWeight: FontWeight.w900,
-                        //       shadows: [
-                        //         Shadow(
-                        //           offset: Offset(0, 1),
-                        //           blurRadius: 4,
-                        //           color: Colors.black45,
-                        //         ),
-                        //       ],
-                        //     ),
-                        //   ),
-                        // ),
+                        Positioned(
+                          left: 16,
+                          bottom: 16,
+                          right: 16,
+                          child: Text(
+                            banner.title,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w900,
+                              shadows: [
+                                Shadow(
+                                  offset: Offset(0, 1),
+                                  blurRadius: 4,
+                                  color: Colors.black45,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),

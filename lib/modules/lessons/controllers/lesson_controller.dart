@@ -33,6 +33,7 @@ class LessonController extends GetxController {
   String? _currentLessonId;
   int _lastSyncedPosition = 0;
   int _latestPosition = 0;
+  int maxWatchedSeconds = 0;
 
   LessonController(this._repository, this._notesRepository);
 
@@ -67,6 +68,7 @@ class LessonController extends GetxController {
           _lastSyncedPosition = startSeconds;
         }
         _latestPosition = startSeconds;
+        maxWatchedSeconds = startSeconds;
 
         if (data['progress'] != null && data['progress']['completed'] != null) {
           isCompleted.value = data['progress']['completed'] as bool;
@@ -174,9 +176,18 @@ class LessonController extends GetxController {
         if (videoPlayerController != null) {
           final currentPos = videoPlayerController.value.position.inSeconds;
           if (currentPos > 0) {
-            _latestPosition = currentPos;
-            if ((currentPos - _lastSyncedPosition).abs() >= 30) {
-              _syncProgress(currentPos);
+            // Restrict seeking forward beyond watched limit
+            if (currentPos > maxWatchedSeconds + 3) {
+              betterPlayerController!.seekTo(Duration(seconds: maxWatchedSeconds));
+              AppToast.error('Skipping forward is restricted');
+            } else {
+              if (currentPos > maxWatchedSeconds) {
+                maxWatchedSeconds = currentPos;
+              }
+              _latestPosition = currentPos;
+              if ((currentPos - _lastSyncedPosition).abs() >= 30) {
+                _syncProgress(currentPos);
+              }
             }
           }
         }

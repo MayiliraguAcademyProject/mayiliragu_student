@@ -1,0 +1,230 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import '../controllers/profile_controller.dart';
+import '../../../core/constants/app_colors.dart';
+import '../widgets/demographics_section.dart';
+import '../widgets/contact_section.dart';
+import '../widgets/address_section.dart';
+import '../widgets/education_section.dart';
+
+class ProfileOnboardingView extends StatefulWidget {
+  const ProfileOnboardingView({Key? key}) : super(key: key);
+
+  @override
+  State<ProfileOnboardingView> createState() => _ProfileOnboardingViewState();
+}
+
+class _ProfileOnboardingViewState extends State<ProfileOnboardingView> {
+  final ProfileController controller = Get.find<ProfileController>();
+  final PageController _pageController = PageController();
+  int _activeStep = 0;
+  final int _totalSteps = 4;
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  void _nextStep() {
+    if (_activeStep < _totalSteps - 1) {
+      setState(() {
+        _activeStep++;
+      });
+      _pageController.animateToPage(
+        _activeStep,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    } else {
+      controller.updateStudentProfile(isOnboarding: true);
+    }
+  }
+
+  void _prevStep() {
+    if (_activeStep > 0) {
+      setState(() {
+        _activeStep--;
+      });
+      _pageController.animateToPage(
+        _activeStep,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final primaryColor = AppColors.primary;
+    final borderColor = Theme.of(context).brightness == Brightness.dark ? AppColors.borderDark : AppColors.border;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Complete Your Profile', style: TextStyle(fontWeight: FontWeight.bold)),
+        centerTitle: true,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        automaticallyImplyLeading: false,
+      ),
+      body: SafeArea(
+        child: Obx(() {
+          if (controller.isLoading.value) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          return Column(
+            children: [
+              // Progress Bar
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+                child: Row(
+                  children: List.generate(_totalSteps, (index) {
+                    final isActive = index <= _activeStep;
+                    return Expanded(
+                      child: Container(
+                        height: 6,
+                        margin: const EdgeInsets.symmetric(horizontal: 3.0),
+                        decoration: BoxDecoration(
+                          color: isActive ? primaryColor : borderColor,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+              ),
+
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Step ${_activeStep + 1} of $_totalSteps',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: primaryColor,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                    Text(
+                      _getStepTitle(_activeStep),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              Expanded(
+                child: PageView(
+                  controller: _pageController,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: [
+                    SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: DemographicsSection(controller: controller),
+                    ),
+                    SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: ContactSection(controller: controller),
+                    ),
+                    SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: AddressSection(controller: controller),
+                    ),
+                    SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: EducationSection(controller: controller),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Action Buttons
+              Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Row(
+                  children: [
+                    if (_activeStep > 0) ...[
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: _prevStep,
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            side: BorderSide(color: primaryColor),
+                          ),
+                          child: Text(
+                            'Back',
+                            style: TextStyle(
+                              color: primaryColor,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                    ],
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: controller.isUpdatingStudentProfile.value ? null : _nextStep,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primaryColor,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          elevation: 2,
+                        ),
+                        child: controller.isUpdatingStudentProfile.value
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : Text(
+                                _activeStep == _totalSteps - 1 ? 'Submit' : 'Continue',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
+        }),
+      ),
+    );
+  }
+
+  String _getStepTitle(int step) {
+    switch (step) {
+      case 0:
+        return 'Demographics';
+      case 1:
+        return 'Contact & Family';
+      case 2:
+        return 'Address';
+      case 3:
+        return 'Education';
+      default:
+        return '';
+    }
+  }
+}

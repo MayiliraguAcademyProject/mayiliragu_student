@@ -36,29 +36,39 @@ void main() async {
 
   final role = await storage.getUserRole();
   final hasSeenOnboarding = await storage.hasSeenOnboarding();
+  final savedThemeMode = await storage.getThemeMode();
+  final themeMode = savedThemeMode == 'dark'
+      ? ThemeMode.dark
+      : savedThemeMode == 'light'
+          ? ThemeMode.light
+          : ThemeMode.system;
 
   String initialRoute = Routes.ONBOARDING;
   if (hasSeenOnboarding) {
     if (token != null && role == 'STUDENT') {
-      initialRoute = Routes.DASHBOARD;
+      final onboardingCompleted = await storage.isOnboardingCompleted();
+      initialRoute = onboardingCompleted ? Routes.DASHBOARD : Routes.PROFILE_ONBOARDING;
     } else {
       initialRoute = Routes.LOGIN;
     }
   }
 
-  runApp(MyApp(initialRoute: initialRoute));
+  runApp(MyApp(initialRoute: initialRoute, themeMode: themeMode));
 }
 
 class MyApp extends StatelessWidget {
   final String initialRoute;
-  const MyApp({super.key, required this.initialRoute});
+  final ThemeMode themeMode;
+  const MyApp({super.key, required this.initialRoute, required this.themeMode});
 
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
       title: 'Education App',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.darkTheme,
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: themeMode,
       initialRoute: initialRoute,
       getPages: AppPages.routes,
     );

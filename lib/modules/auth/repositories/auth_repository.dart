@@ -20,4 +20,8 @@ class AuthRepository {
   Future<Response> logout() async {
     return await _apiClient.post(ApiConstants.logout);
   }
+
+  Future<Response> getStudentProfile(String userId) async {
+    return await _apiClient.get('/enrollments/students/$userId/profile');
+  }
 }

@@ -4,6 +4,7 @@ import '../../../../core/services/secure_storage_service.dart';
 import '../../../../core/services/notification_service.dart';
 import '../../../../app/routes/app_routes.dart';
 import '../repositories/auth_repository.dart';
+import '../../../shared/models/student_profile_model.dart';
 
 class AuthController extends GetxController {
   final AuthRepository _authRepository;
@@ -61,8 +62,30 @@ class AuthController extends GetxController {
         emailController.clear();
         passwordController.clear();
         
-        // Navigate to Dashboard
-        Get.offAllNamed(Routes.DASHBOARD);
+        // Check student profile completion status using repository and model
+        bool isCompleted = false;
+        try {
+          final profileRes = await _authRepository.getStudentProfile(responseData['user']['id']);
+          if (profileRes.statusCode == 200 && profileRes.data['data'] != null) {
+            final profileModel = StudentProfileModel.fromJson(profileRes.data['data']);
+            if (profileModel.gender != null && 
+                profileModel.gender!.isNotEmpty && 
+                profileModel.mobileNumber != null && 
+                profileModel.mobileNumber!.isNotEmpty) {
+              isCompleted = true;
+            }
+          }
+        } catch (e) {
+          debugPrint('Error checking profile completion on login: $e');
+        }
+
+        if (isCompleted) {
+          await _storage.setIsOnboardingCompleted(true);
+          Get.offAllNamed(Routes.DASHBOARD);
+        } else {
+          await _storage.setIsOnboardingCompleted(false);
+          Get.offAllNamed(Routes.PROFILE_ONBOARDING);
+        }
       } else {
         errorMessage.value = response.data['message'] ?? 'Login failed';
       }
