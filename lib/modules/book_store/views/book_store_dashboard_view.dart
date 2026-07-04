@@ -9,6 +9,7 @@ import '../controllers/book_store_controller.dart';
 import '../../../../core/utils/toast_helper.dart';
 import '../models/book_model.dart';
 import 'book_detail_view.dart';
+import '../../../../shared/widgets/custom_network_image.dart';
 
 class BookStoreDashboardView extends StatefulWidget {
   const BookStoreDashboardView({super.key});
@@ -204,14 +205,12 @@ class _BookStoreDashboardViewState extends State<BookStoreDashboardView> with Si
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(8),
-                    child: Image.network(
-                      book.thumbnailUrl.startsWith('http://') || book.thumbnailUrl.startsWith('https://')
-                          ? book.thumbnailUrl
-                          : '${ApiConstants.baseUrl.replaceAll('/api', '')}${book.thumbnailUrl}',
+                    child: CustomNetworkImage(
+                      imageUrl: book.thumbnailUrl,
                       width: 50,
                       height: 70,
                       fit: fitCover(book.thumbnailUrl),
-                      errorBuilder: (_, __, ___) => const Icon(Icons.book, size: 40),
+                      errorWidget: const Icon(Icons.book, size: 40),
                     ),
                   ),
                   const SizedBox(width: 14),
@@ -466,12 +465,10 @@ class _BookStoreDashboardViewState extends State<BookStoreDashboardView> with Si
                   borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
                 ),
                 child: Center(
-                  child: Image.network(
-                    book.thumbnailUrl.startsWith('http://') || book.thumbnailUrl.startsWith('https://')
-                        ? book.thumbnailUrl
-                        : '${ApiConstants.baseUrl.replaceAll('/api', '')}${book.thumbnailUrl}',
+                  child: CustomNetworkImage(
+                    imageUrl: book.thumbnailUrl,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => const Icon(Icons.book, size: 40, color: Colors.grey),
+                    errorWidget: const Icon(Icons.book, size: 40, color: Colors.grey),
                   ),
                 ),
               ),

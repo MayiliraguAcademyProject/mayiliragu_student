@@ -12,6 +12,7 @@ import '../controllers/dashboard_controller.dart';
 import '../models/dashboard_model.dart';
 import '../../courses/views/course_detail_view.dart';
 import '../../tests/controllers/tests_controller.dart';
+import '../../../shared/widgets/custom_network_image.dart';
 
 class DashboardHomeView extends GetView<DashboardController> {
   const DashboardHomeView({super.key});
@@ -696,43 +697,28 @@ class _BannerCarouselState extends State<BannerCarousel> {
                                   );
                                 },
                               )
-                            : Image.network(
-                                banner.imageUrl,
+                            : CustomNetworkImage(
+                                imageUrl: banner.imageUrl,
                                 fit: BoxFit.fill,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Container(
-                                    decoration: const BoxDecoration(
-                                      gradient: LinearGradient(
-                                        colors: [
-                                          Color(0xFFE1BEE7),
-                                          Color(0xFFCE93D8),
-                                        ],
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                      ),
+                                errorWidget: Container(
+                                  decoration: const BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        Color(0xFFE1BEE7),
+                                        Color(0xFFCE93D8),
+                                      ],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
                                     ),
-                                    child: const Center(
-                                      child: Icon(
-                                        Icons.broken_image_rounded,
-                                        color: Colors.white,
-                                        size: 40,
-                                      ),
+                                  ),
+                                  child: const Center(
+                                    child: Icon(
+                                      Icons.broken_image_rounded,
+                                      color: Colors.white,
+                                      size: 40,
                                     ),
-                                  );
-                                },
-                                loadingBuilder:
-                                    (context, child, loadingProgress) {
-                                      if (loadingProgress == null) return child;
-                                      return Container(
-                                        color: const Color(0xFFF5F5F5),
-                                        child: const Center(
-                                          child: CircularProgressIndicator(
-                                            color: AppColors.brandPurple,
-                                            strokeWidth: 2,
-                                          ),
-                                        ),
-                                      );
-                                    },
+                                  ),
+                                ),
                               ),
                         // Dark Gradient Overlay for title readability
                         Container(

@@ -4,6 +4,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../controllers/book_store_controller.dart';
 import 'book_checkout_view.dart';
+import '../../../../shared/widgets/custom_network_image.dart';
 
 class BookDetailView extends StatefulWidget {
   final String bookId;
@@ -86,13 +87,11 @@ class _BookDetailViewState extends State<BookDetailView> {
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.circular(12),
-                      child: Image.network(
-                        book.thumbnailUrl.startsWith('http://') || book.thumbnailUrl.startsWith('https://')
-                            ? book.thumbnailUrl
-                            : '${ApiConstants.baseUrl.replaceAll('/api', '')}${book.thumbnailUrl}',
+                      child: CustomNetworkImage(
+                        imageUrl: book.thumbnailUrl,
                         height: 220,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => const Icon(Icons.book, size: 80, color: Colors.grey),
+                        errorWidget: const Icon(Icons.book, size: 80, color: Colors.grey),
                       ),
                     ),
                     const SizedBox(height: 16),

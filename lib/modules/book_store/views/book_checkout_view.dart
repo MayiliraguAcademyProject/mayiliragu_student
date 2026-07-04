@@ -4,6 +4,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/toast_helper.dart';
 import '../controllers/book_store_controller.dart';
 import '../models/book_model.dart';
+import 'payment_proof_view.dart';
 
 class BookCheckoutView extends StatefulWidget {
   final BookModel book;
@@ -618,20 +619,50 @@ class _BookCheckoutViewState extends State<BookCheckoutView> {
 
                           if (order != null) {
                             Get.defaultDialog(
-                              title: "Order Placed!",
-                              middleText: widget.format == 'HARD_COPY'
-                                  ? "Your order has been placed successfully via Cash on Delivery."
-                                  : "Order created. Please pay at center to unlock this soft copy in 'My Books'.",
-                              onConfirm: () {
-                                Get.back(); // close dialog
-                                Get.back(); // close checkout
-                                Get.back(); // close detail
-                              },
-                              textConfirm: "OK",
-                              confirmTextColor: Colors.white,
-                              buttonColor: AppColors.brandPurple,
+                              title: "Order Created!",
+                              content: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    widget.format == 'HARD_COPY'
+                                        ? "Would you like to pay online now via QR Code or choose Cash on Delivery?"
+                                        : "Would you like to pay online now via QR Code to unlock it instantly, or pay offline later at the center?",
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(fontSize: 13),
+                                  ),
+                                  const SizedBox(height: 20),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Get.back(); // close dialog
+                                          Get.back(); // close checkout
+                                          Get.back(); // close detail
+                                        },
+                                        child: Text(
+                                          widget.format == 'HARD_COPY' ? 'COD' : 'Pay Offline',
+                                          style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
+                                        ),
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          Get.back(); // close dialog
+                                          Get.to(() => PaymentProofView(order: order));
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: AppColors.brandPurple,
+                                          foregroundColor: Colors.white,
+                                        ),
+                                        child: const Text('Pay Online (QR)', style: TextStyle(fontWeight: FontWeight.bold)),
+                                      ),
+                                    ],
+                                  )
+                                ],
+                              ),
                             );
                           }
+
                         },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.brandPurple,

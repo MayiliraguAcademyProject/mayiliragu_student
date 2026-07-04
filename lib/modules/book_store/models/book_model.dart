@@ -141,6 +141,7 @@ class BookOrderModel {
   final String? shippingName;
   final String? shippingPhone;
   final String? shippingAddress;
+  final String? paymentScreenshotUrl;
   final List<BookOrderItemModel>? items;
   final CouponModel? coupon;
 
@@ -159,6 +160,7 @@ class BookOrderModel {
     this.shippingName,
     this.shippingPhone,
     this.shippingAddress,
+    this.paymentScreenshotUrl,
     this.items,
     this.coupon,
   });
@@ -179,6 +181,7 @@ class BookOrderModel {
       shippingName: json['shippingName'],
       shippingPhone: json['shippingPhone'],
       shippingAddress: json['shippingAddress'],
+      paymentScreenshotUrl: json['paymentScreenshotUrl'],
       items: json['items'] != null
           ? (json['items'] as List).map((i) => BookOrderItemModel.fromJson(i)).toList()
           : null,
@@ -186,3 +189,4 @@ class BookOrderModel {
     );
   }
 }
+
