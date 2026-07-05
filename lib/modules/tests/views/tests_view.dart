@@ -336,10 +336,17 @@ class TestsView extends GetView<TestsController> {
                     args['test_title'] = featuredTest.title;
                     Get.toNamed('/test-results', arguments: args);
                   } else {
-                    Get.toNamed(
-                      '/test-runner',
-                      arguments: featuredTest.id,
-                    )?.then((_) => controller.fetchTests());
+                    if (featuredTest.isSectioned) {
+                      Get.toNamed(
+                        '/test-sections',
+                        arguments: featuredTest.id,
+                      )?.then((_) => controller.fetchTests());
+                    } else {
+                      Get.toNamed(
+                        '/test-runner',
+                        arguments: featuredTest.id,
+                      )?.then((_) => controller.fetchTests());
+                    }
                   }
                 },
                 style: ElevatedButton.styleFrom(
@@ -648,10 +655,17 @@ class TestsView extends GetView<TestsController> {
                           args['test_title'] = test.title;
                           Get.toNamed('/test-results', arguments: args);
                         } else {
-                          Get.toNamed(
-                            '/test-runner',
-                            arguments: test.id,
-                          )?.then((_) => controller.fetchTests());
+                          if (test.isSectioned) {
+                            Get.toNamed(
+                              '/test-sections',
+                              arguments: test.id,
+                            )?.then((_) => controller.fetchTests());
+                          } else {
+                            Get.toNamed(
+                              '/test-runner',
+                              arguments: test.id,
+                            )?.then((_) => controller.fetchTests());
+                          }
                         }
                       },
                       style: OutlinedButton.styleFrom(

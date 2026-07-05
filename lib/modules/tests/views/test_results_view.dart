@@ -227,6 +227,30 @@ class TestResultsView extends GetView<TestResultsController> {
                   ),
                 ),
                 const SizedBox(height: 20),
+                Obx(() {
+                  if (controller.sectionBreakdowns.isEmpty) return const SizedBox.shrink();
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Section Performance Breakdown',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w900,
+                            color: Color(0xFF1E293B),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        ...controller.sectionBreakdowns.map((sec) => Padding(
+                          padding: const EdgeInsets.only(bottom: 12.0),
+                          child: _buildSectionRow(sec),
+                        )).toList(),
+                      ],
+                    ),
+                  );
+                }),
               ],
 
               // Comparative Stats Container
@@ -593,6 +617,91 @@ class TestResultsView extends GetView<TestResultsController> {
             fontSize: 10,
             color: color,
             fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSectionRow(Map<String, dynamic> data) {
+    final String name = data['name'] ?? 'Section';
+    final double score = (data['score'] as num?)?.toDouble() ?? 0.0;
+    final double totalMarks = (data['total_marks'] as num?)?.toDouble() ?? 0.0;
+    final double cutoff = (data['cutoff_marks'] as num?)?.toDouble() ?? 0.0;
+    final int correct = data['correct'] ?? 0;
+    final int wrong = data['wrong'] ?? 0;
+    final int skipped = data['skipped'] ?? 0;
+    final bool isPassed = data['passed'] ?? false;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFE5E7EB)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                name,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF1F2937),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: isPassed ? const Color(0xFFD1FAE5) : const Color(0xFFFEE2E2),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  isPassed ? 'Passed Cutoff' : 'Failed Cutoff',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: isPassed ? const Color(0xFF065F46) : const Color(0xFF991B1B),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildSectionDetailCol('Score', '$score / ${totalMarks.toInt()}'),
+              _buildSectionDetailCol('Cutoff', '$cutoff'),
+              _buildSectionDetailCol('Correct', '$correct', color: const Color(0xFF10B981)),
+              _buildSectionDetailCol('Wrong', '$wrong', color: const Color(0xFFEF4444)),
+              _buildSectionDetailCol('Skipped', '$skipped', color: Colors.grey),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionDetailCol(String label, String val, {Color? color}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          val,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.bold,
+            color: color ?? const Color(0xFF1F2937),
           ),
         ),
       ],

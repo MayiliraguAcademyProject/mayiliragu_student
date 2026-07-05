@@ -21,9 +21,11 @@ class TestsController extends GetxController {
   // Human-readable mapping configs
   final categories = [
     {'id': 'cat_tnpsc', 'name': 'TNPSC'},
+    {'id': 'TNPSC_GROUP_2_4', 'name': 'TNPSC Group 2 & 4'},
     {'id': 'cat_upsc', 'name': 'UPSC'},
     {'id': 'cat_ssc', 'name': 'SSC'},
     {'id': 'cat_banking', 'name': 'Banking'},
+    {'id': 'IBPS_PO', 'name': 'IBPS PO'},
   ];
 
   final Map<String, String> subjectNames = {

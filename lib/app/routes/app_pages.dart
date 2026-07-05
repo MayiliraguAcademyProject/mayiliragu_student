@@ -14,6 +14,8 @@ import '../../modules/profile/views/profile_view.dart';
 import '../../modules/profile/views/profile_onboarding_view.dart';
 import '../../modules/tests/bindings/test_runner_binding.dart';
 import '../../modules/tests/views/test_runner_view.dart';
+import '../../modules/tests/bindings/section_selection_binding.dart';
+import '../../modules/tests/views/section_selection_view.dart';
 import '../../modules/tests/bindings/test_results_binding.dart';
 import '../../modules/tests/views/test_results_view.dart';
 import '../../modules/tests/bindings/test_solutions_binding.dart';
@@ -74,6 +76,11 @@ class AppPages {
       name: Routes.TEST_RUNNER,
       page: () => const TestRunnerView(),
       binding: TestRunnerBinding(),
+    ),
+    GetPage(
+      name: Routes.TEST_SECTIONS,
+      page: () => const SectionSelectionView(),
+      binding: SectionSelectionBinding(),
     ),
     GetPage(
       name: Routes.TEST_RESULTS,

@@ -58,6 +58,7 @@ class QuestionModel {
   final String? hint;
   final String? modelAnswer;
   final int? wordLimit;
+  final String? sectionId;
 
   QuestionModel({
     required this.id,
@@ -77,6 +78,7 @@ class QuestionModel {
     this.hint,
     this.modelAnswer,
     this.wordLimit,
+    this.sectionId,
   });
 
   factory QuestionModel.fromJson(Map<String, dynamic> json) {
@@ -122,6 +124,7 @@ class QuestionModel {
       hint: json['hint'],
       modelAnswer: json['model_answer'],
       wordLimit: json['word_limit'] != null ? (json['word_limit'] as num).toInt() : null,
+      sectionId: json['section_id'],
     );
   }
 }

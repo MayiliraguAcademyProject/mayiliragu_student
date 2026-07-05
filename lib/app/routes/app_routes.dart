@@ -8,6 +8,7 @@ abstract class Routes {
   static const PROFILE = '/profile';
   static const PROFILE_ONBOARDING = '/profile-onboarding';
   static const TEST_RUNNER = '/test-runner';
+  static const TEST_SECTIONS = '/test-sections';
   static const TEST_RESULTS = '/test-results';
   static const TEST_SOLUTIONS = '/test-solutions';
   static const CURRENT_AFFAIRS = '/current-affairs';

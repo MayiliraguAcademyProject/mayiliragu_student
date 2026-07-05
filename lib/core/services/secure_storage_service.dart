@@ -63,4 +63,8 @@ class SecureStorageService extends GetxService {
     await _storage.delete(key: _themeModeKey);
     await _storage.delete(key: _isOnboardingCompletedKey);
   }
+
+  Future<String?> readString(String key) async => await _storage.read(key: key);
+  Future<void> writeString(String key, String value) async => await _storage.write(key: key, value: value);
+  Future<void> deleteKey(String key) async => await _storage.delete(key: key);
 }

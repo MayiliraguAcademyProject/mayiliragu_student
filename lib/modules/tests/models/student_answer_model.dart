@@ -31,6 +31,20 @@ class StudentAnswer {
     };
   }
 
+  factory StudentAnswer.fromJson(Map<String, dynamic> json) {
+    final List<dynamic>? optIds = json['selected_option_ids'];
+    return StudentAnswer(
+      questionId: json['question_id'] ?? '',
+      selectedOptionIds: optIds?.cast<String>(),
+      booleanAnswer: json['boolean_answer'],
+      textAnswer: json['text_answer'],
+      descriptiveText: json['descriptive_text'],
+      attachmentUrl: json['attachment_url'],
+      isFlagged: json['is_flagged'] ?? false,
+      isVisited: json['is_visited'] ?? true,
+    );
+  }
+
   // Helper to check if any answer is filled
   bool get hasAnswer {
     if (selectedOptionIds != null && selectedOptionIds!.isNotEmpty) return true;

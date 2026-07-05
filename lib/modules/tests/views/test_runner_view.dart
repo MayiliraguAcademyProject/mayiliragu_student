@@ -17,8 +17,11 @@ class TestRunnerView extends GetView<TestRunnerController> {
         if (didPop) return;
         final confirm = await _showExitConfirmation(context);
         if (confirm == true) {
-          // Cancel timers and exit
-          controller.submitTest();
+          if (controller.activeSectionId != null) {
+            controller.submitSectionOrTest();
+          } else {
+            controller.submitTest();
+          }
         }
       },
       child: Scaffold(
@@ -34,7 +37,11 @@ class TestRunnerView extends GetView<TestRunnerController> {
                 onPressed: () async {
                   final confirm = await _showExitConfirmation(context);
                   if (confirm == true) {
-                    controller.submitTest();
+                    if (controller.activeSectionId != null) {
+                      controller.submitSectionOrTest();
+                    } else {
+                      controller.submitTest();
+                    }
                   }
                 },
                 icon: const Icon(Icons.exit_to_app, color: Colors.white, size: 20),
@@ -43,10 +50,15 @@ class TestRunnerView extends GetView<TestRunnerController> {
                   style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                 ),
               ),
-              Obx(() => Text(
-                    controller.testTitle.value,
-                    style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-                  )),
+              Expanded(
+                child: Obx(() => Text(
+                      controller.testTitle.value,
+                      style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                      textAlign: TextAlign.center,
+                    )),
+              ),
               Obx(() {
                 final isRed = controller.remainingSeconds.value < 300; // Less than 5 mins remaining
                 return Container(
@@ -378,9 +390,38 @@ class TestRunnerView extends GetView<TestRunnerController> {
             Obx(() {
               final isLast = controller.currentIndex.value == controller.questions.length - 1;
               return ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   if (isLast) {
-                    controller.submitTest();
+                    if (controller.activeSectionId != null) {
+                      final confirm = await showDialog<bool>(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text('Submit Section?'),
+                          content: const Text(
+                            'Are you sure you want to finish this section? You cannot return to it.',
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+                            ),
+                            ElevatedButton(
+                              onPressed: () => Navigator.pop(context, true),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF10B981),
+                                foregroundColor: Colors.white,
+                              ),
+                              child: const Text('Submit'),
+                            ),
+                          ],
+                        ),
+                      );
+                      if (confirm == true) {
+                        controller.submitSectionOrTest();
+                      }
+                    } else {
+                      controller.submitTest();
+                    }
                   } else {
                     controller.nextQuestion();
                   }
