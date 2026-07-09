@@ -7,7 +7,7 @@ class ApiConstants {
     try {
       if (Platform.isAndroid) {
       // return 'https://education-api-tb3k.onrender.com/api';
-       return 'http://192.168.31.86:5000/api';
+       return 'http://192.168.0.15:5000/api';
       }
     } catch (_) {}
     return 'https://education-api-tb3k.onrender.com/api';

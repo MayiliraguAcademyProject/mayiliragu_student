@@ -195,37 +195,57 @@ class TestRunnerView extends GetView<TestRunnerController> {
                           ),
                           const SizedBox(height: 16),
 
-                          // Question Text
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              if (currentQuestion.questionTextEn.isNotEmpty)
-                                Text(
-                                  currentQuestion.questionTextEn,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.textPrimary,
-                                    height: 1.5,
+                          // 1. Shared Context Passage or Caselet (RC / DI)
+                          if (currentQuestion.sharedContextEn != null && currentQuestion.sharedContextEn!.isNotEmpty)
+                            SharedContextBlock(question: currentQuestion),
+
+                          // 2. Data Interpretation Structured Table
+                          if (currentQuestion.tableData != null && currentQuestion.tableData!.isNotEmpty)
+                            DiTableWidget(rows: currentQuestion.tableData!),
+
+                          // 3. Question / Dataset Images Row
+                          if (currentQuestion.images != null && currentQuestion.images!.isNotEmpty)
+                            QuestionImagesRow(images: currentQuestion.images!),
+
+                          if (currentQuestion.images != null && currentQuestion.images!.isNotEmpty)
+                            const SizedBox(height: 12),
+
+                          // 4. Question Text or Assertion-Reason Statements
+                          if (currentQuestion.format == QuestionFormat.assertionReason)
+                            AssertionReasonCard(question: currentQuestion)
+                          else
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (currentQuestion.questionTextEn.isNotEmpty)
+                                  Text(
+                                    currentQuestion.questionTextEn,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.textPrimary,
+                                      height: 1.5,
+                                    ),
                                   ),
-                                ),
-                              if (currentQuestion.questionTextEn.isNotEmpty &&
-                                  currentQuestion.questionTextTa != null &&
-                                  currentQuestion.questionTextTa!.isNotEmpty)
-                                const SizedBox(height: 6),
-                              if (currentQuestion.questionTextTa != null &&
-                                  currentQuestion.questionTextTa!.isNotEmpty)
-                                Text(
-                                  currentQuestion.questionTextTa!,
-                                  style: const TextStyle(
-                                    fontSize: 15,
-                                    color: Colors.black87,
-                                    height: 1.5,
+                                if (currentQuestion.questionTextEn.isNotEmpty &&
+                                    currentQuestion.questionTextTa != null &&
+                                    currentQuestion.questionTextTa!.isNotEmpty)
+                                  const SizedBox(height: 6),
+                                if (currentQuestion.questionTextTa != null &&
+                                    currentQuestion.questionTextTa!.isNotEmpty)
+                                  Text(
+                                    currentQuestion.questionTextTa!,
+                                    style: const TextStyle(
+                                      fontSize: 15,
+                                      color: Colors.black87,
+                                      height: 1.5,
+                                    ),
                                   ),
-                                ),
-                            ],
-                          ),
+                              ],
+                            ),
                           const SizedBox(height: 24),
+
+                          // Choice options based on type
 
                           // Choice options based on type
                           _buildQuestionLayout(currentQuestion, ans),

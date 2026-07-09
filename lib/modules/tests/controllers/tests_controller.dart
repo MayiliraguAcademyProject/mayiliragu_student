@@ -1,3 +1,5 @@
+import 'package:flutter/painting.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:get/get.dart';
 import '../models/test_model.dart';
 import '../repositories/tests_repository.dart';
@@ -19,15 +21,6 @@ class TestsController extends GetxController {
   final searchQuery = ''.obs;
 
   // Human-readable mapping configs
-  final categories = [
-    {'id': 'cat_tnpsc', 'name': 'TNPSC'},
-    {'id': 'TNPSC_GROUP_2_4', 'name': 'TNPSC Group 2 & 4'},
-    {'id': 'cat_upsc', 'name': 'UPSC'},
-    {'id': 'cat_ssc', 'name': 'SSC'},
-    {'id': 'cat_banking', 'name': 'Banking'},
-    {'id': 'IBPS_PO', 'name': 'IBPS PO'},
-  ];
-
   final Map<String, String> subjectNames = {
     'sub_polity': 'Indian Polity',
     'sub_aptitude': 'Quantitative Aptitude',
@@ -45,6 +38,15 @@ class TestsController extends GetxController {
     'top_tenses': 'Tenses & Active Voice',
   };
 
+  final categories = [
+    {'id': 'cat_tnpsc', 'name': 'TNPSC'},
+    {'id': 'TNPSC_GROUP_2_4', 'name': 'TNPSC Group 2 & 4'},
+    {'id': 'cat_upsc', 'name': 'UPSC'},
+    {'id': 'cat_ssc', 'name': 'SSC'},
+    {'id': 'cat_banking', 'name': 'Banking'},
+    {'id': 'IBPS_PO', 'name': 'IBPS PO'},
+  ];
+
   @override
   void onInit() {
     super.onInit();
@@ -52,6 +54,13 @@ class TestsController extends GetxController {
   }
 
   Future<void> fetchTests() async {
+    try {
+      // Clear image cache to refresh modified question assets
+      await DefaultCacheManager().emptyCache();
+      PaintingBinding.instance.imageCache.clear();
+      PaintingBinding.instance.imageCache.clearLiveImages();
+    } catch (_) {}
+
     try {
       isLoading.value = true;
       errorMessage.value = '';
