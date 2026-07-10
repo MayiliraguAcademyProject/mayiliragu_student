@@ -1,19 +1,20 @@
 import 'dart:io';
 
 class ApiConstants {
-  ApiConstants._();                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
+  ApiConstants._();
 
   static String get baseUrl {
     try {
       if (Platform.isAndroid) {
-       return 'https://education-api-tb3k.onrender.com/api';
-       //return 'http://192.168.0.144:5000/api';
+        // return 'https://education-api-tb3k.onrender.com/api';
+        //  return 'http://192.168.0.8:5000/api';
+        return 'https://mayiliragu.sathish.qzz.io/api';
       }
     } catch (_) {}
     return 'https://education-api-tb3k.onrender.com/api';
   }
 
-  static const login = '/auth/login';                                                                                                                                                                                                                                                                                                                                                                       
+  static const login = '/auth/login';
   static const logout = '/auth/logout';
   static const dashboard = '/dashboard/student';
   static const courses = '/courses';

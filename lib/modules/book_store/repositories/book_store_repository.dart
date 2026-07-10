@@ -72,4 +72,23 @@ class BookStoreRepository {
   Future<dio_instance.Response> downloadBookPdf(String id) async {
     return await _apiClient.get('/books/$id/read');
   }
+
+  Future<dio_instance.Response> getPaymentQr() async {
+    return await _apiClient.get('/books/payment-qr');
+  }
+
+  Future<dio_instance.Response> uploadPaymentScreenshot(String orderId, String filePath) async {
+    final fileName = filePath.split('/').last;
+    final formData = dio_instance.FormData.fromMap({
+      'screenshot': await dio_instance.MultipartFile.fromFile(
+        filePath,
+        filename: fileName,
+      ),
+    });
+    return await _apiClient.post(
+      '/books/orders/$orderId/payment-screenshot',
+      data: formData,
+    );
+  }
 }
+

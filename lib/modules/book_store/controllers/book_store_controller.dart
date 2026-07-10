@@ -37,6 +37,7 @@ class BookStoreController extends GetxController {
   final appliedCoupon = Rxn<CouponModel>();
   final discountAmount = 0.0.obs;
   final couponError = ''.obs;
+  final paymentQrUrl = ''.obs;
 
   @override
   void onInit() {
@@ -46,7 +47,9 @@ class BookStoreController extends GetxController {
     fetchBookmarks();
     fetchMyBooks();
     fetchMyOrders();
+    fetchPaymentQr();
   }
+
 
   Future<void> fetchCategories() async {
     try {
@@ -291,4 +294,35 @@ class BookStoreController extends GetxController {
     }
     return null;
   }
+
+  Future<void> fetchPaymentQr() async {
+    try {
+      final response = await _repository.getPaymentQr();
+      if (response.statusCode == 200) {
+        final data = response.data['data'];
+        if (data != null) {
+          paymentQrUrl.value = data['paymentQrUrl'] ?? '';
+        }
+      }
+    } catch (e) {
+      print('Fetch payment QR error: $e');
+    }
+  }
+
+  Future<bool> uploadPaymentScreenshot(String orderId, String filePath) async {
+    try {
+      isPlacingOrder.value = true;
+      final response = await _repository.uploadPaymentScreenshot(orderId, filePath);
+      if (response.statusCode == 200) {
+        fetchMyOrders();
+        return true;
+      }
+    } catch (e) {
+      AppToast.error(e.toString().replaceAll('Exception:', ''), title: 'Upload Error');
+    } finally {
+      isPlacingOrder.value = false;
+    }
+    return false;
+  }
 }
+

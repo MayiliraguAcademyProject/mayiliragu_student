@@ -1,8 +1,11 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../core/services/secure_storage_service.dart';
 import '../models/question_model.dart';
 import '../models/student_answer_model.dart';
+import '../models/test_model.dart';
 import '../repositories/tests_repository.dart';
 
 class TestRunnerController extends GetxController {
@@ -19,6 +22,8 @@ class TestRunnerController extends GetxController {
 
   // Active Test Configuration
   String? _activeTestId;
+  String? activeSectionId;
+  int? activeSectionIndex;
   int _totalDurationSeconds = 0;
 
   // Timer fields
@@ -37,9 +42,19 @@ class TestRunnerController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    final String? testId = Get.arguments as String?;
-    if (testId != null) {
-      loadTest(testId);
+    final args = Get.arguments;
+    if (args is String) {
+      loadTest(args);
+    } else if (args is Map) {
+      final String? testId = args['test_id'] as String?;
+      activeSectionId = args['section_id'] as String?;
+      activeSectionIndex = args['section_index'] as int?;
+      if (testId != null) {
+        loadTest(testId);
+      } else {
+        errorMessage.value = 'No test selected';
+        isLoading.value = false;
+      }
     } else {
       errorMessage.value = 'No test selected';
       isLoading.value = false;
@@ -53,6 +68,82 @@ class TestRunnerController extends GetxController {
     super.onClose();
   }
 
+  Future<void> loadSectionDraft() async {
+    if (_activeTestId == null || activeSectionId == null) return;
+    try {
+      final secureStorage = Get.find<SecureStorageService>();
+      final draftStr = await secureStorage.readString('test_draft_$_activeTestId');
+      if (draftStr != null) {
+        final Map<String, dynamic> draft = jsonDecode(draftStr);
+        
+        final Map<String, dynamic> answers = draft['answers'] ?? {};
+        answers.forEach((qId, ansJson) {
+          userAnswers[qId] = StudentAnswer.fromJson(Map<String, dynamic>.from(ansJson));
+        });
+
+        final Map<String, dynamic> timers = draft['section_timers'] ?? {};
+        if (timers.containsKey(activeSectionId)) {
+          remainingSeconds.value = timers[activeSectionId] as int;
+        } else {
+          remainingSeconds.value = _totalDurationSeconds;
+        }
+      } else {
+        remainingSeconds.value = _totalDurationSeconds;
+      }
+    } catch (e) {
+      print('Error loading section draft: $e');
+      remainingSeconds.value = _totalDurationSeconds;
+    }
+  }
+
+  Future<void> saveSectionDraft() async {
+    if (_activeTestId == null || activeSectionId == null) return;
+    try {
+      final secureStorage = Get.find<SecureStorageService>();
+      final draftStr = await secureStorage.readString('test_draft_$_activeTestId');
+      Map<String, dynamic> draft = {};
+      if (draftStr != null) {
+        draft = jsonDecode(draftStr);
+      }
+
+      final Map<String, dynamic> answers = draft['answers'] ?? {};
+      userAnswers.forEach((qId, ans) {
+        answers[qId] = ans.toJson();
+      });
+      draft['answers'] = answers;
+
+      final Map<String, dynamic> timers = draft['section_timers'] ?? {};
+      timers[activeSectionId!] = remainingSeconds.value;
+      draft['section_timers'] = timers;
+
+      await secureStorage.writeString('test_draft_$_activeTestId', jsonEncode(draft));
+    } catch (e) {
+      print('Error saving section draft: $e');
+    }
+  }
+
+  Future<void> markSectionCompleted() async {
+    if (_activeTestId == null || activeSectionId == null) return;
+    try {
+      final secureStorage = Get.find<SecureStorageService>();
+      final draftStr = await secureStorage.readString('test_draft_$_activeTestId');
+      Map<String, dynamic> draft = {};
+      if (draftStr != null) {
+        draft = jsonDecode(draftStr);
+      }
+
+      final List<dynamic> completed = draft['completed_sections'] ?? [];
+      if (!completed.contains(activeSectionId)) {
+        completed.add(activeSectionId);
+      }
+      draft['completed_sections'] = completed;
+
+      await secureStorage.writeString('test_draft_$_activeTestId', jsonEncode(draft));
+    } catch (e) {
+      print('Error marking section completed: $e');
+    }
+  }
+
   Future<void> loadTest(String testId) async {
     try {
       isLoading.value = true;
@@ -64,11 +155,23 @@ class TestRunnerController extends GetxController {
         final data = response.data['data'];
         testTitle.value = data['title'] ?? 'Practice Test';
         
-        final List<dynamic> qList = data['questions'] ?? [];
-        final List<QuestionModel> loadedQuestions = 
-            qList.map((item) => QuestionModel.fromJson(item)).toList();
+        final testModel = TestModel.fromJson(data);
+        final List<QuestionModel> loadedQuestions = testModel.questions ?? [];
+
+        final bool testIsSectioned = testModel.isSectioned;
         
-        questions.assignAll(loadedQuestions);
+        if (testIsSectioned && activeSectionId != null) {
+          final TestSectionModel section = testModel.sections!.firstWhere(
+            (s) => s.id == activeSectionId || s.name == activeSectionId,
+          );
+          
+          final sectionQuestions = loadedQuestions.where((q) => q.sectionId == section.id || q.sectionId == section.name).toList();
+          questions.assignAll(sectionQuestions);
+          _totalDurationSeconds = section.duration * 60;
+        } else {
+          questions.assignAll(loadedQuestions);
+          _totalDurationSeconds = (data['duration'] ?? 45) * 60;
+        }
 
         // Initialize userAnswers with visited = false
         userAnswers.clear();
@@ -81,10 +184,13 @@ class TestRunnerController extends GetxController {
           _markAsVisited(questions[0].id);
         }
 
+        if (testIsSectioned && activeSectionId != null) {
+          await loadSectionDraft();
+        } else {
+          remainingSeconds.value = _totalDurationSeconds;
+        }
+
         // Start timer
-        final int durationMins = data['duration'] ?? 45;
-        _totalDurationSeconds = durationMins * 60;
-        remainingSeconds.value = _totalDurationSeconds;
         _startTimer();
 
         // Start auto-save periodic trigger (10 seconds)
@@ -107,7 +213,11 @@ class TestRunnerController extends GetxController {
         remainingSeconds.value--;
       } else {
         timer.cancel();
-        submitTest(isTimeOut: true);
+        if (activeSectionId != null) {
+          submitSectionOrTest(isTimeOut: true);
+        } else {
+          submitTest(isTimeOut: true);
+        }
       }
     });
   }
@@ -174,6 +284,7 @@ class TestRunnerController extends GetxController {
       isVisited: true,
     );
     _isDirty = true;
+    if (activeSectionId != null) saveSectionDraft();
   }
 
   void toggleMultiChoiceOption(String questionId, String optionId) {
@@ -193,6 +304,7 @@ class TestRunnerController extends GetxController {
       isVisited: true,
     );
     _isDirty = true;
+    if (activeSectionId != null) saveSectionDraft();
   }
 
   void setBooleanAnswer(String questionId, bool value) {
@@ -204,6 +316,7 @@ class TestRunnerController extends GetxController {
       isVisited: true,
     );
     _isDirty = true;
+    if (activeSectionId != null) saveSectionDraft();
   }
 
   void setTextAnswer(String questionId, String text) {
@@ -215,6 +328,7 @@ class TestRunnerController extends GetxController {
       isVisited: true,
     );
     _isDirty = true;
+    if (activeSectionId != null) saveSectionDraft();
   }
 
   void setDescriptiveText(String questionId, String text) {
@@ -227,6 +341,7 @@ class TestRunnerController extends GetxController {
       isVisited: true,
     );
     _isDirty = true;
+    if (activeSectionId != null) saveSectionDraft();
   }
 
   void setAttachmentUrl(String questionId, String url) {
@@ -239,6 +354,7 @@ class TestRunnerController extends GetxController {
       isVisited: true,
     );
     _isDirty = true;
+    if (activeSectionId != null) saveSectionDraft();
   }
 
   void toggleFlag(String questionId) {
@@ -252,6 +368,7 @@ class TestRunnerController extends GetxController {
       isVisited: true,
     );
     _isDirty = true;
+    if (activeSectionId != null) saveSectionDraft();
   }
 
   // Palette stats
@@ -291,6 +408,123 @@ class TestRunnerController extends GetxController {
   }
 
   // Submission handler
+  Future<void> submitSectionOrTest({bool isTimeOut = false}) async {
+    _countdownTimer?.cancel();
+    _autoSaveTimer?.cancel();
+
+    if (_activeTestId == null || activeSectionId == null) {
+      Get.back();
+      return;
+    }
+
+    await saveSectionDraft();
+    await markSectionCompleted();
+
+    try {
+      final response = await _repository.getTestById(_activeTestId!);
+      if (response.statusCode == 200) {
+        final testModel = TestModel.fromJson(response.data['data']);
+        final sectionsList = testModel.sections ?? [];
+        
+        final int currentSecIdx = sectionsList.indexWhere((s) => s.id == activeSectionId || s.name == activeSectionId);
+        
+        if (currentSecIdx != -1 && currentSecIdx < sectionsList.length - 1) {
+          if (isTimeOut) {
+            Get.snackbar(
+              'Time\'s Up!',
+              'Automatically moving to the next section.',
+              backgroundColor: Colors.amber,
+              colorText: Colors.black,
+            );
+          }
+          Get.back(); 
+        } else {
+          await submitFullSectionedTest();
+        }
+      } else {
+        Get.back();
+      }
+    } catch (e) {
+      print('Error in submitSectionOrTest: $e');
+      Get.back();
+    }
+  }
+
+  Future<void> submitFullSectionedTest() async {
+    if (_activeTestId == null) return;
+
+    Get.dialog(
+      const Center(
+        child: CircularProgressIndicator(color: Colors.white),
+      ),
+      barrierDismissible: false,
+    );
+
+    try {
+      final secureStorage = Get.find<SecureStorageService>();
+      final draftStr = await secureStorage.readString('test_draft_$_activeTestId');
+      Map<String, dynamic> draft = {};
+      if (draftStr != null) {
+        draft = jsonDecode(draftStr);
+      }
+
+      final Map<String, dynamic> draftAns = draft['answers'] ?? {};
+      final response = await _repository.getTestById(_activeTestId!);
+      final testModel = TestModel.fromJson(response.data['data']);
+      
+      final List<Map<String, dynamic>> sectionsPayload = [];
+      int totalTimeTaken = 0;
+
+      if (testModel.sections != null) {
+        for (var sec in testModel.sections!) {
+          final List<Map<String, dynamic>> secAnswers = [];
+          final secQs = testModel.questions?.where((q) => q.sectionId == sec.id || q.sectionId == sec.name).toList() ?? [];
+          for (var q in secQs) {
+            final ansMap = draftAns[q.id];
+            if (ansMap != null) {
+              secAnswers.add(ansMap);
+            } else {
+              secAnswers.add(StudentAnswer(questionId: q.id).toJson());
+            }
+          }
+
+          final Map<String, dynamic> timers = draft['section_timers'] ?? {};
+          final int secRemaining = timers[sec.id] ?? timers[sec.name] ?? 0;
+          final int secTimeTaken = (sec.duration * 60) - secRemaining;
+          totalTimeTaken += secTimeTaken;
+
+          sectionsPayload.add({
+            'section_id': sec.id,
+            'time_taken': secTimeTaken,
+            'answers': secAnswers,
+          });
+        }
+      }
+
+      final submitResponse = await _repository.submitTestAttempt(_activeTestId!, {
+        'time_taken': totalTimeTaken,
+        'sections': sectionsPayload,
+      });
+
+      Get.back();
+
+      if (submitResponse.statusCode == 200) {
+        final result = Map<String, dynamic>.from(submitResponse.data['data']);
+        result['test_id'] = _activeTestId;
+        result['test_title'] = testTitle.value;
+
+        await secureStorage.deleteKey('test_draft_$_activeTestId');
+
+        Get.offNamed('/test-results', arguments: result);
+      } else {
+        Get.offAllNamed('/dashboard');
+      }
+    } catch (e) {
+      Get.back();
+      Get.offAllNamed('/dashboard');
+    }
+  }
+
   Future<void> submitTest({bool isTimeOut = false}) async {
     _countdownTimer?.cancel();
     _autoSaveTimer?.cancel();

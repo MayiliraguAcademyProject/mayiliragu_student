@@ -24,6 +24,7 @@ class TestResultsController extends GetxController {
   final topScore = 0.obs;
 
   final subjectPerformance = <Map<String, dynamic>>[].obs;
+  final sectionBreakdowns = <Map<String, dynamic>>[].obs;
   final isLoading = false.obs;
 
   @override
@@ -51,6 +52,13 @@ class TestResultsController extends GetxController {
       if (subjPerf != null) {
         subjectPerformance.assignAll(
           subjPerf.map((e) => Map<String, dynamic>.from(e)).toList(),
+        );
+      }
+
+      final List<dynamic>? secList = args['sections'];
+      if (secList != null) {
+        sectionBreakdowns.assignAll(
+          secList.map((e) => Map<String, dynamic>.from(e)).toList(),
         );
       }
 
@@ -84,6 +92,13 @@ class TestResultsController extends GetxController {
         if (subjPerf != null) {
           subjectPerformance.assignAll(
             subjPerf.map((e) => Map<String, dynamic>.from(e)).toList(),
+          );
+        }
+
+        final List<dynamic>? secList = data['sections'];
+        if (secList != null) {
+          sectionBreakdowns.assignAll(
+            secList.map((e) => Map<String, dynamic>.from(e)).toList(),
           );
         }
       }

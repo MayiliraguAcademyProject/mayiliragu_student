@@ -27,4 +27,15 @@ class ProfileRepository {
       },
     );
   }
+
+  Future<Response> getStudentProfile(String userId) async {
+    return await _apiClient.get('/enrollments/students/$userId/profile');
+  }
+
+  Future<Response> updateStudentProfile(String userId, Map<String, dynamic> data) async {
+    return await _apiClient.put(
+      '/enrollments/students/$userId/profile',
+      data: data,
+    );
+  }
 }

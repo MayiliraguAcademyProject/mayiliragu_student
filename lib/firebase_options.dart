@@ -17,7 +17,10 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      return web;
+      throw UnsupportedError(
+        'DefaultFirebaseOptions have not been configured for web - '
+        'you can reconfigure this by running the FlutterFire CLI again.',
+      );
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -30,7 +33,10 @@ class DefaultFirebaseOptions {
           'you can reconfigure this by running the FlutterFire CLI again.',
         );
       case TargetPlatform.windows:
-        return windows;
+        throw UnsupportedError(
+          'DefaultFirebaseOptions have not been configured for windows - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
@@ -43,40 +49,20 @@ class DefaultFirebaseOptions {
     }
   }
 
-  static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyDchydKWM7JigfibZWltqWiMrDEyuGUMAE',
-    appId: '1:1017424215687:web:a86347e01609e81755c222',
-    messagingSenderId: '1017424215687',
-    projectId: 'education-app-74250',
-    authDomain: 'education-app-74250.firebaseapp.com',
-    storageBucket: 'education-app-74250.firebasestorage.app',
-    measurementId: 'G-3Q3394Z23J',
-  );
-
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyCz9s3d2RDQOYsUgP4f99X5YHFYYaJunzo',
-    appId: '1:1017424215687:android:1a8908b4a5b3b36855c222',
-    messagingSenderId: '1017424215687',
-    projectId: 'education-app-74250',
-    storageBucket: 'education-app-74250.firebasestorage.app',
+    apiKey: 'AIzaSyDLGz6TbIBV6s8OiFxW4DjWqmh8-dq537E',
+    appId: '1:388970099836:android:1263d86df30286226745f9',
+    messagingSenderId: '388970099836',
+    projectId: 'mayiliraguacadamy',
+    storageBucket: 'mayiliraguacadamy.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyA7376M89afjtCbXheS3xH6mVSwFu8uiNg',
-    appId: '1:1017424215687:ios:dafccb1d431d25d255c222',
-    messagingSenderId: '1017424215687',
-    projectId: 'education-app-74250',
-    storageBucket: 'education-app-74250.firebasestorage.app',
-    iosBundleId: 'com.learning.mayiliragu.mayiliragu',
-  );
-
-  static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyDchydKWM7JigfibZWltqWiMrDEyuGUMAE',
-    appId: '1:1017424215687:web:531dcd38edfa30c155c222',
-    messagingSenderId: '1017424215687',
-    projectId: 'education-app-74250',
-    authDomain: 'education-app-74250.firebaseapp.com',
-    storageBucket: 'education-app-74250.firebasestorage.app',
-    measurementId: 'G-0ZZHYGX7F5',
+    apiKey: 'AIzaSyBZLYmQ1maHpR08LjWrvPeAkBsqq76p3UI',
+    appId: '1:388970099836:ios:0a1828a64d18a9116745f9',
+    messagingSenderId: '388970099836',
+    projectId: 'mayiliraguacadamy',
+    storageBucket: 'mayiliraguacadamy.firebasestorage.app',
+    iosBundleId: 'com.learning.Mayiliragu.Mayiliragu',
   );
 }

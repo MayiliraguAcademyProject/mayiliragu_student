@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
+import '../../shared/widgets/custom_network_image.dart';
 
 class CourseImage extends StatelessWidget {
   final String imageUrl;
@@ -51,20 +52,13 @@ class CourseImage extends StatelessWidget {
     }
 
     // Default to Network Image
-    return Image.network(
-      imageUrl,
+    return CustomNetworkImage(
+      imageUrl: imageUrl,
       fit: fit,
       width: double.infinity,
       height: double.infinity,
-      loadingBuilder: (context, child, loadingProgress) {
-        if (loadingProgress == null) return child;
-        return const Center(
-          child: CircularProgressIndicator(color: AppColors.accent),
-        );
-      },
-      errorBuilder: (context, error, stackTrace) {
-        return errorWidget ?? _defaultErrorWidget();
-      },
+      placeholder: placeholder,
+      errorWidget: errorWidget ?? _defaultErrorWidget(),
     );
   }
 

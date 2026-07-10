@@ -17,8 +17,11 @@ class TestRunnerView extends GetView<TestRunnerController> {
         if (didPop) return;
         final confirm = await _showExitConfirmation(context);
         if (confirm == true) {
-          // Cancel timers and exit
-          controller.submitTest();
+          if (controller.activeSectionId != null) {
+            controller.submitSectionOrTest();
+          } else {
+            controller.submitTest();
+          }
         }
       },
       child: Scaffold(
@@ -34,7 +37,11 @@ class TestRunnerView extends GetView<TestRunnerController> {
                 onPressed: () async {
                   final confirm = await _showExitConfirmation(context);
                   if (confirm == true) {
-                    controller.submitTest();
+                    if (controller.activeSectionId != null) {
+                      controller.submitSectionOrTest();
+                    } else {
+                      controller.submitTest();
+                    }
                   }
                 },
                 icon: const Icon(Icons.exit_to_app, color: Colors.white, size: 20),
@@ -43,10 +50,15 @@ class TestRunnerView extends GetView<TestRunnerController> {
                   style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                 ),
               ),
-              Obx(() => Text(
-                    controller.testTitle.value,
-                    style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-                  )),
+              Expanded(
+                child: Obx(() => Text(
+                      controller.testTitle.value,
+                      style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                      textAlign: TextAlign.center,
+                    )),
+              ),
               Obx(() {
                 final isRed = controller.remainingSeconds.value < 300; // Less than 5 mins remaining
                 return Container(
@@ -183,37 +195,57 @@ class TestRunnerView extends GetView<TestRunnerController> {
                           ),
                           const SizedBox(height: 16),
 
-                          // Question Text
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              if (currentQuestion.questionTextEn.isNotEmpty)
-                                Text(
-                                  currentQuestion.questionTextEn,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.textPrimary,
-                                    height: 1.5,
+                          // 1. Shared Context Passage or Caselet (RC / DI)
+                          if (currentQuestion.sharedContextEn != null && currentQuestion.sharedContextEn!.isNotEmpty)
+                            SharedContextBlock(question: currentQuestion),
+
+                          // 2. Data Interpretation Structured Table
+                          if (currentQuestion.tableData != null && currentQuestion.tableData!.isNotEmpty)
+                            DiTableWidget(rows: currentQuestion.tableData!),
+
+                          // 3. Question / Dataset Images Row
+                          if (currentQuestion.images != null && currentQuestion.images!.isNotEmpty)
+                            QuestionImagesRow(images: currentQuestion.images!),
+
+                          if (currentQuestion.images != null && currentQuestion.images!.isNotEmpty)
+                            const SizedBox(height: 12),
+
+                          // 4. Question Text or Assertion-Reason Statements
+                          if (currentQuestion.format == QuestionFormat.assertionReason)
+                            AssertionReasonCard(question: currentQuestion)
+                          else
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (currentQuestion.questionTextEn.isNotEmpty)
+                                  Text(
+                                    currentQuestion.questionTextEn,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.textPrimary,
+                                      height: 1.5,
+                                    ),
                                   ),
-                                ),
-                              if (currentQuestion.questionTextEn.isNotEmpty &&
-                                  currentQuestion.questionTextTa != null &&
-                                  currentQuestion.questionTextTa!.isNotEmpty)
-                                const SizedBox(height: 6),
-                              if (currentQuestion.questionTextTa != null &&
-                                  currentQuestion.questionTextTa!.isNotEmpty)
-                                Text(
-                                  currentQuestion.questionTextTa!,
-                                  style: const TextStyle(
-                                    fontSize: 15,
-                                    color: Colors.black87,
-                                    height: 1.5,
+                                if (currentQuestion.questionTextEn.isNotEmpty &&
+                                    currentQuestion.questionTextTa != null &&
+                                    currentQuestion.questionTextTa!.isNotEmpty)
+                                  const SizedBox(height: 6),
+                                if (currentQuestion.questionTextTa != null &&
+                                    currentQuestion.questionTextTa!.isNotEmpty)
+                                  Text(
+                                    currentQuestion.questionTextTa!,
+                                    style: const TextStyle(
+                                      fontSize: 15,
+                                      color: Colors.black87,
+                                      height: 1.5,
+                                    ),
                                   ),
-                                ),
-                            ],
-                          ),
+                              ],
+                            ),
                           const SizedBox(height: 24),
+
+                          // Choice options based on type
 
                           // Choice options based on type
                           _buildQuestionLayout(currentQuestion, ans),
@@ -378,9 +410,38 @@ class TestRunnerView extends GetView<TestRunnerController> {
             Obx(() {
               final isLast = controller.currentIndex.value == controller.questions.length - 1;
               return ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   if (isLast) {
-                    controller.submitTest();
+                    if (controller.activeSectionId != null) {
+                      final confirm = await showDialog<bool>(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text('Submit Section?'),
+                          content: const Text(
+                            'Are you sure you want to finish this section? You cannot return to it.',
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+                            ),
+                            ElevatedButton(
+                              onPressed: () => Navigator.pop(context, true),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF10B981),
+                                foregroundColor: Colors.white,
+                              ),
+                              child: const Text('Submit'),
+                            ),
+                          ],
+                        ),
+                      );
+                      if (confirm == true) {
+                        controller.submitSectionOrTest();
+                      }
+                    } else {
+                      controller.submitTest();
+                    }
                   } else {
                     controller.nextQuestion();
                   }

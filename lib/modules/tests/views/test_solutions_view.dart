@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/test_solutions_controller.dart';
 import '../../../core/utils/toast_helper.dart';
+import '../models/question_model.dart';
+import 'widgets/question_layouts.dart';
+
 
 class TestSolutionsView extends GetView<TestSolutionsController> {
   const TestSolutionsView({super.key});
@@ -252,27 +255,65 @@ class TestSolutionsView extends GetView<TestSolutionsController> {
                   'Question $displayIndex',
                   style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF1F2937)),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 12),
 
-                // Question Text
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (q['question_text_en'] != null && q['question_text_en'].toString().isNotEmpty)
-                      Text(
-                        q['question_text_en'].toString(),
-                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF1F2937), height: 1.4),
-                      ),
-                    if (q['question_text_en'] != null && q['question_text_en'].toString().isNotEmpty &&
-                        q['question_text_ta'] != null && q['question_text_ta'].toString().isNotEmpty)
-                      const SizedBox(height: 4),
-                    if (q['question_text_ta'] != null && q['question_text_ta'].toString().isNotEmpty)
-                      Text(
-                        q['question_text_ta'].toString(),
-                        style: const TextStyle(fontSize: 13, color: Color(0xFF4B5563), height: 1.4),
-                      ),
-                  ],
-                ),
+                // Map JSON map to QuestionModel for format-aware layout rendering
+                () {
+                  final questionModel = QuestionModel.fromJson(q);
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 1. Shared Context Passage or Caselet (RC / DI)
+                      if (questionModel.sharedContextEn != null && questionModel.sharedContextEn!.isNotEmpty)
+                        SharedContextBlock(question: questionModel),
+
+                      // 2. Data Interpretation Structured Table
+                      if (questionModel.tableData != null && questionModel.tableData!.isNotEmpty)
+                        DiTableWidget(rows: questionModel.tableData!),
+
+                      // 3. Question / Dataset Images Row
+                      if (questionModel.images != null && questionModel.images!.isNotEmpty)
+                        QuestionImagesRow(images: questionModel.images!),
+
+                      if (questionModel.images != null && questionModel.images!.isNotEmpty)
+                        const SizedBox(height: 12),
+
+                      // 4. Question Text or Assertion-Reason Statements
+                      if (questionModel.format == QuestionFormat.assertionReason)
+                        AssertionReasonCard(question: questionModel)
+                      else
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (questionModel.questionTextEn.isNotEmpty)
+                              Text(
+                                questionModel.questionTextEn,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFF1F2937),
+                                  height: 1.4,
+                                ),
+                              ),
+                            if (questionModel.questionTextEn.isNotEmpty &&
+                                questionModel.questionTextTa != null &&
+                                questionModel.questionTextTa!.isNotEmpty)
+                              const SizedBox(height: 4),
+                            if (questionModel.questionTextTa != null &&
+                                questionModel.questionTextTa!.isNotEmpty)
+                              Text(
+                                questionModel.questionTextTa!,
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  color: Color(0xFF4B5563),
+                                  height: 1.4,
+                                ),
+                              ),
+                          ],
+                        ),
+                    ],
+                  );
+                }(),
                 const SizedBox(height: 12),
 
                 // Options list or Fill-in-blank block
