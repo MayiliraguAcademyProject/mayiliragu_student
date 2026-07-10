@@ -322,7 +322,14 @@ class ProfileController extends GetxController {
         return false;
       }
     } catch (e) {
-      AppToast.error('Error updating profile: $e');
+      String msg = 'Error updating profile: $e';
+      if (e is DioException && e.response?.data != null) {
+        final data = e.response?.data;
+        if (data is Map && data['message'] != null) {
+          msg = data['message'].toString();
+        }
+      }
+      AppToast.error(msg);
       return false;
     } finally {
       isUpdatingStudentProfile.value = false;

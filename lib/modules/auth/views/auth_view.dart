@@ -10,8 +10,9 @@ class AuthView extends GetView<AuthController> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFF),
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -46,7 +47,7 @@ class AuthView extends GetView<AuthController> {
                 const SizedBox(height: 24),
                 Container(
                   decoration: BoxDecoration(
-                    color: AppColors.cardBg,
+                    color: theme.colorScheme.surface,
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Padding(
@@ -55,9 +56,19 @@ class AuthView extends GetView<AuthController> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text('Mayiliragu LMS', style: AppTextStyles.heading),
+                        Text(
+                          'Mayiliragu LMS',
+                          style: AppTextStyles.heading.copyWith(
+                            color: theme.colorScheme.onSurface,
+                          ),
+                        ),
                         const SizedBox(height: 8),
-                        Text('Secure Sign In', style: AppTextStyles.subheading),
+                        Text(
+                          'Secure Sign In',
+                          style: AppTextStyles.subheading.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
                         const SizedBox(height: 32),
 
                         // Email input label

@@ -835,7 +835,7 @@ class QuestionImagesRow extends StatelessWidget {
             onTap: () => _openZoomModal(context, img.url, img.caption),
             child: Container(
               margin: const EdgeInsets.only(right: 12),
-              width: double.infinity,
+              width: 300,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(color: const Color(0xFFE5E7EB)),
