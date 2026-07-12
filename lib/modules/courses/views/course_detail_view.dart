@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/course_image.dart';
 import '../repositories/course_repository.dart';
@@ -22,22 +21,14 @@ class CourseDetailView extends StatelessWidget {
     );
 
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
-    final gradientColors = isDark
-        ? [
-            AppColors.backgroundStartDark,
-            AppColors.accentDark,
-            AppColors.backgroundEndDark,
-          ]
-        : [
-            AppColors.backgroundStart,
-            AppColors.secondary,
-            AppColors.backgroundEnd,
-          ];
+    final gradientColors = [
+      theme.colorScheme.background,
+      theme.colorScheme.surfaceVariant,
+    ];
 
-    final textColorPrimary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
-    final textColorSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
+    final textColorPrimary = theme.colorScheme.onBackground;
+    final textColorSecondary = theme.colorScheme.onSurfaceVariant;
 
     return Scaffold(
       body: Container(
@@ -50,8 +41,8 @@ class CourseDetailView extends StatelessWidget {
         ),
         child: Obx(() {
           if (controller.isLoading.value) {
-            return const Center(
-              child: CircularProgressIndicator(color: AppColors.accent),
+            return Center(
+              child: CircularProgressIndicator(color: theme.colorScheme.secondary),
             );
           }
 
@@ -65,14 +56,14 @@ class CourseDetailView extends StatelessWidget {
                         ? controller.errorMessage.value 
                         : 'Course details not found.',
                     style: AppTextStyles.body.copyWith(
-                      color: AppColors.error,
+                      color: theme.colorScheme.error,
                     ),
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: controller.fetchCourseDetails,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.accent,
+                      backgroundColor: theme.colorScheme.secondary,
                     ),
                     child: const Text('Retry'),
                   ),
@@ -131,14 +122,14 @@ class CourseDetailView extends StatelessWidget {
   }
 
   Widget _buildSliverAppBar(BuildContext context, CourseDetailModel course) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
 
     return SliverAppBar(
       expandedHeight: 220,
       pinned: true,
-      backgroundColor: isDark ? AppColors.backgroundStartDark : AppColors.backgroundStart,
+      backgroundColor: theme.colorScheme.background,
       iconTheme: IconThemeData(
-        color: isDark ? Colors.white : AppColors.textPrimary,
+        color: theme.colorScheme.onBackground,
       ),
       flexibleSpace: FlexibleSpaceBar(
         title: Text(
@@ -162,15 +153,15 @@ class CourseDetailView extends StatelessWidget {
             CourseImage(
               imageUrl: course.thumbnail,
               fit: BoxFit.cover,
-              placeholder: const Icon(
+              placeholder: Icon(
                 Icons.image,
                 size: 80,
-                color: AppColors.textSecondary,
+                color: theme.colorScheme.onSurfaceVariant,
               ),
-              errorWidget: const Icon(
+              errorWidget: Icon(
                 Icons.broken_image,
                 size: 80,
-                color: AppColors.textSecondary,
+                color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
             Container(
@@ -190,11 +181,11 @@ class CourseDetailView extends StatelessWidget {
 
   Widget _buildModulesList(BuildContext context, CourseDetailModel course) {
     final modules = course.modules;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
     
-    final textColorPrimary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
-    final textColorSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
-    final cardBackgroundColor = isDark ? AppColors.cardBgDark : AppColors.cardBg;
+    final textColorPrimary = theme.colorScheme.onBackground;
+    final textColorSecondary = theme.colorScheme.onSurfaceVariant;
+    final cardBackgroundColor = theme.colorScheme.surface;
 
     if (modules.isEmpty) {
       return SliverToBoxAdapter(
@@ -237,7 +228,7 @@ class CourseDetailView extends StatelessWidget {
                 color: textColorSecondary,
               ),
             ),
-            iconColor: AppColors.accent,
+            iconColor: theme.colorScheme.secondary,
             collapsedIconColor: textColorSecondary,
             children: lessons
                 .map<Widget>((lesson) => _buildLessonItem(context, lesson))
@@ -253,15 +244,15 @@ class CourseDetailView extends StatelessWidget {
     final durationSeconds = lesson.duration;
     final durationMinutes = (durationSeconds / 60).toStringAsFixed(1);
     final isCompleted = lesson.progress?.completed == true;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
     
-    final textColorPrimary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
-    final textColorSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
+    final textColorPrimary = theme.colorScheme.onBackground;
+    final textColorSecondary = theme.colorScheme.onSurfaceVariant;
 
     return ListTile(
       leading: Icon(
         isCompleted ? Icons.check_circle : Icons.play_circle_outline,
-        color: isCompleted ? Colors.green : AppColors.accent,
+        color: isCompleted ? Colors.green : theme.colorScheme.secondary,
         size: 24,
       ),
       title: Text(
