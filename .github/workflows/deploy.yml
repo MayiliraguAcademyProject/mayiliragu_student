@@ -1,19 +1,22 @@
-name: Flutter CI/CD (Fastlane)
-
+name: Firebase App Distribution
+# Trigger build: Verifying robust GHA CI/CD release configuration
 on:
   push:
     branches:
       - main
-      - develop
 
 jobs:
-  deploy:
+  build_and_distribute:
+    name: Build and Distribute
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: read
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup Java JDK
+      - name: Setup Java
         uses: actions/setup-java@v3
         with:
           distribution: 'zulu'
@@ -22,61 +25,58 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.x'
+          flutter-version: '3.41.5'
           channel: 'stable'
 
-      - name: Cache Pub packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.pub-cache
-          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-pub-
+      - name: Increment Version in Pubspec
+        id: get_version
+        shell: pwsh
+        run: |
+          $content = Get-Content pubspec.yaml
+          $line = $content | Select-String -Pattern "version: (.*)"
+          $version = $line.Matches.Value.Split(" ")[1]
+          $versionParts = $version.Split("+")
+          $baseVersion = $versionParts[0]
+          $buildNumber = [int]$versionParts[1] + 1
+          $newVersion = "$baseVersion+$buildNumber"
+          
+          # Replace in file
+          (Get-Content pubspec.yaml) -replace "version: .*", "version: $newVersion" | Set-Content pubspec.yaml
+          
+          echo "version=$baseVersion" >> $env:GITHUB_OUTPUT
+          echo "build_number=$buildNumber" >> $env:GITHUB_OUTPUT
+          echo "new_version=$newVersion" >> $env:GITHUB_OUTPUT
 
-      - name: Install Dependencies
+      - name: Commit version bump and push tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add pubspec.yaml
+          git commit -m "chore: bump version to ${{ steps.get_version.outputs.new_version }} [skip ci] [ci skip]"
+          git tag "v${{ steps.get_version.outputs.version }}-${{ steps.get_version.outputs.build_number }}"
+          git push
+          git push origin "v${{ steps.get_version.outputs.version }}-${{ steps.get_version.outputs.build_number }}"
+
+      - name: Flutter Pub Get
         run: flutter pub get
 
-      - name: Setup Ruby and Bundler
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.0'
-          bundler-cache: true
-          working-directory: android
-
-      - name: Decode Android Keystore
-        run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/upload-keystore.jks
-
-      - name: Create key.properties file
-        run: |
-          echo "storePassword=${{ secrets.KEYSTORE_PASSWORD }}" > android/key.properties
-          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/key.properties
-          echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/key.properties
-          echo "storeFile=app/upload-keystore.jks" >> android/key.properties
-
-      - name: Create Firebase Service Account File
-        run: |
-          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > android/firebase-service-account.json
-
-      - name: Build APK (Release)
+      - name: Build APK
         run: flutter build apk --release
 
-      - name: Run Fastlane (Beta to Firebase)
-        if: github.ref == 'refs/heads/develop'
-        working-directory: android
-        run: bundle exec fastlane beta
-        env:
-          FIREBASE_APP_ID_ANDROID: ${{ secrets.FIREBASE_ANDROID_APP_ID }}
-          GOOGLE_APPLICATION_CREDENTIALS: "firebase-service-account.json"
-          FIREBASE_TESTERS: ${{ secrets.FIREBASE_TESTERS }}
-          FIREBASE_GROUPS: android
+      - name: Upload artifact to Firebase App Distribution
+        uses: wzieba/Firebase-Distribution-Github-Action@v1
+        with:
+          appId: "1:1094138626511:android:74f59415cf8a1b464d12ba"
+          serviceCredentialsFile: "clean-culture-c7fbcc032a97.json"
+          groups: group-1
+          file: build/app/outputs/flutter-apk/app-release.apk
 
-      - name: Run Fastlane (Production to Firebase)
-        if: github.ref == 'refs/heads/main'
-        working-directory: android
-        run: bundle exec fastlane release
-        env:
-          FIREBASE_APP_ID_ANDROID: ${{ secrets.FIREBASE_ANDROID_APP_ID }}
-          GOOGLE_APPLICATION_CREDENTIALS: "firebase-service-account.json"
-          FIREBASE_TESTERS: ${{ secrets.FIREBASE_TESTERS }}
-          FIREBASE_GROUPS: android
+      - name: Create Release and Upload
+        uses: softprops/action-gh-release@v2
+        with:
+          token: "${{ secrets.GITHUB_TOKEN }}"
+          tag_name: "v${{ steps.get_version.outputs.version }}-${{ steps.get_version.outputs.build_number }}"
+          name: "Coconut Delivery v${{ steps.get_version.outputs.version }}-${{ steps.get_version.outputs.build_number }}"
+          prerelease: true
+          files: |
+            build/app/outputs/flutter-apk/app-release.apk
