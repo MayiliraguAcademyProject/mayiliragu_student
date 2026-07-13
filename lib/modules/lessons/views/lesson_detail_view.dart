@@ -486,6 +486,7 @@ class LessonDetailView extends GetView<LessonController> {
                   AspectRatio(
                     aspectRatio: 16 / 9,
                     child: BetterPlayer(
+                      
                       controller: controller.betterPlayerController!,
                     ),
                   )

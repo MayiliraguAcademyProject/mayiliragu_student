@@ -7,6 +7,7 @@ class AppStrings {
   static const String tabLearn = 'Learn';
   static const String tabProgress = 'Progress';
   static const String tabMore = 'More';
+  static const String person = 'Person';
 
   // Common
   static const String retry = 'Retry';

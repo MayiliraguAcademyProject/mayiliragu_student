@@ -7,11 +7,11 @@ class ApiConstants {
     try {
       if (Platform.isAndroid) {
         // return 'https://education-api-tb3k.onrender.com/api';
-        //  return 'http://192.168.0.8:5000/api';
-        return 'https://mayiliragu.sathish.qzz.io/api';
+          return 'http://192.168.31.86:5000/api';
+        //return 'https://mayiliragu.sathish.qzz.io/api';
       }
     } catch (_) {}
-    return 'https://education-api-tb3k.onrender.com/api';
+    return 'https://mayiliragu.sathish.qzz.io/api';
   }
 
   static const login = '/auth/login';

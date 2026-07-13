@@ -200,8 +200,8 @@ class TestsView extends GetView<TestsController> {
       scrollDirection: Axis.horizontal,
       child: Row(
         children: controller.categories.map((cat) {
-          final id = cat['id']!;
-          final name = cat['name']!;
+          final id = cat.id;
+          final name = cat.name;
           return Obx(() {
             final isSelected = controller.selectedCategory.value == id;
             return GestureDetector(

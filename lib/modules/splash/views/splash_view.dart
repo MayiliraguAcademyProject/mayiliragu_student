@@ -1,0 +1,110 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import '../../../../core/constants/app_colors.dart';
+import '../controllers/splash_controller.dart';
+
+class SplashView extends GetView<SplashController> {
+  const SplashView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              AppColors.backgroundStart,
+              AppColors.backgroundEnd,
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: Stack(
+            children: [
+              // Logo and brand center alignment
+              Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Premium shadow-card logo container
+                    Container(
+                      width: 110,
+                      height: 110,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(28),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withAlpha(76),
+                            blurRadius: 24,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.school_rounded,
+                        color: Colors.white,
+                        size: 58,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    const Text(
+                      'Mayiliragu Academy',
+                      style: TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Shaping Your Bright Future',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: AppColors.textSecondary.withAlpha(204),
+                        letterSpacing: 0.2,
+                      ),
+                    ),
+                    const SizedBox(height: 48),
+                    // Elegant circular indicator
+                    SizedBox(
+                      width: 32,
+                      height: 32,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 3,
+                        color: AppColors.primary,
+                        valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Version info at bottom center
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 24.0),
+                  child: Obx(() => Text(
+                        controller.versionText.value,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textSecondary.withAlpha(153),
+                          letterSpacing: 0.5,
+                        ),
+                      )),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

@@ -39,4 +39,8 @@ class TestsRepository {
   Future<dio_instance.Response> getAttemptDetails(String attemptId) async {
     return await _apiClient.get('/tests/attempts/$attemptId');
   }
+
+  Future<dio_instance.Response> getCategories() async {
+    return await _apiClient.get('/tests/categories');
+  }
 }

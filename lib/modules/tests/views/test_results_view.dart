@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/test_results_controller.dart';
+import '../models/test_attempt_result_model.dart';
 
 class TestResultsView extends GetView<TestResultsController> {
   const TestResultsView({super.key});
@@ -36,7 +37,7 @@ class TestResultsView extends GetView<TestResultsController> {
         ],
       ),
       body: Obx(() {
-        if (controller.isLoading.value) {
+        if (controller.isLoading.value || controller.result.value == null) {
           return const Center(
             child: Padding(
               padding: EdgeInsets.all(80.0),
@@ -46,6 +47,7 @@ class TestResultsView extends GetView<TestResultsController> {
             ),
           );
         }
+        final attemptResult = controller.result.value!;
         return SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -79,7 +81,7 @@ class TestResultsView extends GetView<TestResultsController> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          controller.testTitle.value,
+                          attemptResult.testTitle,
                           textAlign: TextAlign.center,
                           style: const TextStyle(
                             fontSize: 13,
@@ -115,9 +117,9 @@ class TestResultsView extends GetView<TestResultsController> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          _buildCircularProgressIndicator(),
+                          _buildCircularProgressIndicator(attemptResult.score),
                           const SizedBox(height: 14),
-                          _buildPassFailBadge(),
+                          _buildPassFailBadge(attemptResult.passed),
                         ],
                       ),
                     ),
@@ -141,42 +143,42 @@ class TestResultsView extends GetView<TestResultsController> {
                   children: [
                     _buildStatCard(
                       label: 'Correct',
-                      value: '${controller.correctCount.value}',
+                      value: '${attemptResult.correct}',
                       icon: Icons.check_circle_outline,
                       iconColor: const Color(0xFF10B981),
                       valColor: const Color(0xFF10B981),
                     ),
                     _buildStatCard(
                       label: 'Wrong',
-                      value: '${controller.wrongCount.value}',
+                      value: '${attemptResult.wrong}',
                       icon: Icons.cancel_outlined,
                       iconColor: const Color(0xFFEF4444),
                       valColor: const Color(0xFFEF4444),
                     ),
                     _buildStatCard(
                       label: 'Skipped',
-                      value: '${controller.skippedCount.value}',
+                      value: '${attemptResult.skipped}',
                       icon: Icons.skip_next_outlined,
                       iconColor: const Color(0xFF6B7280),
                       valColor: const Color(0xFF374151),
                     ),
                     _buildStatCard(
                       label: 'Accuracy',
-                      value: '${controller.accuracy.value}%',
+                      value: '${attemptResult.accuracy}%',
                       icon: Icons.track_changes_outlined,
                       iconColor: const Color(0xFF1E60FF),
                       valColor: const Color(0xFF1E60FF),
                     ),
                     _buildStatCard(
                       label: 'Time Taken',
-                      value: controller.timeTakenFormatted.value,
+                      value: controller.timeTakenFormatted,
                       icon: Icons.access_time_outlined,
                       iconColor: const Color(0xFF8B5CF6),
                       valColor: const Color(0xFF6D28D9),
                     ),
                     _buildStatCard(
                       label: 'Rank',
-                      value: '#${controller.rank.value}',
+                      value: '#${attemptResult.rank}',
                       icon: Icons.emoji_events_outlined,
                       iconColor: const Color(0xFFD97706),
                       valColor: const Color(0xFFB45309),
@@ -187,7 +189,7 @@ class TestResultsView extends GetView<TestResultsController> {
               const SizedBox(height: 24),
 
               // Subject Performance Section
-              if (controller.subjectPerformance.isNotEmpty) ...[
+              if (attemptResult.subjectPerformance.isNotEmpty) ...[
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20.0),
                   child: const Text(
@@ -212,14 +214,14 @@ class TestResultsView extends GetView<TestResultsController> {
                     child: ListView.separated(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      itemCount: controller.subjectPerformance.length,
+                      itemCount: attemptResult.subjectPerformance.length,
                       separatorBuilder: (context, index) =>
                           const SizedBox(height: 16),
                       itemBuilder: (context, index) {
-                        final data = controller.subjectPerformance[index];
+                        final data = attemptResult.subjectPerformance[index];
                         return _buildSubjectRow(
-                          subjectName: data['subject'] ?? 'General Studies',
-                          percentage: data['percentage'] ?? 0,
+                          subjectName: data.subject,
+                          percentage: data.percentage,
                           colorIndex: index,
                         );
                       },
@@ -228,9 +230,13 @@ class TestResultsView extends GetView<TestResultsController> {
                 ),
                 const SizedBox(height: 20),
                 Obx(() {
-                  if (controller.sectionBreakdowns.isEmpty) return const SizedBox.shrink();
+                  final list = controller.result.value?.sections ?? [];
+                  if (list.isEmpty) return const SizedBox.shrink();
                   return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20.0,
+                      vertical: 10,
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -243,10 +249,14 @@ class TestResultsView extends GetView<TestResultsController> {
                           ),
                         ),
                         const SizedBox(height: 12),
-                        ...controller.sectionBreakdowns.map((sec) => Padding(
-                          padding: const EdgeInsets.only(bottom: 12.0),
-                          child: _buildSectionRow(sec),
-                        )).toList(),
+                        ...list
+                            .map(
+                              (sec) => Padding(
+                                padding: const EdgeInsets.only(bottom: 12.0),
+                                child: _buildSectionRow(sec),
+                              ),
+                            )
+                            .toList(),
                       ],
                     ),
                   );
@@ -267,19 +277,19 @@ class TestResultsView extends GetView<TestResultsController> {
                     children: [
                       _buildCompareCol(
                         'Your Score',
-                        '${controller.score.value}%',
+                        '${attemptResult.score}%',
                         const Color(0xFF1E60FF),
                       ),
                       _buildDivider(),
                       _buildCompareCol(
                         'Class Avg',
-                        '${controller.classAvg.value}%',
+                        '${attemptResult.classAvg}%',
                         const Color(0xFF4B5563),
                       ),
                       _buildDivider(),
                       _buildCompareCol(
                         'Top Score',
-                        '${controller.topScore.value}%',
+                        '${attemptResult.topScore}%',
                         const Color(0xFFB45309),
                       ),
                     ],
@@ -376,12 +386,12 @@ class TestResultsView extends GetView<TestResultsController> {
           ),
         );
       }),
-      bottomNavigationBar: _buildBottomNavBar(),
+      // bottomNavigationBar: _buildBottomNavBar(),
     );
   }
 
-  Widget _buildCircularProgressIndicator() {
-    final double pct = controller.score.value / 100.0;
+  Widget _buildCircularProgressIndicator(int scoreVal) {
+    final double pct = scoreVal / 100.0;
 
     return SizedBox(
       width: 140,
@@ -400,7 +410,7 @@ class TestResultsView extends GetView<TestResultsController> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  '${controller.score.value}',
+                  '$scoreVal',
                   style: const TextStyle(
                     fontSize: 34,
                     fontWeight: FontWeight.bold,
@@ -424,8 +434,7 @@ class TestResultsView extends GetView<TestResultsController> {
     );
   }
 
-  Widget _buildPassFailBadge() {
-    final bool isPassed = controller.passed.value;
+  Widget _buildPassFailBadge(bool isPassed) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
       decoration: BoxDecoration(
@@ -623,16 +632,7 @@ class TestResultsView extends GetView<TestResultsController> {
     );
   }
 
-  Widget _buildSectionRow(Map<String, dynamic> data) {
-    final String name = data['name'] ?? 'Section';
-    final double score = (data['score'] as num?)?.toDouble() ?? 0.0;
-    final double totalMarks = (data['total_marks'] as num?)?.toDouble() ?? 0.0;
-    final double cutoff = (data['cutoff_marks'] as num?)?.toDouble() ?? 0.0;
-    final int correct = data['correct'] ?? 0;
-    final int wrong = data['wrong'] ?? 0;
-    final int skipped = data['skipped'] ?? 0;
-    final bool isPassed = data['passed'] ?? false;
-
+  Widget _buildSectionRow(SectionBreakdownModel data) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -647,7 +647,7 @@ class TestResultsView extends GetView<TestResultsController> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                name,
+                data.name,
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
@@ -657,15 +657,19 @@ class TestResultsView extends GetView<TestResultsController> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: isPassed ? const Color(0xFFD1FAE5) : const Color(0xFFFEE2E2),
+                  color: data.cutoffMet
+                      ? const Color(0xFFD1FAE5)
+                      : const Color(0xFFFEE2E2),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
-                  isPassed ? 'Passed Cutoff' : 'Failed Cutoff',
+                  data.cutoffMet ? 'Passed Cutoff' : 'Failed Cutoff',
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
-                    color: isPassed ? const Color(0xFF065F46) : const Color(0xFF991B1B),
+                    color: data.cutoffMet
+                        ? const Color(0xFF065F46)
+                        : const Color(0xFF991B1B),
                   ),
                 ),
               ),
@@ -675,11 +679,26 @@ class TestResultsView extends GetView<TestResultsController> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildSectionDetailCol('Score', '$score / ${totalMarks.toInt()}'),
-              _buildSectionDetailCol('Cutoff', '$cutoff'),
-              _buildSectionDetailCol('Correct', '$correct', color: const Color(0xFF10B981)),
-              _buildSectionDetailCol('Wrong', '$wrong', color: const Color(0xFFEF4444)),
-              _buildSectionDetailCol('Skipped', '$skipped', color: Colors.grey),
+              _buildSectionDetailCol(
+                'Score',
+                '${data.scoreRaw} / ${data.totalMarks}',
+              ),
+              _buildSectionDetailCol('Cutoff', '${data.cutoffMarks}'),
+              _buildSectionDetailCol(
+                'Correct',
+                '${data.correct}',
+                color: const Color(0xFF10B981),
+              ),
+              _buildSectionDetailCol(
+                'Wrong',
+                '${data.wrong}',
+                color: const Color(0xFFEF4444),
+              ),
+              _buildSectionDetailCol(
+                'Skipped',
+                '${data.skipped}',
+                color: Colors.grey,
+              ),
             ],
           ),
         ],
@@ -693,7 +712,11 @@ class TestResultsView extends GetView<TestResultsController> {
       children: [
         Text(
           label,
-          style: const TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.bold),
+          style: const TextStyle(
+            fontSize: 10,
+            color: Colors.grey,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(height: 4),
         Text(

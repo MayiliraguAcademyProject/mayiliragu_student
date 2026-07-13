@@ -16,4 +16,5 @@ abstract class Routes {
   static const PERFORMANCE = '/performance';
   static const BOOK_STORE = '/book-store';
   static const NOTIFICATIONS = '/notifications';
+  static const SPLASH = '/splash';
 }

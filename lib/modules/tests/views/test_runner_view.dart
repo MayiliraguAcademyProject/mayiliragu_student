@@ -5,6 +5,8 @@ import '../controllers/test_runner_controller.dart';
 import '../models/question_model.dart';
 import 'widgets/question_layouts.dart';
 import 'widgets/question_navigator_sheet.dart';
+import 'widgets/submit_confirmation_dialog.dart';
+
 
 class TestRunnerView extends GetView<TestRunnerController> {
   const TestRunnerView({super.key});
@@ -410,38 +412,24 @@ class TestRunnerView extends GetView<TestRunnerController> {
             Obx(() {
               final isLast = controller.currentIndex.value == controller.questions.length - 1;
               return ElevatedButton(
-                onPressed: () async {
+                onPressed: () {
                   if (isLast) {
-                    if (controller.activeSectionId != null) {
-                      final confirm = await showDialog<bool>(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          title: const Text('Submit Section?'),
-                          content: const Text(
-                            'Are you sure you want to finish this section? You cannot return to it.',
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(context, false),
-                              child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
-                            ),
-                            ElevatedButton(
-                              onPressed: () => Navigator.pop(context, true),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF10B981),
-                                foregroundColor: Colors.white,
-                              ),
-                              child: const Text('Submit'),
-                            ),
-                          ],
-                        ),
-                      );
-                      if (confirm == true) {
-                        controller.submitSectionOrTest();
-                      }
-                    } else {
-                      controller.submitTest();
-                    }
+                    showDialog(
+                      context: context,
+                      builder: (context) => SubmitConfirmationDialog(
+                        answeredCount: controller.countAnswered,
+                        skippedCount: controller.countSkipped,
+                        flaggedCount: controller.countFlagged,
+                        totalCount: controller.questions.length,
+                        onSubmit: () {
+                          if (controller.activeSectionId != null) {
+                            controller.submitSectionOrTest();
+                          } else {
+                            controller.submitTest();
+                          }
+                        },
+                      ),
+                    );
                   } else {
                     controller.nextQuestion();
                   }

@@ -161,6 +161,11 @@ class LessonController extends GetxController {
         placeholder: const Center(
           child: CircularProgressIndicator(color: AppColors.accent),
         ),
+        controlsConfiguration: const BetterPlayerControlsConfiguration(
+          enableSkips: false,
+          enableProgressText: false,
+          enableProgressBar: false,
+        ),
       ),
       betterPlayerDataSource: dataSource,
     );

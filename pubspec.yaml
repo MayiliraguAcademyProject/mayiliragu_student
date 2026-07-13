@@ -44,6 +44,7 @@ dependencies:
   persistent_bottom_nav_bar_v2: ^6.3.2
   file_picker: ^8.1.2
   url_launcher: ^6.3.2
+  package_info_plus: ^9.0.1
   firebase_core: ^4.10.0
   firebase_messaging: ^16.3.0
   flutter_local_notifications: ^22.0.0

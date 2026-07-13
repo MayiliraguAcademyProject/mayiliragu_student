@@ -42,24 +42,22 @@ class DashboardView extends GetView<DashboardController> {
             title: AppStrings.tabLearn,
           ),
         ),
-        PersistentTabConfig(
-          screen: const ProgressPlaceholderView(),
-          item: ItemConfig(
-            icon: const Icon(Icons.trending_up),
-            title: AppStrings.tabProgress,
-          ),
-        ),
+        // PersistentTabConfig(
+        //   screen: const ProgressPlaceholderView(),
+        //   item: ItemConfig(
+        //     icon: const Icon(Icons.trending_up),
+        //     title: AppStrings.tabProgress,
+        //   ),
+        // ),
         PersistentTabConfig(
           screen: const ProfileView(),
           item: ItemConfig(
-            icon: const Icon(Icons.more_horiz),
-            title: AppStrings.tabMore,
+            icon: const Icon(Icons.person),
+            title: AppStrings.person,
           ),
         ),
       ],
-      navBarBuilder: (navBarConfig) => CustomNavBar(
-        navBarConfig: navBarConfig,
-      ),
+      navBarBuilder: (navBarConfig) => CustomNavBar(navBarConfig: navBarConfig),
     );
   }
 }
@@ -128,11 +126,7 @@ class CustomNavBar extends StatelessWidget {
     );
   }
 
-  Widget _buildNavBarItem(
-    ItemConfig item,
-    bool isActive,
-    VoidCallback onTap,
-  ) {
+  Widget _buildNavBarItem(ItemConfig item, bool isActive, VoidCallback onTap) {
     if (isActive) {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

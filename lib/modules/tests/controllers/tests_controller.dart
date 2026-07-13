@@ -2,6 +2,7 @@ import 'package:flutter/painting.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:get/get.dart';
 import '../models/test_model.dart';
+import '../models/category_model.dart';
 import '../repositories/tests_repository.dart';
 
 enum FilterTab { topicWise, subjectWise }
@@ -13,44 +14,62 @@ class TestsController extends GetxController {
 
   final isLoading = false.obs;
   final testsList = <TestModel>[].obs;
-  final selectedCategory = 'cat_tnpsc'.obs; // Default: TNPSC
+  final selectedCategory = ''.obs; // Loaded dynamically
   final activeTab = FilterTab.topicWise.obs; // Default: Topic Wise
   final errorMessage = ''.obs;
 
   // Search query
   final searchQuery = ''.obs;
 
-  // Human-readable mapping configs
-  final Map<String, String> subjectNames = {
-    'sub_polity': 'Indian Polity',
-    'sub_aptitude': 'Quantitative Aptitude',
-    'sub_english': 'General English',
-    'sub_history': 'History',
-    'sub_economics': 'Economics',
-    'Polity': 'Indian Polity',
-    'History': 'History',
-    'Economics': 'Economics',
-  };
+  // Human-readable mapping configs loaded dynamically
+  final subjectNames = <String, String>{}.obs;
+  final topicNames = <String, String>{}.obs;
 
-  final Map<String, String> topicNames = {
-    'top_rights': 'Fundamental Rights',
-    'top_ratios': 'Ratios & Proportions',
-    'top_tenses': 'Tenses & Active Voice',
-  };
-
-  final categories = [
-    {'id': 'cat_tnpsc', 'name': 'TNPSC'},
-    {'id': 'TNPSC_GROUP_2_4', 'name': 'TNPSC Group 2 & 4'},
-    {'id': 'cat_upsc', 'name': 'UPSC'},
-    {'id': 'cat_ssc', 'name': 'SSC'},
-    {'id': 'cat_banking', 'name': 'Banking'},
-    {'id': 'IBPS_PO', 'name': 'IBPS PO'},
-  ];
+  final categories = <CategoryModel>[].obs;
 
   @override
   void onInit() {
     super.onInit();
-    fetchTests();
+    fetchCategories().then((_) => fetchTests());
+  }
+
+  Future<void> fetchCategories() async {
+    try {
+      final response = await _repository.getCategories();
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data['data'] ?? [];
+        
+        final List<CategoryModel> loadedCategories = data
+            .map((item) => CategoryModel.fromJson(item))
+            .toList();
+            
+        final Map<String, String> loadedSubjects = {};
+        final Map<String, String> loadedTopics = {};
+        
+        for (var cat in loadedCategories) {
+          for (var sub in cat.subjects) {
+            if (sub.id.isNotEmpty) {
+              loadedSubjects[sub.id] = sub.name;
+            }
+            for (var top in sub.topics) {
+              if (top.id.isNotEmpty) {
+                loadedTopics[top.id] = top.name;
+              }
+            }
+          }
+        }
+        
+        categories.assignAll(loadedCategories);
+        subjectNames.assignAll(loadedSubjects);
+        topicNames.assignAll(loadedTopics);
+        
+        if (categories.isNotEmpty && (selectedCategory.value.isEmpty || !categories.any((c) => c.id == selectedCategory.value))) {
+          selectedCategory.value = categories.first.id;
+        }
+      }
+    } catch (e) {
+      errorMessage.value = 'Failed to load categories: $e';
+    }
   }
 
   Future<void> fetchTests() async {

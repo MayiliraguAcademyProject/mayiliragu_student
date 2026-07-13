@@ -3,6 +3,8 @@ import '../../modules/auth/bindings/auth_binding.dart';
 import '../../modules/auth/views/auth_view.dart';
 import '../../modules/onboarding/bindings/onboarding_binding.dart';
 import '../../modules/onboarding/views/onboarding_view.dart';
+import '../../modules/splash/bindings/splash_binding.dart';
+import '../../modules/splash/views/splash_view.dart';
 import '../../modules/dashboard/bindings/dashboard_binding.dart';
 import '../../modules/dashboard/views/dashboard_view.dart';
 import '../../modules/courses/bindings/course_binding.dart';
@@ -34,9 +36,14 @@ import 'app_routes.dart';
 class AppPages {
   AppPages._();
 
-  static const INITIAL = Routes.LOGIN;
+  static const INITIAL = Routes.SPLASH;
 
   static final routes = [
+    GetPage(
+      name: Routes.SPLASH,
+      page: () => const SplashView(),
+      binding: SplashBinding(),
+    ),
     GetPage(
       name: Routes.ONBOARDING,
       page: () => const OnboardingView(),
