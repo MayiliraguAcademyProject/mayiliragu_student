@@ -68,7 +68,7 @@ jobs:
         with:
           appId: "1:388970099836:android:1263d86df30286226745f9"
           serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          groups: group-1
+          groups: android
           file: build/app/outputs/flutter-apk/app-release.apk
 
       - name: Create Release and Upload
