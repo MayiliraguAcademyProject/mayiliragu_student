@@ -66,8 +66,8 @@ jobs:
       - name: Upload artifact to Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1
         with:
-          appId: "1:1094138626511:android:74f59415cf8a1b464d12ba"
-          serviceCredentialsFile: "clean-culture-c7fbcc032a97.json"
+          appId: "1:388970099836:android:1263d86df30286226745f9"
+          serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           groups: group-1
           file: build/app/outputs/flutter-apk/app-release.apk
 
