@@ -3,16 +3,22 @@ class VersionComparator {
   /// Strings are expected to be in semantic format: x.y.z (major.minor.patch).
   static bool isVersionOutdated(String installedVersion, String requiredVersion) {
     try {
-      final List<int> installedParts = installedVersion
+      final String cleanInstalled = installedVersion
           .split('+')[0] // remove build number if any: e.g. 1.0.0+4 -> 1.0.0
+          .replaceFirst(RegExp(r'^[^0-9]+'), '');
+
+      final String cleanRequired = requiredVersion
+          .split('+')[0]
+          .replaceFirst(RegExp(r'^[^0-9]+'), '');
+
+      final List<int> installedParts = cleanInstalled
           .split('.')
-          .map((part) => int.parse(part))
+          .map((part) => int.parse(part.trim()))
           .toList();
 
-      final List<int> requiredParts = requiredVersion
-          .split('+')[0]
+      final List<int> requiredParts = cleanRequired
           .split('.')
-          .map((part) => int.parse(part))
+          .map((part) => int.parse(part.trim()))
           .toList();
 
       // Pad versions to same length just in case

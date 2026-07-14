@@ -1,13 +1,16 @@
-name: Firebase App Distribution
-# Trigger build: Verifying robust GHA CI/CD release configuration
+name: Firebase App Distribution (Staging)
+
 on:
   push:
     branches:
-      - main
+      - stage
+  pull_request:
+    branches:
+      - stage
 
 jobs:
   build_and_distribute:
-    name: Build and Distribute
+    name: Build and Distribute (Stage)
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -15,6 +18,9 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.head_ref || github.ref_name }}
 
       - name: Setup Java
         uses: actions/setup-java@v3
@@ -52,16 +58,20 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add pubspec.yaml
-          git commit -m "chore: bump version to ${{ steps.get_version.outputs.new_version }} [skip ci] [ci skip]"
-          git tag "v${{ steps.get_version.outputs.version }}-${{ steps.get_version.outputs.build_number }}"
-          git push
-          git push origin "v${{ steps.get_version.outputs.version }}-${{ steps.get_version.outputs.build_number }}"
+          git commit -m "chore: bump version to ${{ steps.get_version.outputs.new_version }} (stage) [skip ci] [ci skip]"
+          git tag "v${{ steps.get_version.outputs.version }}-${{ steps.get_version.outputs.build_number }}-stage"
+          git push origin HEAD:${{ github.head_ref || github.ref_name }}
+          git push origin "v${{ steps.get_version.outputs.version }}-${{ steps.get_version.outputs.build_number }}-stage"
+
+      - name: Create .env file
+        run: |
+          echo "BASE_URL=${{ secrets.BASE_URL_STAGE }}" > .env
 
       - name: Flutter Pub Get
         run: flutter pub get
 
       - name: Build APK
-        run: flutter build apk --release
+        run: flutter build apk --release --dart-define-from-file=.env
 
       - name: Upload artifact to Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1
@@ -75,8 +85,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           token: "${{ secrets.GITHUB_TOKEN }}"
-          tag_name: "v${{ steps.get_version.outputs.version }}-${{ steps.get_version.outputs.build_number }}"
-          name: "Coconut Delivery v${{ steps.get_version.outputs.version }}-${{ steps.get_version.outputs.build_number }}"
+          tag_name: "v${{ steps.get_version.outputs.version }}-${{ steps.get_version.outputs.build_number }}-stage"
+          name: "Coconut Delivery Stage v${{ steps.get_version.outputs.version }}-${{ steps.get_version.outputs.build_number }}"
           prerelease: true
           files: |
             build/app/outputs/flutter-apk/app-release.apk

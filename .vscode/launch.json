@@ -1,0 +1,32 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Mayiliragu Student (Local)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "args": [
+        "--dart-define=FLUTTER_ENV=.env.local"
+      ]
+    },
+    {
+      "name": "Mayiliragu Student (Stage)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "args": [
+        "--dart-define=FLUTTER_ENV=.env.stage"
+      ]
+    },
+    {
+      "name": "Mayiliragu Student (Prod)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "args": [
+        "--dart-define=FLUTTER_ENV=.env.prod"
+      ]
+    }
+  ]
+}
