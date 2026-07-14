@@ -61,22 +61,26 @@ jobs:
           git commit -m "chore: bump version to ${{ steps.get_version.outputs.new_version }} [skip ci] [ci skip]"
           git tag "v${{ steps.get_version.outputs.version }}-${{ steps.get_version.outputs.build_number }}"
           git push origin HEAD:${{ github.head_ref || github.ref_name }}
-          git push origin "v${{ steps.get_version.outputs.version }}-${{ steps.get_version.outputs.build_number }}"
+          git push origin "v${{ steps.get_version.outputs.version }}-${{ steps.get_version.outputs.build_number }}" --force
 
-      - name: Create .env file
+      - name: Create Production Environment
         run: |
-          echo "BASE_URL=${{ secrets.BASE_URL_PROD }}" > .env
+          cat > .env.prod <<EOF
+          BASE_URL=${{ secrets.BASE_URL_PROD }}
+          APP_NAME=Mayiliragu
+          ENABLE_LOGS=false
+          EOF
 
       - name: Flutter Pub Get
         run: flutter pub get
 
       - name: Build APK
-        run: flutter build apk --release --dart-define-from-file=.env
+        run: flutter build apk --release --dart-define-from-file=.env.prod
 
       - name: Upload artifact to Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1
         with:
-          appId: "1:388970099836:android:1263d86df30286226745f9"
+          appId: ${{ secrets.FIREBASE_ANDROID_APP_ID }}
           serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           groups: android
           file: build/app/outputs/flutter-apk/app-release.apk

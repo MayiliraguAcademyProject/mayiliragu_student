@@ -1,9 +1,9 @@
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import '../config/app_config.dart';
 
 class ApiConstants {
   ApiConstants._();
 
-  static String get baseUrl => dotenv.env['BASE_URL'] ?? '';
+  static String get baseUrl => AppConfig.baseUrl;
 
   static const login = '/auth/login';
   static const logout = '/auth/logout';
