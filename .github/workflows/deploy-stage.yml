@@ -61,7 +61,7 @@ jobs:
           git commit -m "chore: bump version to ${{ steps.get_version.outputs.new_version }} (stage) [skip ci] [ci skip]"
           git tag "v${{ steps.get_version.outputs.version }}-${{ steps.get_version.outputs.build_number }}-stage"
           git push origin HEAD:${{ github.head_ref || github.ref_name }}
-          git push origin "v${{ steps.get_version.outputs.version }}-${{ steps.get_version.outputs.build_number }}-stage"
+          git push origin "v${{ steps.get_version.outputs.version }}-${{ steps.get_version.outputs.build_number }}-stage" --force
 
       - name: Create Stage Environment
         run: |
