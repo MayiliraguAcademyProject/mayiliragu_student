@@ -56,7 +56,6 @@ class DefaultFirebaseOptions {
     projectId: 'mayiliraguacadamy',
     storageBucket: 'mayiliraguacadamy.firebasestorage.app',
   );
-
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyBZLYmQ1maHpR08LjWrvPeAkBsqq76p3UI',
     appId: '1:388970099836:ios:0a1828a64d18a9116745f9',

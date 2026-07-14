@@ -1,13 +1,16 @@
-name: Firebase App Distribution
-# Trigger build: Verifying robust GHA CI/CD release configuration
+name: Firebase App Distribution (Production)
+
 on:
   push:
     branches:
-      - main
+      - prod
+  pull_request:
+    branches:
+      - prod
 
 jobs:
   build_and_distribute:
-    name: Build and Distribute
+    name: Build and Distribute (Prod)
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -15,6 +18,8 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Java
         uses: actions/setup-java@v3
@@ -57,11 +62,15 @@ jobs:
           git push
           git push origin "v${{ steps.get_version.outputs.version }}-${{ steps.get_version.outputs.build_number }}"
 
+      - name: Create .env file
+        run: |
+          echo "BASE_URL=${{ secrets.BASE_URL_PROD }}" > .env
+
       - name: Flutter Pub Get
         run: flutter pub get
 
       - name: Build APK
-        run: flutter build apk --release
+        run: flutter build apk --release --dart-define-from-file=.env
 
       - name: Upload artifact to Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1

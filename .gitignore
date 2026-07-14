@@ -56,3 +56,9 @@ android/app/upload-keystore.jks
 android/key.properties
 android/firebase-service-account.json
 
+# Environment files
+.env
+.env.*
+*.env
+
+

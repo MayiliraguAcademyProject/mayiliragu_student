@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:dio/dio.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import '../repositories/profile_repository.dart';
 import '../../../core/utils/toast_helper.dart';
 import '../../../core/constants/api_constants.dart';
@@ -66,12 +67,23 @@ class ProfileController extends GetxController {
   final obscureConfirmPassword = true.obs;
 
   final isDarkMode = false.obs;
+  final appVersion = ''.obs;
 
   @override
   void onInit() {
     super.onInit();
     fetchProfile();
     _loadThemeMode();
+    _loadAppVersion();
+  }
+
+  Future<void> _loadAppVersion() async {
+    try {
+      final packageInfo = await PackageInfo.fromPlatform();
+      appVersion.value = "v${packageInfo.version}+${packageInfo.buildNumber}";
+    } catch (e) {
+      appVersion.value = "v1.0.0";
+    }
   }
 
   void _loadThemeMode() {
