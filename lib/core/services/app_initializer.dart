@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../../firebase_options.dart';
 import '../constants/api_constants.dart';
 import '../network/api_client.dart';
@@ -18,12 +17,7 @@ class AppInitializer {
   static Future<ThemeMode> init() async {
     WidgetsFlutterBinding.ensureInitialized();
 
-    // 1. Load environment variables
-    const envFile = String.fromEnvironment('FLUTTER_ENV', defaultValue: '.env');
-    await dotenv.load(fileName: envFile);
-
     debugPrint('--- APP CONFIG ---');
-    debugPrint('Loaded env file: $envFile');
     debugPrint('Using API Base URL: ${ApiConstants.baseUrl}');
     debugPrint('------------------');
 
