@@ -1,18 +1,9 @@
-import 'dart:io';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ApiConstants {
   ApiConstants._();
 
-  static String get baseUrl {
-    try {
-      if (Platform.isAndroid) {
-        // return 'https://education-api-tb3k.onrender.com/api';
-          return 'http://192.168.31.86:5000/api';
-        //return 'https://mayiliragu.sathish.qzz.io/api';
-      }
-    } catch (_) {}
-    return 'https://mayiliragu.sathish.qzz.io/api';
-  }
+  static String get baseUrl => dotenv.env['BASE_URL'] ?? '';
 
   static const login = '/auth/login';
   static const logout = '/auth/logout';
@@ -25,3 +16,4 @@ class ApiConstants {
   static const notificationsUnreadCount = '/notifications/unread-count';
   static String markNotificationRead(String id) => '/notifications/$id/read';
 }
+

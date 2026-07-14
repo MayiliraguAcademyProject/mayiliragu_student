@@ -40,9 +40,7 @@ class UpdateRequiredDialog extends StatelessWidget {
     return PopScope(
       canPop: false,
       child: AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Row(
           children: [
             Icon(
@@ -53,10 +51,7 @@ class UpdateRequiredDialog extends StatelessWidget {
             const SizedBox(width: 12),
             const Text(
               'Update Required',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-              ),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
             ),
           ],
         ),
@@ -66,19 +61,13 @@ class UpdateRequiredDialog extends StatelessWidget {
           children: [
             Text(
               'A newer version of Mayiliragu Academy (v$requiredVersion) is required to continue. Please download the update.',
-              style: const TextStyle(
-                fontSize: 14,
-                height: 1.4,
-              ),
+              style: const TextStyle(fontSize: 14, height: 1.4),
             ),
             if (releaseNotes != null && releaseNotes!.trim().isNotEmpty) ...[
               const SizedBox(height: 16),
               const Text(
                 "What's New:",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13,
-                ),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
               ),
               const SizedBox(height: 6),
               Container(
@@ -87,9 +76,7 @@ class UpdateRequiredDialog extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: AppColors.backgroundEnd.withAlpha(51),
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: AppColors.border.withAlpha(128),
-                  ),
+                  border: Border.all(color: AppColors.border.withAlpha(128)),
                 ),
                 constraints: const BoxConstraints(maxHeight: 150),
                 child: SingleChildScrollView(
@@ -136,10 +123,7 @@ class UpdateRequiredDialog extends StatelessWidget {
                   SizedBox(width: 8),
                   Text(
                     'Download Update',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                   ),
                 ],
               ),

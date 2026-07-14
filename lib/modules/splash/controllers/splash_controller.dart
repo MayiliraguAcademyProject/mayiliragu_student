@@ -41,6 +41,12 @@ class SplashController extends GetxController {
         appConfig.requiredVersion!,
       );
 
+      Get.log('--- Version Check ---');
+      Get.log('Installed Version: $installedVersion');
+      Get.log('Required Version: ${appConfig.requiredVersion}');
+      Get.log('Is Outdated: $isOutdated');
+      Get.log('---------------------');
+
       if (isOutdated) {
         // Stop delay and show non-dismissible dialog
         Get.dialog(

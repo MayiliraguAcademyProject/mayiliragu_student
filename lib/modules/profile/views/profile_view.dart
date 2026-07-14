@@ -23,6 +23,12 @@ class ProfileView extends GetView<ProfileController> {
           'Profile Settings',
           style: AppTextStyles.heading.copyWith(fontSize: 20, fontWeight: FontWeight.w800),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.bug_report, color: Colors.red),
+            onPressed: () => throw Exception('Test crash for Firebase Crashlytics'),
+          ),
+        ],
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -319,7 +325,7 @@ class ProfileView extends GetView<ProfileController> {
                   ),
                   value: controller.isDarkMode.value,
                   onChanged: controller.toggleTheme,
-                  activeColor: AppColors.accent,
+                  activeThumbColor: AppColors.accent,
                 ),
               ),
               const SizedBox(height: 24),
@@ -529,6 +535,20 @@ class ProfileView extends GetView<ProfileController> {
                 ),
               ),
               const SizedBox(height: 32),
+
+
+              Center(
+                child: Text(
+                  'Version ${controller.appVersion.value}',
+                  style: TextStyle(
+                    color: theme.colorScheme.onSurface.withAlpha(120),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+              
             ],
           ),
         );
