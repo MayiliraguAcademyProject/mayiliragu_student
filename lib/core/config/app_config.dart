@@ -3,7 +3,7 @@ class AppConfig {
 
   static const baseUrl = String.fromEnvironment(
     'BASE_URL',
-    defaultValue: '',
+    defaultValue: 'http://192.168.31.86:5000/api',
   );
 
   static const appName = String.fromEnvironment(
