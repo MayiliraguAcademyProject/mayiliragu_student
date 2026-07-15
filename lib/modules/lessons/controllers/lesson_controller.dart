@@ -75,7 +75,8 @@ class LessonController extends GetxController {
         }
 
         final driveFileId = data['driveFileId']?.toString() ?? '';
-        await _initializeVideoPlayer(driveFileId, startSeconds: startSeconds);
+        final hlsUrl = data['hlsUrl']?.toString() ?? '';
+        await _initializeVideoPlayer(driveFileId, hlsUrl: hlsUrl, startSeconds: startSeconds);
         fetchNotes(id);
       } else {
         errorMessage.value = 'Failed to load lesson details';
@@ -89,7 +90,7 @@ class LessonController extends GetxController {
 
   bool get isVideoPlayerSupported => GetPlatform.isAndroid || GetPlatform.isIOS || GetPlatform.isWeb;
 
-  Future<void> _initializeVideoPlayer(String driveFileId, {int startSeconds = 0}) async {
+  Future<void> _initializeVideoPlayer(String driveFileId, {String hlsUrl = '', int startSeconds = 0}) async {
     if (!isVideoPlayerSupported) {
       return;
     }
@@ -104,8 +105,28 @@ class LessonController extends GetxController {
         BetterPlayerDataSourceType.file,
         localPath!,
       );
+    } else if (hlsUrl.isNotEmpty && _currentLessonId != null) {
+      // HLS Video Delivery
+      String videoUrl = hlsUrl;
+      try {
+        final signedUrlResponse = await _repository.getSignedVideoUrl(_currentLessonId!);
+        if (signedUrlResponse.statusCode == 200 && signedUrlResponse.data['data'] != null) {
+          videoUrl = signedUrlResponse.data['data']['url'] ?? hlsUrl;
+        }
+      } catch (e) {
+        debugPrint('Failed to fetch signed HLS video URL, falling back to raw path: $e');
+      }
+
+      dataSource = BetterPlayerDataSource(
+        BetterPlayerDataSourceType.network,
+        videoUrl,
+        liveStream: false,
+        useAsmsSubtitles: true,
+        useAsmsAudioTracks: true,
+        useAsmsTracks: true, // Enables resolution tracks (720p, 480p, 360p) in controls
+      );
     } else {
-      // If the driveFileId is already a full URL (or for fallback test stream)
+      // Legacy Google Drive Streaming
       String videoUrl = driveFileId;
       Map<String, String>? headers;
 
@@ -135,7 +156,7 @@ class LessonController extends GetxController {
 
         if (isGoogleDriveUrl || !driveFileId.startsWith('http')) {
           // Use backend proxy streaming endpoint
-          videoUrl = '${ApiConstants.baseUrl}/lessons/stream/$extractedId';
+          videoUrl = '${ApiConstants.baseUrl}${ApiConstants.streamLesson(extractedId)}';
           final token = await Get.find<SecureStorageService>().getAccessToken();
           if (token != null) {
             headers = {
@@ -339,7 +360,7 @@ class LessonController extends GetxController {
     }
 
     if (isGoogleDriveUrl || !driveFileId.startsWith('http')) {
-      videoUrl = '${ApiConstants.baseUrl}/lessons/stream/$extractedId';
+      videoUrl = '${ApiConstants.baseUrl}${ApiConstants.streamLesson(extractedId)}';
       final token = await Get.find<SecureStorageService>().getAccessToken();
       if (token != null) {
         headers = {
@@ -362,7 +383,8 @@ class LessonController extends GetxController {
         // Reload player with offline file source
         final startSecs = betterPlayerController?.videoPlayerController?.value.position.inSeconds ?? 0;
         betterPlayerController?.dispose();
-        await _initializeVideoPlayer(driveFileId, startSeconds: startSecs);
+        final hlsUrl = lessonData.value!['hlsUrl']?.toString() ?? '';
+        await _initializeVideoPlayer(driveFileId, hlsUrl: hlsUrl, startSeconds: startSecs);
         update();
       },
       onError: (err) {
@@ -378,9 +400,10 @@ class LessonController extends GetxController {
     AppToast.info('Local offline video deleted successfully.');
     // Reload player with network source
     final driveFileId = lessonData.value!['driveFileId']?.toString() ?? '';
+    final hlsUrl = lessonData.value!['hlsUrl']?.toString() ?? '';
     final startSecs = betterPlayerController?.videoPlayerController?.value.position.inSeconds ?? 0;
     betterPlayerController?.dispose();
-    await _initializeVideoPlayer(driveFileId, startSeconds: startSecs);
+    await _initializeVideoPlayer(driveFileId, hlsUrl: hlsUrl, startSeconds: startSecs);
     update();
   }
 

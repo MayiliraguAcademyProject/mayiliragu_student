@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart' as dio_instance;
 import '../../../core/network/api_client.dart';
+import '../../../core/constants/api_constants.dart';
 
 class LessonRepository {
   final ApiClient _apiClient;
@@ -7,12 +8,12 @@ class LessonRepository {
   LessonRepository(this._apiClient);
 
   Future<dio_instance.Response> getLessonById(String id) async {
-    return await _apiClient.get('/lessons/$id');
+    return await _apiClient.get(ApiConstants.lessonDetails(id));
   }
 
   Future<dio_instance.Response> updateProgress(String lessonId, int watchedSeconds) async {
     return await _apiClient.post(
-      '/progress/update',
+      ApiConstants.updateProgress,
       data: {
         'lessonId': lessonId,
         'watchedSeconds': watchedSeconds,
@@ -22,7 +23,7 @@ class LessonRepository {
 
   Future<dio_instance.Response> markAsComplete(String lessonId) async {
     return await _apiClient.post(
-      '/progress/complete',
+      ApiConstants.markComplete,
       data: {
         'lessonId': lessonId,
       },
@@ -30,6 +31,10 @@ class LessonRepository {
   }
 
   Future<dio_instance.Response> logVideoDownload(String lessonId) async {
-    return await _apiClient.post('/lessons/$lessonId/download');
+    return await _apiClient.post(ApiConstants.downloadLesson(lessonId));
+  }
+
+  Future<dio_instance.Response> getSignedVideoUrl(String lessonId) async {
+    return await _apiClient.get(ApiConstants.signedVideoUrl(lessonId));
   }
 }

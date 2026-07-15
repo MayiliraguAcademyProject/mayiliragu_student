@@ -15,5 +15,13 @@ class ApiConstants {
   static const notifications = '/notifications';
   static const notificationsUnreadCount = '/notifications/unread-count';
   static String markNotificationRead(String id) => '/notifications/$id/read';
+
+  // Lessons and playback HLS endpoints
+  static String lessonDetails(String id) => '/lessons/$id';
+  static const updateProgress = '/progress/update';
+  static const markComplete = '/progress/complete';
+  static String downloadLesson(String id) => '/lessons/$id/download';
+  static String signedVideoUrl(String id) => '/lessons/$id/video-url';
+  static String streamLesson(String id) => '/lessons/stream/$id';
 }
 
