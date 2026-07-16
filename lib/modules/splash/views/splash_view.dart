@@ -16,10 +16,7 @@ class SplashView extends GetView<SplashController> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              AppColors.backgroundStart,
-              AppColors.backgroundEnd,
-            ],
+            colors: [AppColors.backgroundStart, AppColors.backgroundEnd],
           ),
         ),
         child: SafeArea(
@@ -35,20 +32,15 @@ class SplashView extends GetView<SplashController> {
                       width: 110,
                       height: 110,
                       decoration: BoxDecoration(
-                        color: AppColors.primary,
+                        //  color: AppColors.primary,
                         borderRadius: BorderRadius.circular(28),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.primary.withAlpha(76),
-                            blurRadius: 24,
-                            offset: const Offset(0, 8),
-                          ),
-                        ],
                       ),
-                      child: const Icon(
-                        Icons.school_rounded,
-                        color: Colors.white,
-                        size: 58,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Image.asset(
+                          'assets/images/app_logo.png',
+                          fit: BoxFit.contain,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -78,7 +70,9 @@ class SplashView extends GetView<SplashController> {
                       child: CircularProgressIndicator(
                         strokeWidth: 3,
                         color: AppColors.primary,
-                        valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          AppColors.primary,
+                        ),
                       ),
                     ),
                   ],
@@ -90,15 +84,17 @@ class SplashView extends GetView<SplashController> {
                 alignment: Alignment.bottomCenter,
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: 24.0),
-                  child: Obx(() => Text(
-                        controller.versionText.value,
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textSecondary.withAlpha(153),
-                          letterSpacing: 0.5,
-                        ),
-                      )),
+                  child: Obx(
+                    () => Text(
+                      controller.versionText.value,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textSecondary.withAlpha(153),
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ],

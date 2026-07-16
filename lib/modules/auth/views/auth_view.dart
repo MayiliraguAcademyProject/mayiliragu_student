@@ -38,10 +38,12 @@ class AuthView extends GetView<AuthController> {
                       ),
                     ],
                   ),
-                  child: const Icon(
-                    Icons.school,
-                    color: Colors.white,
-                    size: 38,
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Image.asset(
+                      'assets/images/app_logo.png',
+                      fit: BoxFit.contain,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 24),
