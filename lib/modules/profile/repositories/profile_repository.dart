@@ -38,4 +38,8 @@ class ProfileRepository {
       data: data,
     );
   }
+
+  Future<Response> deleteAccount() async {
+    return await _apiClient.delete(ApiConstants.profile);
+  }
 }
