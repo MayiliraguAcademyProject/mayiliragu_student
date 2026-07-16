@@ -36,7 +36,10 @@ class AuthController extends GetxController {
     errorMessage.value = '';
 
     try {
-      final response = await _authRepository.login(email: email, password: password);
+      final response = await _authRepository.login(
+        email: email,
+        password: password,
+      );
       if (response.statusCode == 200) {
         final responseData = response.data['data'] as Map<String, dynamic>;
         final accessToken = responseData['accessToken'] as String;
@@ -61,22 +64,22 @@ class AuthController extends GetxController {
 
         emailController.clear();
         passwordController.clear();
-        
-        // Check student profile completion status using repository and model
+
+        // Check student profile completion status using the returned profile in response
         bool isCompleted = false;
-        try {
-          final profileRes = await _authRepository.getStudentProfile(responseData['user']['id']);
-          if (profileRes.statusCode == 200 && profileRes.data['data'] != null) {
-            final profileModel = StudentProfileModel.fromJson(profileRes.data['data']);
-            if (profileModel.gender != null && 
-                profileModel.gender!.isNotEmpty && 
-                profileModel.mobileNumber != null && 
+        final profileData = responseData['profile'];
+        if (profileData != null) {
+          try {
+            final profileModel = StudentProfileModel.fromJson(profileData);
+            if (profileModel.gender != null &&
+                profileModel.gender!.isNotEmpty &&
+                profileModel.mobileNumber != null &&
                 profileModel.mobileNumber!.isNotEmpty) {
               isCompleted = true;
             }
+          } catch (e) {
+            debugPrint('Error parsing profile completion on login: $e');
           }
-        } catch (e) {
-          debugPrint('Error checking profile completion on login: $e');
         }
 
         if (isCompleted) {

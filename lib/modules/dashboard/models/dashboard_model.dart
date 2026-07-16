@@ -3,6 +3,7 @@ class DashboardModel {
   final List<EnrolledCourse> enrolledCourses;
   final ContinueLearning? continueLearning;
   final List<RecentlyWatched> recentlyWatched;
+  final List<QuickActionModel> quickActions;
   final UserProfile? profile;
 
   DashboardModel({
@@ -10,6 +11,7 @@ class DashboardModel {
     required this.enrolledCourses,
     this.continueLearning,
     required this.recentlyWatched,
+    required this.quickActions,
     this.profile,
   });
 
@@ -34,11 +36,17 @@ class DashboardModel {
         .map((r) => RecentlyWatched.fromJson(r as Map<String, dynamic>))
         .toList();
 
+    final actionsList = json['quickActions'] as List? ?? json['quick_actions'] as List? ?? [];
+    final List<QuickActionModel> actions = actionsList
+        .map((a) => QuickActionModel.fromJson(a as Map<String, dynamic>))
+        .toList();
+
     return DashboardModel(
       banners: banners,
       enrolledCourses: courses,
       continueLearning: contLearn,
       recentlyWatched: recent,
+      quickActions: actions,
       profile: profile,
     );
   }
@@ -162,5 +170,45 @@ class UserProfile {
       name: json['name'] as String? ?? '',
       email: json['email'] as String? ?? '',
     );
+  }
+}
+
+class QuickActionModel {
+  final String id;
+  final String title;
+  final String icon;
+  final String route;
+  final bool isEnabled;
+  final int order;
+
+  QuickActionModel({
+    required this.id,
+    required this.title,
+    required this.icon,
+    required this.route,
+    required this.isEnabled,
+    required this.order,
+  });
+
+  factory QuickActionModel.fromJson(Map<String, dynamic> json) {
+    return QuickActionModel(
+      id: json['id'] as String? ?? '',
+      title: json['title'] as String? ?? '',
+      icon: json['icon'] as String? ?? '',
+      route: json['route'] as String? ?? '',
+      isEnabled: json['isEnabled'] as bool? ?? json['is_enabled'] as bool? ?? true,
+      order: json['order'] as int? ?? 0,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'icon': icon,
+      'route': route,
+      'isEnabled': isEnabled,
+      'order': order,
+    };
   }
 }
