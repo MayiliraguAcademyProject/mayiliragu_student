@@ -94,7 +94,7 @@ class ProfileController extends GetxController {
       if (mode != null) {
         isDarkMode.value = mode == 'dark';
       } else {
-        isDarkMode.value = Get.isDarkMode;
+        isDarkMode.value = false;
       }
     });
   }

@@ -40,9 +40,12 @@ class _StudyMaterialDetailViewState extends State<StudyMaterialDetailView> {
     final result = await controller.downloadMaterial(id);
     if (result != null) {
       final fileUrl = result['fileUrl'] as String;
-      // Dynamically get domain base from active ApiConstants.baseUrl
-      final base = ApiConstants.baseUrl.replaceAll('/api', '');
-      final fullUrl = '$base$fileUrl';
+      String fullUrl = fileUrl;
+      if (!fileUrl.startsWith('http://') && !fileUrl.startsWith('https://')) {
+        // Dynamically get domain base from active ApiConstants.baseUrl
+        final base = ApiConstants.baseUrl.replaceAll('/api', '');
+        fullUrl = '$base$fileUrl';
+      }
       final uri = Uri.parse(fullUrl);
       try {
         await launchUrl(uri, mode: LaunchMode.externalApplication);

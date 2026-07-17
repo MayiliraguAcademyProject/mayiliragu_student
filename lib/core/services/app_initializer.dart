@@ -55,9 +55,7 @@ class AppInitializer {
     final savedThemeMode = await storage.getThemeMode();
     return savedThemeMode == 'dark'
         ? ThemeMode.dark
-        : savedThemeMode == 'light'
-            ? ThemeMode.light
-            : ThemeMode.system;
+        : ThemeMode.light;
   }
 }
 
