@@ -9,7 +9,6 @@ import '../../tests/views/tests_view.dart';
 import '../../tests/controllers/tests_controller.dart';
 import '../../courses/views/course_list_view.dart';
 import '../../courses/controllers/course_controller.dart';
-import 'progress_placeholder_view.dart';
 import '../../profile/views/profile_view.dart';
 import '../../profile/controllers/profile_controller.dart';
 

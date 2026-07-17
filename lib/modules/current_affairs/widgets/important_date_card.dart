@@ -21,7 +21,7 @@ class ImportantDateCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: AppColors.brandPurple.withOpacity(0.08),
+              color: AppColors.brandPurple.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(16),
             ),
             child: const Icon(Icons.calendar_month, color: AppColors.brandPurple, size: 24),

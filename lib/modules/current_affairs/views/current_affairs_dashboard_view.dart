@@ -115,7 +115,7 @@ class CurrentAffairsDashboardView extends GetView<CurrentAffairsController> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 10,
             offset: const Offset(0, 4),
           )
@@ -256,7 +256,7 @@ class CurrentAffairsDashboardView extends GetView<CurrentAffairsController> {
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         itemCount: controller.articlesList.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 12),
+        separatorBuilder: (_, _) => const SizedBox(height: 12),
         itemBuilder: (context, index) {
           final art = controller.articlesList[index];
           return ArticleFeedCard(

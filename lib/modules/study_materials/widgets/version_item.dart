@@ -40,7 +40,7 @@ class VersionItem extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 16,
-                backgroundColor: AppColors.brandPurple.withOpacity(0.08),
+                backgroundColor: AppColors.brandPurple.withValues(alpha: 0.08),
                 child: Text(
                   'v${version.version}',
                   style: const TextStyle(

@@ -203,7 +203,7 @@ class AnalyticsDashboardView extends StatelessWidget {
           children: [
             Container(
               padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(color: AppColors.brandPurple.withOpacity(0.06), borderRadius: BorderRadius.circular(12)),
+              decoration: BoxDecoration(color: AppColors.brandPurple.withValues(alpha: 0.06), borderRadius: BorderRadius.circular(12)),
               child: const Icon(Icons.arrow_forward_ios, color: AppColors.brandPurple, size: 16),
             ),
             const SizedBox(width: 16),

@@ -411,7 +411,7 @@ class LessonController extends GetxController {
     if (!confirm) return false;
 
     try {
-      final String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
+      final String? selectedDirectory = await FilePicker.getDirectoryPath();
       if (selectedDirectory != null && selectedDirectory.isNotEmpty) {
         final success = await downloadService.setCustomDownloadDirectory(selectedDirectory);
         if (success) {

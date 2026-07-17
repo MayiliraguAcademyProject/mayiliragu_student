@@ -6,7 +6,6 @@ import 'package:get/get.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/widgets/course_image.dart';
-import '../../../core/utils/toast_helper.dart';
 import '../../../app/routes/app_routes.dart';
 import '../controllers/dashboard_controller.dart';
 import '../models/dashboard_model.dart';
@@ -221,46 +220,59 @@ class DashboardHomeView extends GetView<DashboardController> {
 
   // Quick Actions Section
   Widget _buildQuickActions() {
-    return GridView.count(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: 2,
-      crossAxisSpacing: 12,
-      mainAxisSpacing: 12,
-      childAspectRatio: 2.3,
-      children: [
-        _buildActionCard(
-          Icons.quiz_outlined,
-          AppStrings.actionPracticeTest,
-          () {
-            controller.tabController.jumpToTab(1);
-            if (Get.isRegistered<TestsController>()) {
-              Get.find<TestsController>().fetchTests();
-            }
-          },
+    return Obx(() {
+      final actions = controller.dashboardData.value?.quickActions ?? [];
+      if (actions.isEmpty) {
+        return const SizedBox.shrink();
+      }
+
+      return GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: 2.3,
         ),
-        _buildActionCard(
-          Icons.newspaper,
-          AppStrings.actionCurrentAffairs,
-          () => Get.toNamed(Routes.CURRENT_AFFAIRS),
-        ),
-        _buildActionCard(
-          Icons.menu_book,
-          AppStrings.actionStudyMaterials,
-          () => Get.toNamed(Routes.STUDY_MATERIALS),
-        ),
-        _buildActionCard(
-          Icons.analytics_outlined,
-          AppStrings.actionPerformance,
-          () => Get.toNamed(Routes.PERFORMANCE),
-        ),
-        _buildActionCard(
-          Icons.shopping_bag_outlined,
-          "Book Store",
-          () => Get.toNamed(Routes.BOOK_STORE),
-        ),
-      ],
-    );
+        itemCount: actions.length,
+        itemBuilder: (context, index) {
+          final action = actions[index];
+          return _buildActionCard(
+            _getIconData(action.icon),
+            action.title,
+            () {
+              if (action.route == '/tests') {
+                controller.tabController.jumpToTab(1);
+                if (Get.isRegistered<TestsController>()) {
+                  Get.find<TestsController>().fetchTests();
+                }
+              } else {
+                Get.toNamed(action.route);
+              }
+            },
+          );
+        },
+      );
+    });
+  }
+
+  IconData _getIconData(String iconName) {
+    switch (iconName) {
+      case 'assignment_outlined':
+      case 'quiz_outlined':
+        return Icons.quiz_outlined;
+      case 'newspaper':
+        return Icons.newspaper;
+      case 'menu_book':
+        return Icons.menu_book;
+      case 'analytics_outlined':
+        return Icons.analytics_outlined;
+      case 'shopping_bag_outlined':
+        return Icons.shopping_bag_outlined;
+      default:
+        return Icons.link;
+    }
   }
 
   Widget _buildActionCard(IconData icon, String title, VoidCallback onTap) {
@@ -659,7 +671,7 @@ class _BannerCarouselState extends State<BannerCarousel> {
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
+                        color: Colors.black.withValues(alpha: 0.08),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
@@ -725,9 +737,9 @@ class _BannerCarouselState extends State<BannerCarousel> {
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               colors: [
-                                Colors.black.withOpacity(0.4),
+                                Colors.black.withValues(alpha: 0.4),
                                 Colors.transparent,
-                                Colors.black.withOpacity(0.2),
+                                Colors.black.withValues(alpha: 0.2),
                               ],
                               begin: Alignment.bottomCenter,
                               end: Alignment.topCenter,
@@ -782,7 +794,7 @@ class _BannerCarouselState extends State<BannerCarousel> {
                       borderRadius: BorderRadius.circular(3),
                       color: _currentPage == index
                           ? Colors.white
-                          : Colors.white.withOpacity(0.5),
+                          : Colors.white.withValues(alpha: 0.5),
                     ),
                   ),
                 ),

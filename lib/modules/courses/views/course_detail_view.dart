@@ -23,12 +23,11 @@ class CourseDetailView extends StatelessWidget {
     final theme = Theme.of(context);
 
     final gradientColors = [
-      theme.colorScheme.background,
-      theme.colorScheme.surfaceVariant,
+      theme.colorScheme.surface,
+      theme.colorScheme.surfaceContainerHighest,
     ];
 
-    final textColorPrimary = theme.colorScheme.onBackground;
-    final textColorSecondary = theme.colorScheme.onSurfaceVariant;
+    final textColorPrimary = theme.colorScheme.onSurface;
 
     return Scaffold(
       body: Container(
@@ -95,7 +94,7 @@ class CourseDetailView extends StatelessWidget {
                       Text(
                         course.description.isNotEmpty ? course.description : 'No description provided.',
                         style: AppTextStyles.body.copyWith(
-                          color: textColorPrimary.withOpacity(0.85),
+                          color: textColorPrimary.withValues(alpha: 0.85),
                           height: 1.5,
                         ),
                       ),
@@ -127,9 +126,9 @@ class CourseDetailView extends StatelessWidget {
     return SliverAppBar(
       expandedHeight: 220,
       pinned: true,
-      backgroundColor: theme.colorScheme.background,
+      backgroundColor: theme.colorScheme.surface,
       iconTheme: IconThemeData(
-        color: theme.colorScheme.onBackground,
+        color: theme.colorScheme.onSurface,
       ),
       flexibleSpace: FlexibleSpaceBar(
         title: Text(
@@ -183,7 +182,7 @@ class CourseDetailView extends StatelessWidget {
     final modules = course.modules;
     final theme = Theme.of(context);
     
-    final textColorPrimary = theme.colorScheme.onBackground;
+    final textColorPrimary = theme.colorScheme.onSurface;
     final textColorSecondary = theme.colorScheme.onSurfaceVariant;
     final cardBackgroundColor = theme.colorScheme.surface;
 
@@ -246,7 +245,7 @@ class CourseDetailView extends StatelessWidget {
     final isCompleted = lesson.progress?.completed == true;
     final theme = Theme.of(context);
     
-    final textColorPrimary = theme.colorScheme.onBackground;
+    final textColorPrimary = theme.colorScheme.onSurface;
     final textColorSecondary = theme.colorScheme.onSurfaceVariant;
 
     return ListTile(

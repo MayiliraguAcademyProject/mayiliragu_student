@@ -8,7 +8,7 @@ import '../widgets/address_section.dart';
 import '../widgets/education_section.dart';
 
 class ProfileOnboardingView extends StatefulWidget {
-  const ProfileOnboardingView({Key? key}) : super(key: key);
+  const ProfileOnboardingView({super.key});
 
   @override
   State<ProfileOnboardingView> createState() => _ProfileOnboardingViewState();
