@@ -111,7 +111,7 @@ class _StudyMaterialDetailViewState extends State<StudyMaterialDetailView> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
-                            color: AppColors.brandPurple.withOpacity(0.08),
+                            color: AppColors.brandPurple.withValues(alpha: 0.08),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
@@ -216,7 +216,7 @@ class _StudyMaterialDetailViewState extends State<StudyMaterialDetailView> {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: mat.versions.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 10),
+                  separatorBuilder: (_, _) => const SizedBox(height: 10),
                   itemBuilder: (context, index) {
                     final ver = mat.versions[index];
                     return VersionItem(

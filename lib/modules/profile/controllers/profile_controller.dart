@@ -91,7 +91,11 @@ class ProfileController extends GetxController {
   void _loadThemeMode() {
     final storage = Get.find<SecureStorageService>();
     storage.getThemeMode().then((mode) {
-      isDarkMode.value = mode == 'dark';
+      if (mode != null) {
+        isDarkMode.value = mode == 'dark';
+      } else {
+        isDarkMode.value = Get.isDarkMode;
+      }
     });
   }
 

@@ -6,7 +6,6 @@ import 'package:get/get.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/widgets/course_image.dart';
-import '../../../core/utils/toast_helper.dart';
 import '../../../app/routes/app_routes.dart';
 import '../controllers/dashboard_controller.dart';
 import '../models/dashboard_model.dart';
@@ -672,7 +671,7 @@ class _BannerCarouselState extends State<BannerCarousel> {
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
+                        color: Colors.black.withValues(alpha: 0.08),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
@@ -738,9 +737,9 @@ class _BannerCarouselState extends State<BannerCarousel> {
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               colors: [
-                                Colors.black.withOpacity(0.4),
+                                Colors.black.withValues(alpha: 0.4),
                                 Colors.transparent,
-                                Colors.black.withOpacity(0.2),
+                                Colors.black.withValues(alpha: 0.2),
                               ],
                               begin: Alignment.bottomCenter,
                               end: Alignment.topCenter,
@@ -795,7 +794,7 @@ class _BannerCarouselState extends State<BannerCarousel> {
                       borderRadius: BorderRadius.circular(3),
                       color: _currentPage == index
                           ? Colors.white
-                          : Colors.white.withOpacity(0.5),
+                          : Colors.white.withValues(alpha: 0.5),
                     ),
                   ),
                 ),

@@ -240,7 +240,7 @@ class _CurrentAffairDetailViewState extends State<CurrentAffairDetailView> with 
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: controller.quizzesList.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 16),
+            separatorBuilder: (_, _) => const SizedBox(height: 16),
             itemBuilder: (context, idx) {
               final quiz = controller.quizzesList[idx];
 

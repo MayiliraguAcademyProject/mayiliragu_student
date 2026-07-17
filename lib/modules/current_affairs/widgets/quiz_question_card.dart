@@ -61,7 +61,7 @@ class QuizQuestionCard extends StatelessWidget {
                 statusIcon = Icons.cancel;
               }
             } else if (isSelected) {
-              optionBg = AppColors.brandPurple.withOpacity(0.08);
+              optionBg = AppColors.brandPurple.withValues(alpha: 0.08);
               optionBorder = AppColors.brandPurple;
             }
 
@@ -125,7 +125,7 @@ class QuizQuestionCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.amber.shade50.withOpacity(0.5),
+                color: Colors.amber.shade50.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: Colors.amber.shade200),
               ),

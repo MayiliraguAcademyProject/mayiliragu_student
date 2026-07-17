@@ -6,7 +6,7 @@ import './profile_fields.dart';
 
 class AddressSection extends StatelessWidget {
   final ProfileController controller;
-  const AddressSection({Key? key, required this.controller}) : super(key: key);
+  const AddressSection({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {

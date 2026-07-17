@@ -88,9 +88,7 @@ class TestModel {
         : [];
 
     final List<dynamic>? secList = json['sections'];
-    final List<TestSectionModel>? parsedSections = secList != null
-        ? secList.map((s) => TestSectionModel.fromJson(s, parsedQuestions)).toList()
-        : null;
+    final List<TestSectionModel>? parsedSections = secList?.map((s) => TestSectionModel.fromJson(s, parsedQuestions)).toList();
 
     return TestModel(
       id: json['id'],

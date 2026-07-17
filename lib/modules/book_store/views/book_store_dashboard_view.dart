@@ -63,7 +63,7 @@ class _BookStoreDashboardViewState extends State<BookStoreDashboardView> with Si
                 borderRadius: BorderRadius.circular(10),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.brandPurple.withOpacity(0.2),
+                    color: AppColors.brandPurple.withValues(alpha: 0.2),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   )
@@ -191,7 +191,7 @@ class _BookStoreDashboardViewState extends State<BookStoreDashboardView> with Si
         return ListView.separated(
           padding: const EdgeInsets.all(16.0),
           itemCount: controller.myBooksList.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 12),
+          separatorBuilder: (_, _) => const SizedBox(height: 12),
           itemBuilder: (context, index) {
             final book = controller.myBooksList[index];
             return Container(
@@ -270,7 +270,7 @@ class _BookStoreDashboardViewState extends State<BookStoreDashboardView> with Si
         return ListView.separated(
           padding: const EdgeInsets.all(16.0),
           itemCount: controller.myOrdersList.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 12),
+          separatorBuilder: (_, _) => const SizedBox(height: 12),
           itemBuilder: (context, index) {
             final order = controller.myOrdersList[index];
             return Container(
@@ -380,7 +380,7 @@ class _BookStoreDashboardViewState extends State<BookStoreDashboardView> with Si
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 8,
             offset: const Offset(0, 4),
           )
@@ -502,7 +502,7 @@ class _BookStoreDashboardViewState extends State<BookStoreDashboardView> with Si
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: AppColors.brandPurple.withOpacity(0.08),
+                          color: AppColors.brandPurple.withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(

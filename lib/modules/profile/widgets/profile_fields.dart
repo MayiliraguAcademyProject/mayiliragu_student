@@ -11,14 +11,14 @@ class ProfileTextField extends StatelessWidget {
   final int maxLines;
 
   const ProfileTextField({
-    Key? key,
+    super.key,
     required this.label,
     required this.controller,
     required this.hint,
     this.keyboardType = TextInputType.text,
     this.inputFormatters,
     this.maxLines = 1,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -66,12 +66,12 @@ class ProfileDropdownField extends StatelessWidget {
   final ValueChanged<String?> onChanged;
 
   const ProfileDropdownField({
-    Key? key,
+    super.key,
     required this.label,
     required this.value,
     required this.items,
     required this.onChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -89,7 +89,7 @@ class ProfileDropdownField extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           DropdownButtonFormField<String>(
-            value: value,
+            initialValue: value,
             style: TextStyle(color: onSurfaceColor, fontSize: 13),
             dropdownColor: theme.colorScheme.surface,
             decoration: InputDecoration(
@@ -115,10 +115,10 @@ class ProfileDatePickerField extends StatelessWidget {
   final TextEditingController controller;
 
   const ProfileDatePickerField({
-    Key? key,
+    super.key,
     required this.label,
     required this.controller,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

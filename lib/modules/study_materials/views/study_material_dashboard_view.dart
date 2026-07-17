@@ -106,7 +106,7 @@ class StudyMaterialDashboardView extends GetView<StudyMaterialsController> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 10,
             offset: const Offset(0, 4),
           )
@@ -208,7 +208,7 @@ class StudyMaterialDashboardView extends GetView<StudyMaterialsController> {
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         itemCount: controller.materialsList.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 12),
+        separatorBuilder: (_, _) => const SizedBox(height: 12),
         itemBuilder: (context, index) {
           final mat = controller.materialsList[index];
           return MaterialCard(
@@ -271,7 +271,7 @@ class StudyMaterialDashboardView extends GetView<StudyMaterialsController> {
                       return ListTile(
                         contentPadding: EdgeInsets.zero,
                         leading: CircleAvatar(
-                          backgroundColor: AppColors.brandPurple.withOpacity(0.08),
+                          backgroundColor: AppColors.brandPurple.withValues(alpha: 0.08),
                           child: const Icon(Icons.folder_zip, color: AppColors.brandPurple, size: 18),
                         ),
                         title: Text(

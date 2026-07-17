@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../controllers/analytics_controller.dart';
-import '../models/analytics_models.dart';
 
 class SubjectAnalysisView extends StatelessWidget {
   const SubjectAnalysisView({super.key});

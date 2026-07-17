@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/api_constants.dart';
 import '../controllers/book_store_controller.dart';
 import 'book_checkout_view.dart';
 import '../../../../shared/widgets/custom_network_image.dart';
@@ -127,7 +126,7 @@ class _BookDetailViewState extends State<BookDetailView> {
                         child: Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: selectedFormat == 'HARD_COPY' ? AppColors.brandPurple.withOpacity(0.06) : Colors.white,
+                            color: selectedFormat == 'HARD_COPY' ? AppColors.brandPurple.withValues(alpha: 0.06) : Colors.white,
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
                               color: selectedFormat == 'HARD_COPY' ? AppColors.brandPurple : Colors.grey.shade200,
@@ -158,7 +157,7 @@ class _BookDetailViewState extends State<BookDetailView> {
                         child: Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: selectedFormat == 'SOFT_COPY' ? AppColors.brandPurple.withOpacity(0.06) : Colors.white,
+                            color: selectedFormat == 'SOFT_COPY' ? AppColors.brandPurple.withValues(alpha: 0.06) : Colors.white,
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
                               color: selectedFormat == 'SOFT_COPY' ? AppColors.brandPurple : Colors.grey.shade200,

@@ -50,7 +50,7 @@ class _MagazinesViewState extends State<MagazinesView> {
         return ListView.separated(
           padding: const EdgeInsets.all(16),
           itemCount: controller.magazinesList.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 12),
+          separatorBuilder: (_, _) => const SizedBox(height: 12),
           itemBuilder: (context, idx) {
             final mag = controller.magazinesList[idx];
             return MonthlyMagazineCard(magazine: mag);

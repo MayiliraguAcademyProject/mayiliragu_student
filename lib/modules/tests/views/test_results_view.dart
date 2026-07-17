@@ -256,7 +256,7 @@ class TestResultsView extends GetView<TestResultsController> {
                                 child: _buildSectionRow(sec),
                               ),
                             )
-                            .toList(),
+                            ,
                       ],
                     ),
                   );
@@ -593,44 +593,6 @@ class TestResultsView extends GetView<TestResultsController> {
     return Container(width: 1, height: 28, color: const Color(0xFFBFDBFE));
   }
 
-  Widget _buildBottomNavBar() {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: Color(0xFFE5E7EB))),
-      ),
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildNavItem(Icons.home_outlined, 'Home', false),
-          _buildNavItem(Icons.assignment_outlined, 'Tests', true),
-          _buildNavItem(Icons.school_outlined, 'Learn', false),
-          _buildNavItem(Icons.trending_up, 'Progress', false),
-          _buildNavItem(Icons.menu, 'More', false),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNavItem(IconData icon, String label, bool isActive) {
-    final color = isActive ? const Color(0xFF0F3CC9) : Colors.grey;
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, color: color, size: 22),
-        const SizedBox(height: 2),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 10,
-            color: color,
-            fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-          ),
-        ),
-      ],
-    );
-  }
 
   Widget _buildSectionRow(SectionBreakdownModel data) {
     return Container(
