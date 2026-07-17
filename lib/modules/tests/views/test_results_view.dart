@@ -117,7 +117,7 @@ class TestResultsView extends GetView<TestResultsController> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          _buildCircularProgressIndicator(attemptResult.score),
+                          _buildCircularProgressIndicator(attemptResult.correct, attemptResult.totalMarks),
                           const SizedBox(height: 14),
                           _buildPassFailBadge(attemptResult.passed),
                         ],
@@ -277,19 +277,19 @@ class TestResultsView extends GetView<TestResultsController> {
                     children: [
                       _buildCompareCol(
                         'Your Score',
-                        '${attemptResult.score}%',
+                        '${attemptResult.correct}',
                         const Color(0xFF1E60FF),
                       ),
                       _buildDivider(),
                       _buildCompareCol(
                         'Class Avg',
-                        '${attemptResult.classAvg}%',
+                        '${attemptResult.classAvg}',
                         const Color(0xFF4B5563),
                       ),
                       _buildDivider(),
                       _buildCompareCol(
                         'Top Score',
-                        '${attemptResult.topScore}%',
+                        '${attemptResult.topScore}',
                         const Color(0xFFB45309),
                       ),
                     ],
@@ -328,35 +328,36 @@ class TestResultsView extends GetView<TestResultsController> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 52,
-                      child: OutlinedButton.icon(
-                        onPressed: () => controller.detailedAnalysis(),
-                        icon: const Icon(
-                          Icons.trending_up,
-                          color: Color(0xFF0F3CC9),
-                        ),
-                        label: const Text(
-                          'Detailed Analysis',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF0F3CC9),
-                          ),
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(
-                            color: Color(0xFF0F3CC9),
-                            width: 1.5,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                      ),
-                    ),
+                    // const SizedBox(height: 12),
+                    // SizedBox(
+                    //   width: double.infinity,
+                    //   height: 52,
+                    //   child: OutlinedButton.icon(
+                    //     onPressed: () => controller.detailedAnalysis(),
+                    //     icon: const Icon(
+                    //       Icons.trending_up,
+                    //       color: Color(0xFF0F3CC9),
+                    //     ),
+                    //     label: const Text(
+                    //       'Detailed Analysis',
+                    //       style: TextStyle(
+                    //         fontSize: 14,
+                    //         fontWeight: FontWeight.bold,
+                    //         color: Color(0xFF0F3CC9),
+                    //       ),
+                    //     ),
+                    //     style: OutlinedButton.styleFrom(
+                    //       side: const BorderSide(
+                    //         color: Color(0xFF0F3CC9),
+                    //         width: 1.5,
+                    //       ),
+                    //       shape: RoundedRectangleBorder(
+                    //         borderRadius: BorderRadius.circular(12),
+                    //       ),
+                    //     ),
+                    //   ),
+                    // ),
+                 
                   ],
                 ),
               ),
@@ -390,8 +391,10 @@ class TestResultsView extends GetView<TestResultsController> {
     );
   }
 
-  Widget _buildCircularProgressIndicator(int scoreVal) {
-    final double pct = scoreVal / 100.0;
+  Widget _buildCircularProgressIndicator(int scoreVal, int totalMarks) {
+
+    
+    final double pct = totalMarks > 0 ? (scoreVal / totalMarks).clamp(0.0, 1.0) : 0.0;
 
     return SizedBox(
       width: 140,
@@ -417,9 +420,9 @@ class TestResultsView extends GetView<TestResultsController> {
                     color: Color(0xFF1F2937),
                   ),
                 ),
-                const Text(
-                  'OUT OF 100',
-                  style: TextStyle(
+                Text(
+                  'OUT OF $totalMarks',
+                  style: const TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
                     color: Colors.grey,

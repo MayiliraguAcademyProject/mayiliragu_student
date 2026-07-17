@@ -21,8 +21,10 @@ class SubmitConfirmationDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasSkippedOrFlagged = skippedCount > 0 || flaggedCount > 0;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AlertDialog(
+      backgroundColor: isDark ? AppColors.cardBgDark : AppColors.cardBg,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -35,12 +37,12 @@ class SubmitConfirmationDialog extends StatelessWidget {
             size: 28,
           ),
           const SizedBox(width: 10),
-          const Text(
+          Text(
             'Confirm Submission',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
+              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
             ),
           ),
         ],
@@ -49,9 +51,12 @@ class SubmitConfirmationDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Here is a summary of your test progress. Are you sure you want to submit?',
-            style: TextStyle(fontSize: 14, color: Colors.black87),
+            style: TextStyle(
+              fontSize: 14,
+              color: isDark ? AppColors.textSecondaryDark : Colors.black87,
+            ),
           ),
           const SizedBox(height: 20),
           _buildSummaryRow(
@@ -59,8 +64,8 @@ class SubmitConfirmationDialog extends StatelessWidget {
             iconColor: const Color(0xFF10B981),
             label: 'Answered',
             count: answeredCount,
-            bgColor: const Color(0xFFECFDF5),
-            textColor: const Color(0xFF065F46),
+            bgColor: isDark ? const Color(0xFF064E3B) : const Color(0xFFECFDF5),
+            textColor: isDark ? const Color(0xFFA7F3D0) : const Color(0xFF065F46),
           ),
           const SizedBox(height: 8),
           _buildSummaryRow(
@@ -68,8 +73,8 @@ class SubmitConfirmationDialog extends StatelessWidget {
             iconColor: const Color(0xFFEF4444),
             label: 'Skipped / Unanswered',
             count: skippedCount,
-            bgColor: const Color(0xFFFEF2F2),
-            textColor: const Color(0xFF991B1B),
+            bgColor: isDark ? const Color(0xFF7F1D1D) : const Color(0xFFFEF2F2),
+            textColor: isDark ? const Color(0xFFFCA5A5) : const Color(0xFF991B1B),
           ),
           const SizedBox(height: 8),
           _buildSummaryRow(
@@ -77,29 +82,29 @@ class SubmitConfirmationDialog extends StatelessWidget {
             iconColor: const Color(0xFFF59E0B),
             label: 'Flagged for Review',
             count: flaggedCount,
-            bgColor: const Color(0xFFFFFBEB),
-            textColor: const Color(0xFF92400E),
+            bgColor: isDark ? const Color(0xFF78350F) : const Color(0xFFFFFBEB),
+            textColor: isDark ? const Color(0xFFFDE68A) : const Color(0xFF92400E),
           ),
           if (hasSkippedOrFlagged) ...[
             const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: const Color(0xFFFEF3C7),
+                color: isDark ? const Color(0xFF451A03) : const Color(0xFFFEF3C7),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: const Color(0xFFFCD34D)),
+                border: Border.all(color: isDark ? const Color(0xFF78350F) : const Color(0xFFFCD34D)),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  Icon(Icons.info_outline, color: Color(0xFFB45309), size: 18),
-                  SizedBox(width: 8),
+                children: [
+                  Icon(Icons.info_outline, color: isDark ? const Color(0xFFFCD34D) : const Color(0xFFB45309), size: 18),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'Warning: You have skipped or flagged questions. You will not be able to change your answers after submitting.',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Color(0xFF92400E),
+                        color: isDark ? const Color(0xFFFDE68A) : const Color(0xFF92400E),
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -117,11 +122,14 @@ class SubmitConfirmationDialog extends StatelessWidget {
               child: OutlinedButton(
                 onPressed: () => Get.back(),
                 style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Color(0xFFE5E7EB)),
+                  side: BorderSide(color: isDark ? AppColors.borderDark : const Color(0xFFE5E7EB)),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   padding: const EdgeInsets.symmetric(vertical: 12),
                 ),
-                child: const Text('Cancel', style: TextStyle(color: Colors.black54)),
+                child: Text(
+                  'Cancel',
+                  style: TextStyle(color: isDark ? AppColors.textSecondaryDark : Colors.black54),
+                ),
               ),
             ),
             const SizedBox(width: 12),
