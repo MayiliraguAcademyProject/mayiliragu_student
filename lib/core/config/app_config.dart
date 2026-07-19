@@ -3,7 +3,7 @@ class AppConfig {
 
   static const baseUrl = String.fromEnvironment(
     'BASE_URL',
-    defaultValue: 'https://mayiliragu.sathish.qzz.io/api',
+    defaultValue: 'https://api-mayiliragu.sathishdev.in/api',
   );
 
   static const appName = String.fromEnvironment(
