@@ -27,7 +27,7 @@ class TestRunnerView extends GetView<TestRunnerController> {
         }
       },
       child: Scaffold(
-        backgroundColor: const Color(0xFFFAF9FF),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
           backgroundColor: const Color(0xFF0F3CC9), // Deep Blue Header
           elevation: 0,
@@ -117,17 +117,17 @@ class TestRunnerView extends GetView<TestRunnerController> {
           final QuestionModel currentQuestion = controller.questions[controller.currentIndex.value];
           final ans = controller.userAnswers[currentQuestion.id];
 
-          return Column(
+            return Column(
             children: [
               // Secondary Status / Progress Bar
-              _buildSecondaryStatusBar(),
+              _buildSecondaryStatusBar(context),
 
               // Main Question Content area
               Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
                   child: Card(
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.surface,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     elevation: 0,
                     child: Padding(
@@ -141,10 +141,10 @@ class TestRunnerView extends GetView<TestRunnerController> {
                             children: [
                               Text(
                                 'Q.${controller.currentIndex.value + 1} of ${controller.questions.length}',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
-                                  color: Color(0xFF0F3CC9),
+                                  color: Theme.of(context).colorScheme.primary,
                                 ),
                               ),
                               Row(
@@ -222,10 +222,10 @@ class TestRunnerView extends GetView<TestRunnerController> {
                                 if (currentQuestion.questionTextEn.isNotEmpty)
                                   Text(
                                     currentQuestion.questionTextEn,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,
-                                      color: AppColors.textPrimary,
+                                      color: Theme.of(context).colorScheme.onSurface,
                                       height: 1.5,
                                     ),
                                   ),
@@ -237,9 +237,9 @@ class TestRunnerView extends GetView<TestRunnerController> {
                                     currentQuestion.questionTextTa!.isNotEmpty)
                                   Text(
                                     currentQuestion.questionTextTa!,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 15,
-                                      color: Colors.black87,
+                                      color: Theme.of(context).colorScheme.onSurface,
                                       height: 1.5,
                                     ),
                                   ),
@@ -291,9 +291,9 @@ class TestRunnerView extends GetView<TestRunnerController> {
     );
   }
 
-  Widget _buildSecondaryStatusBar() {
+  Widget _buildSecondaryStatusBar(BuildContext context) {
     return Container(
-      color: Colors.white,
+      color: Theme.of(context).colorScheme.surface,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -384,8 +384,9 @@ class TestRunnerView extends GetView<TestRunnerController> {
   }
 
   Widget _buildBottomNavigationBar(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
-      color: Colors.white,
+      color: colorScheme.surface,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
       child: SafeArea(
         child: Row(
@@ -398,10 +399,10 @@ class TestRunnerView extends GetView<TestRunnerController> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                   ),
-                  child: const Text('Previous', style: TextStyle(color: Colors.black54)),
+                  child: Text('Previous', style: TextStyle(color: colorScheme.onSurfaceVariant)),
                 )),
             IconButton(
-              icon: const Icon(Icons.grid_on_rounded, color: Color(0xFF0F3CC9), size: 28),
+              icon: Icon(Icons.grid_on_rounded, color: colorScheme.primary, size: 28),
               onPressed: () {
                 Get.bottomSheet(
                   QuestionNavigatorSheet(controller: controller),

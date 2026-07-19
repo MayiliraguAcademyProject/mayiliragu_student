@@ -19,7 +19,7 @@ class DashboardHomeView extends GetView<DashboardController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFAF9FF),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Obx(() {
           if (controller.isLoading.value) {
@@ -69,7 +69,7 @@ class DashboardHomeView extends GetView<DashboardController> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // 1. Header (Greeting & Notification)
-                  _buildHeader(userName),
+                  _buildHeader(context, userName),
                   const SizedBox(height: 24),
 
                   // Banners Carousel
@@ -79,7 +79,7 @@ class DashboardHomeView extends GetView<DashboardController> {
                   ],
 
                   // 2. Quick Actions Section
-                  _buildSectionTitle(AppStrings.quickActions),
+                  _buildSectionTitle(context, AppStrings.quickActions),
                   const SizedBox(height: 12),
                   _buildQuickActions(),
                   const SizedBox(height: 24),
@@ -90,7 +90,7 @@ class DashboardHomeView extends GetView<DashboardController> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        _buildSectionTitle(AppStrings.enrolledCourses),
+                        _buildSectionTitle(context, AppStrings.enrolledCourses),
                         TextButton(
                           onPressed: () {
                             Get.toNamed(Routes.COURSES);
@@ -115,7 +115,7 @@ class DashboardHomeView extends GetView<DashboardController> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _buildSectionTitle(AppStrings.continueLearning),
+                      _buildSectionTitle(context, AppStrings.continueLearning),
                       TextButton(
                         onPressed: () {
                           Get.toNamed(Routes.COURSES);
@@ -144,16 +144,16 @@ class DashboardHomeView extends GetView<DashboardController> {
   }
 
   // Header UI Component
-  Widget _buildHeader(String name) {
+  Widget _buildHeader(BuildContext context, String name) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           '${AppStrings.goodMorning}$name 👋',
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF2C008F),
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         Obx(() {
@@ -162,9 +162,9 @@ class DashboardHomeView extends GetView<DashboardController> {
           return Stack(
             children: [
               IconButton(
-                icon: const Icon(
+                icon: Icon(
                   Icons.notifications_outlined,
-                  color: Color(0xFF2C008F),
+                  color: Theme.of(context).colorScheme.onSurface,
                   size: 26,
                 ),
                 onPressed: () {
@@ -207,13 +207,13 @@ class DashboardHomeView extends GetView<DashboardController> {
   }
 
   // Section Header Text Helper
-  Widget _buildSectionTitle(String title) {
+  Widget _buildSectionTitle(BuildContext context, String title) {
     return Text(
       title,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.bold,
-        color: Color(0xFF0F0F0F),
+        color: Theme.of(context).colorScheme.onSurface,
       ),
     );
   }
@@ -279,319 +279,334 @@ class DashboardHomeView extends GetView<DashboardController> {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x05000000),
-              blurRadius: 10,
-              offset: Offset(0, 4),
-            ),
-          ],
-          border: Border.all(color: const Color(0xFFF0F1F6), width: 1),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppColors.brandPurple.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(icon, color: AppColors.brandPurple, size: 20),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF0F0F0F),
-                  height: 1.2,
+      child: Builder(
+        builder: (context) {
+          final colorScheme = Theme.of(context).colorScheme;
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: colorScheme.surface,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x05000000),
+                  blurRadius: 10,
+                  offset: Offset(0, 4),
                 ),
-              ),
+              ],
+              border: Border.all(color: colorScheme.outline, width: 1),
             ),
-          ],
-        ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.brandPurple.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(icon, color: AppColors.brandPurple, size: 20),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.onSurface,
+                      height: 1.2,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
       ),
     );
   }
 
   Widget _buildEnrolledCoursesList(List<EnrolledCourse> courses) {
-    return SizedBox(
-      height: 180,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: courses.length,
-        itemBuilder: (context, index) {
-          final course = courses[index];
-          return Container(
-            width: 200,
-            margin: const EdgeInsets.only(right: 16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFFF0F1F6), width: 1),
-            ),
-            child: InkWell(
-              onTap: () {
-                Get.to(() => CourseDetailView(courseId: course.id));
-              },
-              borderRadius: BorderRadius.circular(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(16),
-                          topRight: Radius.circular(16),
-                        ),
-                        color: AppColors.lightLavender,
-                        image: course.thumbnail.isNotEmpty
-                            ? DecorationImage(
-                                image: CourseImage.getProvider(
-                                  course.thumbnail,
-                                ),
-                                fit: BoxFit.cover,
-                              )
-                            : null,
-                      ),
-                      child: course.thumbnail.isEmpty
-                          ? const Center(
-                              child: Icon(
-                                Icons.book,
-                                color: AppColors.brandPurple,
-                                size: 32,
-                              ),
-                            )
-                          : null,
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          course.title,
-                          style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF0F0F0F),
+    return Builder(
+      builder: (context) {
+        final colorScheme = Theme.of(context).colorScheme;
+        return SizedBox(
+          height: 180,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: courses.length,
+            itemBuilder: (context, index) {
+              final course = courses[index];
+              return Container(
+                width: 200,
+                margin: const EdgeInsets.only(right: 16),
+                decoration: BoxDecoration(
+                  color: colorScheme.surface,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: colorScheme.outline, width: 1),
+                ),
+                child: InkWell(
+                  onTap: () {
+                    Get.to(() => CourseDetailView(courseId: course.id));
+                  },
+                  borderRadius: BorderRadius.circular(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(16),
+                              topRight: Radius.circular(16),
+                            ),
+                            color: AppColors.lightLavender,
+                            image: course.thumbnail.isNotEmpty
+                                ? DecorationImage(
+                                    image: CourseImage.getProvider(
+                                      course.thumbnail,
+                                    ),
+                                    fit: BoxFit.cover,
+                                  )
+                                : null,
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                          child: course.thumbnail.isEmpty
+                              ? const Center(
+                                  child: Icon(
+                                    Icons.book,
+                                    color: AppColors.brandPurple,
+                                    size: 32,
+                                  ),
+                                )
+                              : null,
                         ),
-                        const SizedBox(height: 6),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              '${course.totalLessons} Lessons',
-                              style: const TextStyle(
-                                fontSize: 11,
-                                color: Color(0xFF6E7191),
-                              ),
-                            ),
-                            Text(
-                              '${course.progressPercentage.toInt()}%',
-                              style: const TextStyle(
-                                fontSize: 11,
+                              course.title,
+                              style: TextStyle(
+                                fontSize: 13,
                                 fontWeight: FontWeight.bold,
-                                color: AppColors.brandPurple,
+                                color: colorScheme.onSurface,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 6),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  '${course.totalLessons} Lessons',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                                Text(
+                                  '${course.progressPercentage.toInt()}%',
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.brandPurple,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 6),
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(2),
+                              child: LinearProgressIndicator(
+                                value: course.progressPercentage / 100,
+                                backgroundColor: colorScheme.outline.withValues(alpha: 0.2),
+                                valueColor: const AlwaysStoppedAnimation<Color>(
+                                  AppColors.brandPurple,
+                                ),
+                                minHeight: 4,
                               ),
                             ),
                           ],
-                        ),
-                        const SizedBox(height: 6),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(2),
-                          child: LinearProgressIndicator(
-                            value: course.progressPercentage / 100,
-                            backgroundColor: const Color(0xFFECEFF1),
-                            valueColor: const AlwaysStoppedAnimation<Color>(
-                              AppColors.brandPurple,
-                            ),
-                            minHeight: 4,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  // Continue Learning Section
-  Widget _buildContinueLearning(ContinueLearning? contLearn) {
-    if (contLearn == null) {
-      return Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFFF0F1F6), width: 1),
-        ),
-        child: const Center(
-          child: Text(
-            AppStrings.startLearningPrompt,
-            style: TextStyle(color: Color(0xFF6E7191), fontSize: 14),
-          ),
-        ),
-      );
-    }
-
-    final progress = contLearn.progress;
-    final percentage = contLearn.progressPercentage;
-
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x05000000),
-            blurRadius: 10,
-            offset: Offset(0, 4),
-          ),
-        ],
-        border: Border.all(color: const Color(0xFFF0F1F6), width: 1),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Graphic header area
-          Container(
-            height: 120,
-            width: double.infinity,
-            decoration: const BoxDecoration(
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(16),
-                topRight: Radius.circular(16),
-              ),
-              gradient: LinearGradient(
-                colors: [Color(0xFFE8EAF6), Color(0xFFC5CAE9)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-            ),
-            child: Stack(
-              children: [
-                Positioned.fill(
-                  child: Opacity(
-                    opacity: 0.1,
-                    child: Icon(
-                      Icons.architecture_outlined,
-                      size: 150,
-                      color: AppColors.brandPurple.withValues(alpha: 0.8),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Text(
-                        contLearn.lessonTitle,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF0F0F0F),
                         ),
                       ),
                     ],
                   ),
                 ),
-              ],
-            ),
+              );
+            },
           ),
+        );
+      }
+    );
+  }
 
-          // Progress & action details
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  // Continue Learning Section
+  Widget _buildContinueLearning(ContinueLearning? contLearn) {
+    return Builder(
+      builder: (context) {
+        final colorScheme = Theme.of(context).colorScheme;
+        if (contLearn == null) {
+          return Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+            decoration: BoxDecoration(
+              color: colorScheme.surface,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: colorScheme.outline, width: 1),
+            ),
+            child: Center(
+              child: Text(
+                AppStrings.startLearningPrompt,
+                style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 14),
+              ),
+            ),
+          );
+        }
+
+        final progress = contLearn.progress;
+        final percentage = contLearn.progressPercentage;
+
+        return Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x05000000),
+                blurRadius: 10,
+                offset: Offset(0, 4),
+              ),
+            ],
+            border: Border.all(color: colorScheme.outline, width: 1),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Graphic header area
+              Container(
+                height: 120,
+                width: double.infinity,
+                decoration: const BoxDecoration(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(16),
+                    topRight: Radius.circular(16),
+                  ),
+                  gradient: LinearGradient(
+                    colors: [Color(0xFFE8EAF6), Color(0xFFC5CAE9)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+                child: Stack(
                   children: [
-                    const Text(
-                      AppStrings.overallProgress,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Color(0xFF6E7191),
-                        fontWeight: FontWeight.w500,
+                    Positioned.fill(
+                      child: Opacity(
+                        opacity: 0.1,
+                        child: Icon(
+                          Icons.architecture_outlined,
+                          size: 150,
+                          color: AppColors.brandPurple.withValues(alpha: 0.8),
+                        ),
                       ),
                     ),
-                    Text(
-                      '$percentage%',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: AppColors.brandPurple,
-                        fontWeight: FontWeight.bold,
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Text(
+                            contLearn.lessonTitle,
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: colorScheme.onSurface,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(4),
-                  child: LinearProgressIndicator(
-                    value: progress,
-                    backgroundColor: const Color(0xFFECEFF1),
-                    valueColor: const AlwaysStoppedAnimation<Color>(
-                      AppColors.brandPurple,
+              ),
+
+              // Progress & action details
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          AppStrings.overallProgress,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: colorScheme.onSurfaceVariant,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        Text(
+                          '$percentage%',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.brandPurple,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
-                    minHeight: 6,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Get.toNamed(
-                        Routes.LESSON_DETAIL,
-                        arguments: contLearn.lessonId,
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.brandPurple,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                    const SizedBox(height: 8),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        value: progress,
+                        backgroundColor: colorScheme.outline.withValues(alpha: 0.2),
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                          AppColors.brandPurple,
+                        ),
+                        minHeight: 6,
                       ),
-                      elevation: 0,
                     ),
-                    child: const Text(
-                      AppStrings.resumeLesson,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Get.toNamed(
+                            Routes.LESSON_DETAIL,
+                            arguments: contLearn.lessonId,
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.brandPurple,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: const Text(
+                          AppStrings.resumeLesson,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      }
     );
   }
 }

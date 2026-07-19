@@ -14,23 +14,23 @@ class TestsView extends GetView<TestsController> {
     final controller = Get.find<TestsController>();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFAF9FF),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0.5,
         title: Obx(() {
           if (controller.searchQuery.value.isNotEmpty || controller.searchQuery.value != '') {
-            return _buildSearchAppBarTitle(controller);
+            return _buildSearchAppBarTitle(context, controller);
           }
           return Text(
             'Practice Tests',
-            style: AppTextStyles.heading.copyWith(fontSize: 22, color: AppColors.textPrimary),
+            style: AppTextStyles.heading.copyWith(fontSize: 22, color: Theme.of(context).colorScheme.onSurface),
           );
         }),
         centerTitle: false,
         actions: [
           IconButton(
-            icon: const Icon(Icons.search, color: AppColors.textPrimary),
+            icon: Icon(Icons.search, color: Theme.of(context).colorScheme.onSurface),
             onPressed: () {
               if (controller.searchQuery.value.isNotEmpty) {
                 controller.updateSearch('');
@@ -40,7 +40,7 @@ class TestsView extends GetView<TestsController> {
             },
           ),
           IconButton(
-            icon: const Icon(Icons.filter_list, color: AppColors.textPrimary),
+            icon: Icon(Icons.filter_list, color: Theme.of(context).colorScheme.onSurface),
             onPressed: () {
               // Filters dialog can be implemented here
             },
@@ -116,7 +116,7 @@ class TestsView extends GetView<TestsController> {
     );
   }
 
-  Widget _buildSearchAppBarTitle(TestsController controller) {
+  Widget _buildSearchAppBarTitle(BuildContext context, TestsController controller) {
     return TextField(
       autofocus: true,
       onChanged: (value) => controller.updateSearch(value),
@@ -125,51 +125,58 @@ class TestsView extends GetView<TestsController> {
         hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 16),
         border: InputBorder.none,
       ),
-      style: const TextStyle(fontSize: 16, color: AppColors.textPrimary),
+      style: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onSurface),
     );
   }
 
   Widget _buildFilterTabs(TestsController controller) {
-    return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
-      child: Container(
-        height: 48,
-        decoration: BoxDecoration(
-          color: const Color(0xFFF3F3FA),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: _buildTabButton(
-                controller,
-                title: 'Topic Wise',
-                tab: FilterTab.topicWise,
-              ),
+    return Builder(
+      builder: (context) {
+        return Container(
+          color: Theme.of(context).colorScheme.surface,
+          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+          child: Container(
+            height: 48,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(12),
             ),
-            Expanded(
-              child: _buildTabButton(
-                controller,
-                title: 'Subject Wise',
-                tab: FilterTab.subjectWise,
-              ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: _buildTabButton(
+                    context,
+                    controller,
+                    title: 'Topic Wise',
+                    tab: FilterTab.topicWise,
+                  ),
+                ),
+                Expanded(
+                  child: _buildTabButton(
+                    context,
+                    controller,
+                    title: 'Subject Wise',
+                    tab: FilterTab.subjectWise,
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      }
     );
   }
 
-  Widget _buildTabButton(TestsController controller, {required String title, required FilterTab tab}) {
+  Widget _buildTabButton(BuildContext context, TestsController controller, {required String title, required FilterTab tab}) {
     return Obx(() {
       final isSelected = controller.activeTab.value == tab;
+      final colorScheme = Theme.of(context).colorScheme;
       return GestureDetector(
         onTap: () => controller.switchTab(tab),
         child: Container(
           margin: const EdgeInsets.all(4),
           decoration: BoxDecoration(
-            color: isSelected ? Colors.white : Colors.transparent,
+            color: isSelected ? colorScheme.surface : Colors.transparent,
             borderRadius: BorderRadius.circular(8),
             boxShadow: isSelected
                 ? [
@@ -187,7 +194,7 @@ class TestsView extends GetView<TestsController> {
             style: TextStyle(
               fontSize: 14,
               fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-              color: isSelected ? AppColors.brandPurple : const Color(0xFF6E7191),
+              color: isSelected ? AppColors.brandPurple : colorScheme.onSurfaceVariant,
             ),
           ),
         ),
@@ -196,48 +203,53 @@ class TestsView extends GetView<TestsController> {
   }
 
   Widget _buildCategoryChips(TestsController controller) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: controller.categories.map((cat) {
-          final id = cat.id;
-          final name = cat.name;
-          return Obx(() {
-            final isSelected = controller.selectedCategory.value == id;
-            return GestureDetector(
-              onTap: () => controller.selectCategory(id),
-              child: Container(
-                margin: const EdgeInsets.only(right: 10),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                decoration: BoxDecoration(
-                  color: isSelected ? const Color(0xFF0F3CC9) : Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: isSelected ? Colors.transparent : const Color(0xFFE5E7EB),
-                    width: 1,
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Text(
-                      name,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                        color: isSelected ? Colors.white : const Color(0xFF4E4B66),
+    return Builder(
+      builder: (context) {
+        final colorScheme = Theme.of(context).colorScheme;
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: controller.categories.map((cat) {
+              final id = cat.id;
+              final name = cat.name;
+              return Obx(() {
+                final isSelected = controller.selectedCategory.value == id;
+                return GestureDetector(
+                  onTap: () => controller.selectCategory(id),
+                  child: Container(
+                    margin: const EdgeInsets.only(right: 10),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: isSelected ? const Color(0xFF0F3CC9) : colorScheme.surface,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: isSelected ? Colors.transparent : colorScheme.outline,
+                        width: 1,
                       ),
                     ),
-                    if (isSelected) ...[
-                      const SizedBox(width: 4),
-                      const Icon(Icons.check, size: 14, color: Colors.white),
-                    ]
-                  ],
-                ),
-              ),
-            );
-          });
-        }).toList(),
-      ),
+                    child: Row(
+                      children: [
+                        Text(
+                          name,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: isSelected ? Colors.white : colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        if (isSelected) ...[
+                          const SizedBox(width: 4),
+                          const Icon(Icons.check, size: 14, color: Colors.white),
+                        ]
+                      ],
+                    ),
+                  ),
+                );
+              });
+            }).toList(),
+          ),
+        );
+      }
     );
   }
 
@@ -420,14 +432,14 @@ class TestsView extends GetView<TestsController> {
               padding: const EdgeInsets.only(top: 16.0, bottom: 8.0),
               child: Text(
                 subjectName,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w800,
-                  color: Color(0xFF0F0F0F),
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
             ),
-            ...tests.map((test) => _buildTestCard(test)),
+            ...tests.map((test) => _buildTestCard(context, test)),
           ],
         );
       },
@@ -455,23 +467,24 @@ class TestsView extends GetView<TestsController> {
       itemBuilder: (context, index) {
         final subjectName = groups.keys.elementAt(index);
         final topics = groups[subjectName]!;
+        final colorScheme = Theme.of(context).colorScheme;
 
         return Container(
           margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: colorScheme.surface,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFF0F1F6)),
+            border: Border.all(color: colorScheme.outline),
           ),
           child: Theme(
             data: ThemeData().copyWith(dividerColor: Colors.transparent),
             child: ExpansionTile(
               title: Text(
                 subjectName,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF0F0F0F),
+                  color: colorScheme.onSurface,
                 ),
               ),
               leading: const Icon(Icons.folder_open, color: AppColors.brandPurple),
@@ -498,7 +511,7 @@ class TestsView extends GetView<TestsController> {
                         ],
                       ),
                     ),
-                    ...tests.map((test) => _buildTestCard(test)),
+                    ...tests.map((test) => _buildTestCard(context, test)),
                     const Divider(height: 16),
                   ],
                 );
@@ -510,7 +523,7 @@ class TestsView extends GetView<TestsController> {
     );
   }
 
-  Widget _buildTestCard(TestModel test) {
+  Widget _buildTestCard(BuildContext context, TestModel test) {
     // Generate difficulty colors
     Color diffBgColor = const Color(0xFFEBFDF2);
     Color diffTextColor = const Color(0xFF10B981);
@@ -528,14 +541,15 @@ class TestsView extends GetView<TestsController> {
     }
 
     final isProgressTest = test.title.toLowerCase().contains('history'); // Simulate progress for demo
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFF0F1F6), width: 1),
+        border: Border.all(color: colorScheme.outline, width: 1),
         boxShadow: const [
           BoxShadow(
             color: Color(0x03000000),
@@ -557,10 +571,10 @@ class TestsView extends GetView<TestsController> {
                     Expanded(
                       child: Text(
                         test.title,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF0F0F0F),
+                          color: colorScheme.onSurface,
                         ),
                       ),
                     ),
@@ -641,9 +655,9 @@ class TestsView extends GetView<TestsController> {
                   children: [
                     Text(
                       '${test.questionCount} Q • ${test.duration} Min',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
-                        color: Color(0xFF6E7191),
+                        color: colorScheme.onSurfaceVariant,
                         fontWeight: FontWeight.w500,
                       ),
                     ),

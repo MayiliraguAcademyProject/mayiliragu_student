@@ -9,22 +9,23 @@ class NotificationInboxView extends GetView<NotificationInboxController> {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(NotificationInboxController());
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFAF9FF),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Notifications',
           style: TextStyle(
-            color: Color(0xFF2C008F),
+            color: colorScheme.onSurface,
             fontWeight: FontWeight.bold,
             fontSize: 18,
           ),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: colorScheme.surface,
         elevation: 0.5,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF2C008F)),
+          icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
           onPressed: () => Get.back(),
         ),
       ),
@@ -58,15 +59,15 @@ class NotificationInboxView extends GetView<NotificationInboxController> {
         }
 
         if (controller.notifications.isEmpty) {
-          return const Center(
+          return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.notifications_off_outlined, size: 48, color: Colors.grey),
-                SizedBox(height: 12),
+                Icon(Icons.notifications_off_outlined, size: 48, color: colorScheme.onSurfaceVariant),
+                const SizedBox(height: 12),
                 Text(
                   'No notifications yet',
-                  style: TextStyle(color: Colors.grey, fontSize: 14),
+                  style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 14),
                 ),
               ],
             ),
@@ -102,10 +103,10 @@ class NotificationInboxView extends GetView<NotificationInboxController> {
                 return Container(
                   margin: const EdgeInsets.only(bottom: 12),
                   decoration: BoxDecoration(
-                    color: notification.isRead ? Colors.white : const Color(0xFFF5F3FF),
+                    color: notification.isRead ? colorScheme.surface : colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: notification.isRead ? const Color(0xFFF0F1F6) : AppColors.brandPurple.withValues(alpha: 0.15),
+                      color: notification.isRead ? colorScheme.outline : AppColors.brandPurple.withValues(alpha: 0.15),
                       width: 1,
                     ),
                     boxShadow: const [
@@ -138,7 +139,7 @@ class NotificationInboxView extends GetView<NotificationInboxController> {
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: notification.isRead ? FontWeight.bold : FontWeight.w900,
-                              color: const Color(0xFF0F0F0F),
+                              color: colorScheme.onSurface,
                             ),
                           ),
                         ),
@@ -151,18 +152,18 @@ class NotificationInboxView extends GetView<NotificationInboxController> {
                         children: [
                           Text(
                             notification.body,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 12,
-                              color: Color(0xFF4A4A4A),
+                              color: colorScheme.onSurfaceVariant,
                               height: 1.3,
                             ),
                           ),
                           const SizedBox(height: 8),
                           Text(
                             _formatDate(notification.sentAt),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 10,
-                              color: Colors.grey,
+                              color: colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],

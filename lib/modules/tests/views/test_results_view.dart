@@ -9,7 +9,7 @@ class TestResultsView extends GetView<TestResultsController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF3F4F6),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: const Color(0xFF0F3CC9),
         elevation: 0,
@@ -104,7 +104,7 @@ class TestResultsView extends GetView<TestResultsController> {
                         horizontal: 16,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.surface,
                         borderRadius: BorderRadius.circular(24),
                         boxShadow: [
                           BoxShadow(
@@ -117,7 +117,7 @@ class TestResultsView extends GetView<TestResultsController> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          _buildCircularProgressIndicator(attemptResult.correct, attemptResult.totalMarks),
+                          _buildCircularProgressIndicator(context, attemptResult.correct, attemptResult.totalMarks),
                           const SizedBox(height: 14),
                           _buildPassFailBadge(attemptResult.passed),
                         ],
@@ -142,6 +142,7 @@ class TestResultsView extends GetView<TestResultsController> {
                   mainAxisSpacing: 12,
                   children: [
                     _buildStatCard(
+                      context,
                       label: 'Correct',
                       value: '${attemptResult.correct}',
                       icon: Icons.check_circle_outline,
@@ -149,6 +150,7 @@ class TestResultsView extends GetView<TestResultsController> {
                       valColor: const Color(0xFF10B981),
                     ),
                     _buildStatCard(
+                      context,
                       label: 'Wrong',
                       value: '${attemptResult.wrong}',
                       icon: Icons.cancel_outlined,
@@ -156,6 +158,7 @@ class TestResultsView extends GetView<TestResultsController> {
                       valColor: const Color(0xFFEF4444),
                     ),
                     _buildStatCard(
+                      context,
                       label: 'Skipped',
                       value: '${attemptResult.skipped}',
                       icon: Icons.skip_next_outlined,
@@ -163,6 +166,7 @@ class TestResultsView extends GetView<TestResultsController> {
                       valColor: const Color(0xFF374151),
                     ),
                     _buildStatCard(
+                      context,
                       label: 'Accuracy',
                       value: '${attemptResult.accuracy}%',
                       icon: Icons.track_changes_outlined,
@@ -170,6 +174,7 @@ class TestResultsView extends GetView<TestResultsController> {
                       valColor: const Color(0xFF1E60FF),
                     ),
                     _buildStatCard(
+                      context,
                       label: 'Time Taken',
                       value: controller.timeTakenFormatted,
                       icon: Icons.access_time_outlined,
@@ -177,6 +182,7 @@ class TestResultsView extends GetView<TestResultsController> {
                       valColor: const Color(0xFF6D28D9),
                     ),
                     _buildStatCard(
+                      context,
                       label: 'Rank',
                       value: '#${attemptResult.rank}',
                       icon: Icons.emoji_events_outlined,
@@ -192,12 +198,12 @@ class TestResultsView extends GetView<TestResultsController> {
               if (attemptResult.subjectPerformance.isNotEmpty) ...[
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                  child: const Text(
+                  child: Text(
                     'SUBJECT PERFORMANCE',
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF4B5563),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                       letterSpacing: 0.8,
                     ),
                   ),
@@ -208,7 +214,7 @@ class TestResultsView extends GetView<TestResultsController> {
                   child: Container(
                     padding: const EdgeInsets.all(18),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.surface,
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: ListView.separated(
@@ -220,6 +226,7 @@ class TestResultsView extends GetView<TestResultsController> {
                       itemBuilder: (context, index) {
                         final data = attemptResult.subjectPerformance[index];
                         return _buildSubjectRow(
+                          context,
                           subjectName: data.subject,
                           percentage: data.percentage,
                           colorIndex: index,
@@ -240,12 +247,12 @@ class TestResultsView extends GetView<TestResultsController> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'Section Performance Breakdown',
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w900,
-                            color: Color(0xFF1E293B),
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -253,7 +260,7 @@ class TestResultsView extends GetView<TestResultsController> {
                             .map(
                               (sec) => Padding(
                                 padding: const EdgeInsets.only(bottom: 12.0),
-                                child: _buildSectionRow(sec),
+                                child: _buildSectionRow(context, sec),
                               ),
                             )
                             ,
@@ -269,9 +276,9 @@ class TestResultsView extends GetView<TestResultsController> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFEFF6FF),
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xFFDBEAFE)),
+                    border: Border.all(color: Theme.of(context).colorScheme.outline),
                   ),
                   child: Row(
                     children: [
@@ -280,13 +287,13 @@ class TestResultsView extends GetView<TestResultsController> {
                         '${attemptResult.correct}',
                         const Color(0xFF1E60FF),
                       ),
-                      _buildDivider(),
+                      _buildDivider(context),
                       _buildCompareCol(
                         'Class Avg',
                         '${attemptResult.classAvg}',
-                        const Color(0xFF4B5563),
+                        Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
-                      _buildDivider(),
+                      _buildDivider(context),
                       _buildCompareCol(
                         'Top Score',
                         '${attemptResult.topScore}',
@@ -367,15 +374,15 @@ class TestResultsView extends GetView<TestResultsController> {
               Center(
                 child: TextButton.icon(
                   onPressed: () => controller.retakeTest(),
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.refresh,
-                    color: Colors.black54,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                     size: 20,
                   ),
-                  label: const Text(
+                  label: Text(
                     'Retake Test',
                     style: TextStyle(
-                      color: Colors.black54,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                       fontWeight: FontWeight.bold,
                       fontSize: 13,
                     ),
@@ -391,7 +398,7 @@ class TestResultsView extends GetView<TestResultsController> {
     );
   }
 
-  Widget _buildCircularProgressIndicator(int scoreVal, int totalMarks) {
+  Widget _buildCircularProgressIndicator(BuildContext context, int scoreVal, int totalMarks) {
 
     
     final double pct = totalMarks > 0 ? (scoreVal / totalMarks).clamp(0.0, 1.0) : 0.0;
@@ -405,7 +412,7 @@ class TestResultsView extends GetView<TestResultsController> {
           CircularProgressIndicator(
             value: pct,
             strokeWidth: 10,
-            backgroundColor: const Color(0xFFEFF6FF),
+            backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
             valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF1E60FF)),
           ),
           Center(
@@ -414,10 +421,10 @@ class TestResultsView extends GetView<TestResultsController> {
               children: [
                 Text(
                   '$scoreVal',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 34,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF1F2937),
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 Text(
@@ -469,7 +476,8 @@ class TestResultsView extends GetView<TestResultsController> {
     );
   }
 
-  Widget _buildStatCard({
+  Widget _buildStatCard(
+    BuildContext context, {
     required String label,
     required String value,
     required IconData icon,
@@ -479,7 +487,7 @@ class TestResultsView extends GetView<TestResultsController> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -514,7 +522,8 @@ class TestResultsView extends GetView<TestResultsController> {
     );
   }
 
-  Widget _buildSubjectRow({
+  Widget _buildSubjectRow(
+    BuildContext context, {
     required String subjectName,
     required int percentage,
     required int colorIndex,
@@ -536,18 +545,18 @@ class TestResultsView extends GetView<TestResultsController> {
           children: [
             Text(
               subjectName,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF1F2937),
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             Text(
               '$percentage%',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF1F2937),
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
           ],
@@ -558,7 +567,7 @@ class TestResultsView extends GetView<TestResultsController> {
           child: LinearProgressIndicator(
             value: percentage / 100.0,
             minHeight: 8,
-            backgroundColor: const Color(0xFFF3F4F6),
+            backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
             valueColor: AlwaysStoppedAnimation<Color>(barColor),
           ),
         ),
@@ -592,18 +601,19 @@ class TestResultsView extends GetView<TestResultsController> {
     );
   }
 
-  Widget _buildDivider() {
-    return Container(width: 1, height: 28, color: const Color(0xFFBFDBFE));
+  Widget _buildDivider(BuildContext context) {
+    return Container(width: 1, height: 28, color: Theme.of(context).colorScheme.outline);
   }
 
 
-  Widget _buildSectionRow(SectionBreakdownModel data) {
+  Widget _buildSectionRow(BuildContext context, SectionBreakdownModel data) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        border: Border.all(color: colorScheme.outline),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -613,10 +623,10 @@ class TestResultsView extends GetView<TestResultsController> {
             children: [
               Text(
                 data.name,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF1F2937),
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
               Container(
@@ -645,21 +655,25 @@ class TestResultsView extends GetView<TestResultsController> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               _buildSectionDetailCol(
+                context,
                 'Score',
                 '${data.scoreRaw} / ${data.totalMarks}',
               ),
-              _buildSectionDetailCol('Cutoff', '${data.cutoffMarks}'),
+              _buildSectionDetailCol(context, 'Cutoff', '${data.cutoffMarks}'),
               _buildSectionDetailCol(
+                context,
                 'Correct',
                 '${data.correct}',
                 color: const Color(0xFF10B981),
               ),
               _buildSectionDetailCol(
+                context,
                 'Wrong',
                 '${data.wrong}',
                 color: const Color(0xFFEF4444),
               ),
               _buildSectionDetailCol(
+                context,
                 'Skipped',
                 '${data.skipped}',
                 color: Colors.grey,
@@ -671,7 +685,7 @@ class TestResultsView extends GetView<TestResultsController> {
     );
   }
 
-  Widget _buildSectionDetailCol(String label, String val, {Color? color}) {
+  Widget _buildSectionDetailCol(BuildContext context, String label, String val, {Color? color}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -689,7 +703,7 @@ class TestResultsView extends GetView<TestResultsController> {
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.bold,
-            color: color ?? const Color(0xFF1F2937),
+            color: color ?? Theme.of(context).colorScheme.onSurface,
           ),
         ),
       ],

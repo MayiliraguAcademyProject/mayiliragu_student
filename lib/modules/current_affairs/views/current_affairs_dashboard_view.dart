@@ -18,19 +18,21 @@ class CurrentAffairsDashboardView extends GetView<CurrentAffairsController> {
   Widget build(BuildContext context) {
     final controller = Get.find<CurrentAffairsController>();
 
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFFAF9FF),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: colorScheme.surface,
         elevation: 0.5,
         title: Text(
           'Current Affairs Hub',
-          style: AppTextStyles.heading.copyWith(fontSize: 20, color: AppColors.textPrimary),
+          style: AppTextStyles.heading.copyWith(fontSize: 20, color: colorScheme.onSurface),
         ),
         centerTitle: false,
         actions: [
           IconButton(
-            icon: const Icon(Icons.bookmark_outline, color: AppColors.textPrimary),
+            icon: Icon(Icons.bookmark_outline, color: colorScheme.onSurface),
             onPressed: () {
               controller.fetchBookmarks();
               _showBookmarksSheet(context, controller);
@@ -79,20 +81,20 @@ class CurrentAffairsDashboardView extends GetView<CurrentAffairsController> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     "Daily Updates",
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w900,
-                      color: AppColors.textPrimary,
+                      color: colorScheme.onSurface,
                     ),
                   ),
                   Obx(() => Text(
                     "${controller.articlesList.length} articles",
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.textSecondary,
+                      color: colorScheme.onSurfaceVariant,
                     ),
                   )),
                 ],
@@ -100,7 +102,7 @@ class CurrentAffairsDashboardView extends GetView<CurrentAffairsController> {
               const SizedBox(height: 12),
 
               // Articles Feed
-              _buildArticlesFeed(controller),
+              _buildArticlesFeed(context, controller),
             ],
           ),
         ),
@@ -109,31 +111,37 @@ class CurrentAffairsDashboardView extends GetView<CurrentAffairsController> {
   }
 
   Widget _buildSearchBar(CurrentAffairsController controller) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          )
-        ],
-      ),
-      child: TextField(
-        onChanged: (val) {
-          controller.searchQuery.value = val;
-          controller.fetchArticles();
-        },
-        decoration: const InputDecoration(
-          hintText: "Search articles, subjects, keywords...",
-          hintStyle: TextStyle(fontSize: 13, color: AppColors.textSecondary),
-          prefixIcon: Icon(Icons.search, color: AppColors.textSecondary),
-          border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        ),
-      ),
+    return Builder(
+      builder: (context) {
+        final colorScheme = Theme.of(context).colorScheme;
+        return Container(
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.03),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              )
+            ],
+          ),
+          child: TextField(
+            onChanged: (val) {
+              controller.searchQuery.value = val;
+              controller.fetchArticles();
+            },
+            decoration: InputDecoration(
+              hintText: "Search articles, subjects, keywords...",
+              hintStyle: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant),
+              prefixIcon: Icon(Icons.search, color: colorScheme.onSurfaceVariant),
+              border: InputBorder.none,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            ),
+            style: TextStyle(color: colorScheme.onSurface),
+          ),
+        );
+      }
     );
   }
 
@@ -193,6 +201,7 @@ class CurrentAffairsDashboardView extends GetView<CurrentAffairsController> {
         itemCount: categories.length,
         itemBuilder: (context, index) {
           final cat = categories[index];
+          final colorScheme = Theme.of(context).colorScheme;
           return Obx(() {
             final active = (cat == "All Category" && controller.selectedCategory.value.isEmpty) ||
                 (controller.selectedCategory.value == cat);
@@ -204,14 +213,14 @@ class CurrentAffairsDashboardView extends GetView<CurrentAffairsController> {
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
-                    color: active ? Colors.white : AppColors.textSecondary,
+                    color: active ? Colors.white : colorScheme.onSurfaceVariant,
                   ),
                 ),
                 selected: active,
                 selectedColor: AppColors.brandPurple,
-                backgroundColor: Colors.white,
+                backgroundColor: colorScheme.surface,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                side: BorderSide(color: active ? AppColors.brandPurple : Colors.grey.shade200),
+                side: BorderSide(color: active ? AppColors.brandPurple : colorScheme.outline),
                 onSelected: (selected) {
                   controller.selectedCategory.value = cat == "All Category" ? "" : cat;
                   controller.fetchArticles();
@@ -224,7 +233,7 @@ class CurrentAffairsDashboardView extends GetView<CurrentAffairsController> {
     );
   }
 
-  Widget _buildArticlesFeed(CurrentAffairsController controller) {
+  Widget _buildArticlesFeed(BuildContext context, CurrentAffairsController controller) {
     return Obx(() {
       if (controller.isArticlesLoading.value) {
         return const Padding(
@@ -236,16 +245,17 @@ class CurrentAffairsDashboardView extends GetView<CurrentAffairsController> {
       }
 
       if (controller.articlesList.isEmpty) {
+        final colorScheme = Theme.of(context).colorScheme;
         return Container(
           width: double.infinity,
           padding: const EdgeInsets.symmetric(vertical: 40.0),
           child: Column(
             children: [
-              Icon(Icons.newspaper_outlined, size: 48, color: Colors.grey.shade400),
+              Icon(Icons.newspaper_outlined, size: 48, color: colorScheme.onSurfaceVariant),
               const SizedBox(height: 12),
-              const Text(
+              Text(
                 "No articles match your criteria.",
-                style: TextStyle(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant, fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -272,11 +282,12 @@ class CurrentAffairsDashboardView extends GetView<CurrentAffairsController> {
   void _showBookmarksSheet(BuildContext context, CurrentAffairsController controller) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFFFAF9FF),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       builder: (context) {
+        final colorScheme = Theme.of(context).colorScheme;
         return Container(
           padding: const EdgeInsets.all(20),
           child: Column(
@@ -285,9 +296,9 @@ class CurrentAffairsDashboardView extends GetView<CurrentAffairsController> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     "My Saved Articles",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: colorScheme.onSurface),
                   ),
                   IconButton(
                     icon: const Icon(Icons.close),
@@ -303,9 +314,9 @@ class CurrentAffairsDashboardView extends GetView<CurrentAffairsController> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.bookmark_outline, size: 40, color: Colors.grey.shade400),
+                          Icon(Icons.bookmark_outline, size: 40, color: colorScheme.onSurfaceVariant),
                           const SizedBox(height: 8),
-                          const Text("No saved articles yet.", style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                          Text("No saved articles yet.", style: TextStyle(fontSize: 11, color: colorScheme.onSurfaceVariant)),
                         ],
                       ),
                     );
@@ -322,13 +333,13 @@ class CurrentAffairsDashboardView extends GetView<CurrentAffairsController> {
                         ),
                         title: Text(
                           art.titleEn,
-                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: colorScheme.onSurface),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                         subtitle: Text(
                           art.category,
-                          style: const TextStyle(fontSize: 10, color: AppColors.textSecondary),
+                          style: TextStyle(fontSize: 10, color: colorScheme.onSurfaceVariant),
                         ),
                         trailing: const Icon(Icons.chevron_right, size: 16),
                         onTap: () {

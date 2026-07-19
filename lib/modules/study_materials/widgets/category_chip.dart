@@ -15,21 +15,22 @@ class CategoryChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return ChoiceChip(
       label: Text(
         label,
         style: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.bold,
-          color: isSelected ? Colors.white : AppColors.textSecondary,
+          color: isSelected ? Colors.white : colorScheme.onSurfaceVariant,
         ),
       ),
       selected: isSelected,
       selectedColor: AppColors.brandPurple,
-      backgroundColor: Colors.white,
+      backgroundColor: colorScheme.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       side: BorderSide(
-        color: isSelected ? AppColors.brandPurple : Colors.grey.shade200,
+        color: isSelected ? AppColors.brandPurple : colorScheme.outline,
       ),
       onSelected: onSelected,
     );

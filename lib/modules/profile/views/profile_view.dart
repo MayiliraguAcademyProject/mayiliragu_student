@@ -15,9 +15,7 @@ class ProfileView extends GetView<ProfileController> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final onSurfaceColor = theme.colorScheme.onSurface;
-    final cardBackgroundColor = theme.brightness == Brightness.dark
-        ? Colors.grey[900]!
-        : Colors.white;
+    final cardBackgroundColor = theme.colorScheme.surface;
 
     return Scaffold(
       appBar: AppBar(

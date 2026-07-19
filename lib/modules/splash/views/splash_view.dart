@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:upgrader/upgrader.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../controllers/splash_controller.dart';
 
@@ -8,15 +9,23 @@ class SplashView extends GetView<SplashController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return UpgradeAlert(
+      upgrader: Upgrader(),
+      showIgnore: false,
+      showLater: false,
+      barrierDismissible: false,
+      child: Scaffold(
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [AppColors.backgroundStart, AppColors.backgroundEnd],
+            colors: [
+              Theme.of(context).colorScheme.surface,
+              Theme.of(context).colorScheme.surfaceContainerHighest,
+            ],
           ),
         ),
         child: SafeArea(
@@ -44,12 +53,12 @@ class SplashView extends GetView<SplashController> {
                       ),
                     ),
                     const SizedBox(height: 24),
-                    const Text(
+                    Text(
                       'Mayiliragu Academy',
                       style: TextStyle(
                         fontSize: 26,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
+                        color: Theme.of(context).colorScheme.onSurface,
                         letterSpacing: 0.5,
                       ),
                     ),
@@ -58,7 +67,7 @@ class SplashView extends GetView<SplashController> {
                       'Shaping Your Bright Future',
                       style: TextStyle(
                         fontSize: 14,
-                        color: AppColors.textSecondary.withAlpha(204),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(204),
                         letterSpacing: 0.2,
                       ),
                     ),
@@ -90,7 +99,7 @@ class SplashView extends GetView<SplashController> {
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.textSecondary.withAlpha(153),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(153),
                         letterSpacing: 0.5,
                       ),
                     ),
@@ -101,6 +110,6 @@ class SplashView extends GetView<SplashController> {
           ),
         ),
       ),
-    );
+    ),);
   }
 }

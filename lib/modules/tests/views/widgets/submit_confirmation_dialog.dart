@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../../core/constants/app_colors.dart';
 
 class SubmitConfirmationDialog extends StatelessWidget {
   final int answeredCount;
@@ -21,10 +20,11 @@ class SubmitConfirmationDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasSkippedOrFlagged = skippedCount > 0 || flaggedCount > 0;
+    final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AlertDialog(
-      backgroundColor: isDark ? AppColors.cardBgDark : AppColors.cardBg,
+      backgroundColor: colorScheme.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -42,7 +42,7 @@ class SubmitConfirmationDialog extends StatelessWidget {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+              color: colorScheme.onSurface,
             ),
           ),
         ],
@@ -55,7 +55,7 @@ class SubmitConfirmationDialog extends StatelessWidget {
             'Here is a summary of your test progress. Are you sure you want to submit?',
             style: TextStyle(
               fontSize: 14,
-              color: isDark ? AppColors.textSecondaryDark : Colors.black87,
+              color: colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: 20),
@@ -122,13 +122,13 @@ class SubmitConfirmationDialog extends StatelessWidget {
               child: OutlinedButton(
                 onPressed: () => Get.back(),
                 style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: isDark ? AppColors.borderDark : const Color(0xFFE5E7EB)),
+                  side: BorderSide(color: colorScheme.outline),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   padding: const EdgeInsets.symmetric(vertical: 12),
                 ),
                 child: Text(
                   'Cancel',
-                  style: TextStyle(color: isDark ? AppColors.textSecondaryDark : Colors.black54),
+                  style: TextStyle(color: colorScheme.onSurfaceVariant),
                 ),
               ),
             ),

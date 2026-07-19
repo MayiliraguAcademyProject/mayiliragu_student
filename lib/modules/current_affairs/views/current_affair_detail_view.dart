@@ -47,23 +47,26 @@ class _CurrentAffairDetailViewState extends State<CurrentAffairDetailView> with 
   Widget build(BuildContext context) {
     final controller = Get.find<CurrentAffairsController>();
 
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFFAF9FF),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: colorScheme.surface,
         elevation: 0.5,
-        title: const Text(
+        title: Text(
           'Article Explanation',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: colorScheme.onSurface),
         ),
         actions: [
           Obx(() {
             final art = controller.currentArticle.value;
             if (art == null) return const SizedBox.shrink();
+            final onSurface = colorScheme.onSurface;
             return IconButton(
               icon: Icon(
                 art.isBookmarked ? Icons.bookmark : Icons.bookmark_border,
-                color: art.isBookmarked ? AppColors.brandPurple : AppColors.textPrimary,
+                color: art.isBookmarked ? AppColors.brandPurple : onSurface,
               ),
               onPressed: () => controller.toggleBookmark(art.id),
             );
@@ -90,11 +93,11 @@ class _CurrentAffairDetailViewState extends State<CurrentAffairDetailView> with 
               // Language Selector Header (if Tamil content exists)
               if (hasTamil) ...[
                 Container(
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.surface,
                   child: TabBar(
                     controller: _bilingualTabController,
                     labelColor: AppColors.brandPurple,
-                    unselectedLabelColor: AppColors.textSecondary,
+                    unselectedLabelColor: Theme.of(context).colorScheme.onSurfaceVariant,
                     indicatorColor: AppColors.brandPurple,
                     labelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
                     tabs: const [
@@ -138,33 +141,34 @@ class _CurrentAffairDetailViewState extends State<CurrentAffairDetailView> with 
   }
 
   Widget _buildEnglishContent(CurrentAffair art) {
+    final colorScheme = Theme.of(context).colorScheme;
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             art.titleEn,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: colorScheme.onSurface),
           ),
           const SizedBox(height: 10),
           Row(
             children: [
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(6)),
-                child: Text(art.category, style: const TextStyle(fontSize: 9, color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
+                decoration: BoxDecoration(color: colorScheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(6)),
+                child: Text(art.category, style: TextStyle(fontSize: 9, color: colorScheme.onSurfaceVariant, fontWeight: FontWeight.bold)),
               ),
               const SizedBox(width: 10),
               Text(
                 "${art.publishedDate.day}/${art.publishedDate.month}/${art.publishedDate.year}",
-                style: const TextStyle(fontSize: 10, color: AppColors.textSecondary),
+                style: TextStyle(fontSize: 10, color: colorScheme.onSurfaceVariant),
               ),
             ],
           ),
           const SizedBox(height: 16),
           Text(
             art.contentEn,
-            style: const TextStyle(fontSize: 13, height: 1.5, color: AppColors.textPrimary),
+            style: TextStyle(fontSize: 13, height: 1.5, color: colorScheme.onSurface),
           ),
           const SizedBox(height: 20),
 
@@ -181,28 +185,29 @@ class _CurrentAffairDetailViewState extends State<CurrentAffairDetailView> with 
   }
 
   Widget _buildTamilContent(CurrentAffair art) {
+    final colorScheme = Theme.of(context).colorScheme;
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             art.titleTa ?? art.titleEn,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: colorScheme.onSurface),
           ),
           const SizedBox(height: 10),
           Row(
             children: [
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(6)),
-                child: Text(art.category, style: const TextStyle(fontSize: 9, color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
+                decoration: BoxDecoration(color: colorScheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(6)),
+                child: Text(art.category, style: TextStyle(fontSize: 9, color: colorScheme.onSurfaceVariant, fontWeight: FontWeight.bold)),
               ),
             ],
           ),
           const SizedBox(height: 16),
           Text(
             art.contentTa ?? "தமிழ் விளக்கம் இல்லை.",
-            style: const TextStyle(fontSize: 13, height: 1.5, color: AppColors.textPrimary),
+            style: TextStyle(fontSize: 13, height: 1.5, color: colorScheme.onSurface),
           ),
           const SizedBox(height: 20),
 
@@ -231,9 +236,9 @@ class _CurrentAffairDetailViewState extends State<CurrentAffairDetailView> with 
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             "Daily MCQ Challenge",
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
+            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: Theme.of(context).colorScheme.onSurface),
           ),
           const SizedBox(height: 12),
           ListView.separated(
