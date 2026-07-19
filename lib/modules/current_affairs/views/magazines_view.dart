@@ -21,13 +21,14 @@ class _MagazinesViewState extends State<MagazinesView> {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<CurrentAffairsController>();
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFAF9FF),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: colorScheme.surface,
         elevation: 0.5,
-        title: const Text("Monthly Compilation Magazines", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+        title: Text("Monthly Compilation Magazines", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: colorScheme.onSurface)),
       ),
       body: Obx(() {
         if (controller.isMagazinesLoading.value) {
@@ -39,9 +40,9 @@ class _MagazinesViewState extends State<MagazinesView> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.book_outlined, size: 48, color: Colors.grey.shade400),
+                Icon(Icons.book_outlined, size: 48, color: colorScheme.onSurfaceVariant),
                 const SizedBox(height: 12),
-                const Text("No monthly magazines published yet.", style: TextStyle(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
+                Text("No monthly magazines published yet.", style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant, fontWeight: FontWeight.bold)),
               ],
             ),
           );

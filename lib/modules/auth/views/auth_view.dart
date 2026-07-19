@@ -73,12 +73,12 @@ class AuthView extends GetView<AuthController> {
                         const SizedBox(height: 32),
 
                         // Email input label
-                        const Text(
+                        Text(
                           'Email Address',
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: Color(0xFF6E7191),
+                            color: theme.colorScheme.onSurfaceVariant,
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -86,30 +86,30 @@ class AuthView extends GetView<AuthController> {
                         // Email field
                         TextField(
                           controller: controller.emailController,
-                          style: const TextStyle(
-                            color: Color(0xFF0F0F0F),
+                          style: TextStyle(
+                            color: theme.colorScheme.onSurface,
                             fontSize: 15,
                           ),
                           decoration: InputDecoration(
                             hintText: 'student@learning.com',
-                            hintStyle: const TextStyle(
-                              color: Color(0xFFB0B3C7),
+                            hintStyle: TextStyle(
+                              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
                               fontSize: 15,
                             ),
-                            prefixIcon: const Icon(
+                            prefixIcon: Icon(
                               Icons.email_outlined,
-                              color: Color(0xFF9093A3),
+                              color: theme.colorScheme.onSurfaceVariant,
                               size: 20,
                             ),
                             filled: true,
-                            fillColor: const Color(0xFFF8F9FD),
+                            fillColor: theme.colorScheme.surfaceContainerHighest,
                             contentPadding: const EdgeInsets.symmetric(
                               vertical: 16,
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(
-                                color: Color(0xFFECEEF5),
+                              borderSide: BorderSide(
+                                color: theme.colorScheme.outline,
                                 width: 1.5,
                               ),
                             ),
@@ -126,12 +126,12 @@ class AuthView extends GetView<AuthController> {
                         const SizedBox(height: 16),
 
                         // Password input label
-                        const Text(
+                        Text(
                           'Password',
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: Color(0xFF6E7191),
+                            color: theme.colorScheme.onSurfaceVariant,
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -141,19 +141,19 @@ class AuthView extends GetView<AuthController> {
                           () => TextField(
                             controller: controller.passwordController,
                             obscureText: controller.obscurePassword.value,
-                            style: const TextStyle(
-                              color: Color(0xFF0F0F0F),
+                            style: TextStyle(
+                              color: theme.colorScheme.onSurface,
                               fontSize: 15,
                             ),
                             decoration: InputDecoration(
                               hintText: '••••••••',
-                              hintStyle: const TextStyle(
-                                color: Color(0xFFB0B3C7),
+                              hintStyle: TextStyle(
+                                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
                                 fontSize: 15,
                               ),
-                              prefixIcon: const Icon(
+                              prefixIcon: Icon(
                                 Icons.lock_outline,
-                                color: Color(0xFF9093A3),
+                                color: theme.colorScheme.onSurfaceVariant,
                                 size: 20,
                               ),
                               suffixIcon: IconButton(
@@ -161,20 +161,20 @@ class AuthView extends GetView<AuthController> {
                                   controller.obscurePassword.value
                                       ? Icons.visibility_off_outlined
                                       : Icons.visibility_outlined,
-                                  color: const Color(0xFF9093A3),
+                                  color: theme.colorScheme.onSurfaceVariant,
                                   size: 20,
                                 ),
                                 onPressed: controller.togglePasswordVisibility,
                               ),
                               filled: true,
-                              fillColor: const Color(0xFFF8F9FD),
+                              fillColor: theme.colorScheme.surfaceContainerHighest,
                               contentPadding: const EdgeInsets.symmetric(
                                 vertical: 16,
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(
-                                  color: Color(0xFFECEEF5),
+                                borderSide: BorderSide(
+                                  color: theme.colorScheme.outline,
                                   width: 1.5,
                                 ),
                               ),

@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:dio/dio.dart';
@@ -9,6 +10,7 @@ import '../../../core/network/api_client.dart';
 import '../../../core/services/secure_storage_service.dart';
 import '../../../app/routes/app_routes.dart';
 import '../../../shared/models/student_profile_model.dart';
+import '../../../main.dart';
 
 class ProfileController extends GetxController {
   final ProfileRepository _repository;
@@ -91,10 +93,12 @@ class ProfileController extends GetxController {
   void _loadThemeMode() {
     final storage = Get.find<SecureStorageService>();
     storage.getThemeMode().then((mode) {
-      if (mode != null) {
-        isDarkMode.value = mode == 'dark';
+      if (mode == 'dark') {
+        isDarkMode.value = true;
+      } else if (mode == 'light') {
+        isDarkMode.value = false;
       } else {
-        isDarkMode.value = Get.isDarkMode;
+        isDarkMode.value = PlatformDispatcher.instance.platformBrightness == Brightness.dark;
       }
     });
   }
@@ -104,7 +108,11 @@ class ProfileController extends GetxController {
     final mode = value ? 'dark' : 'light';
     final storage = Get.find<SecureStorageService>();
     await storage.setThemeMode(mode);
-    Get.changeThemeMode(value ? ThemeMode.dark : ThemeMode.light);
+    if (Get.isRegistered<ThemeController>()) {
+      Get.find<ThemeController>().changeThemeMode(value ? ThemeMode.dark : ThemeMode.light);
+    } else {
+      Get.changeThemeMode(value ? ThemeMode.dark : ThemeMode.light);
+    }
   }
 
   Future<void> fetchProfile() async {

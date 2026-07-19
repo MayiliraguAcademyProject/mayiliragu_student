@@ -8,8 +8,9 @@ class OnboardingView extends GetView<OnboardingController> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: AppColors.onPrimary,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         bottom: false,
         child: Column(
@@ -24,10 +25,10 @@ class OnboardingView extends GetView<OnboardingController> {
                 ),
                 child: TextButton(
                   onPressed: controller.finishOnboarding,
-                  child: const Text(
+                  child: Text(
                     'Skip',
                     style: TextStyle(
-                      color: Color(0xFF6E7191),
+                      color: theme.colorScheme.onSurfaceVariant,
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                     ),
@@ -57,13 +58,13 @@ class OnboardingView extends GetView<OnboardingController> {
               flex: 5,
               child: Container(
                 width: double.infinity,
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surface,
+                  borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(32),
                     topRight: Radius.circular(32),
                   ),
-                  boxShadow: [
+                  boxShadow: const [
                     BoxShadow(
                       color: Color(0x0F000000),
                       blurRadius: 20,
@@ -95,10 +96,10 @@ class OnboardingView extends GetView<OnboardingController> {
                                 Text(
                                   slide['title'] ?? '',
                                   textAlign: TextAlign.center,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 22,
                                     fontWeight: FontWeight.bold,
-                                    color: Color(0xFF0F0F0F),
+                                    color: theme.colorScheme.onSurface,
                                     height: 1.3,
                                   ),
                                 ),
@@ -106,9 +107,9 @@ class OnboardingView extends GetView<OnboardingController> {
                                 Text(
                                   slide['subtitle'] ?? '',
                                   textAlign: TextAlign.center,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 14,
-                                    color: Color(0xFF6E7191),
+                                    color: theme.colorScheme.onSurfaceVariant,
                                     height: 1.5,
                                   ),
                                 ),

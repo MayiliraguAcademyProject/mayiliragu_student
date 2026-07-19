@@ -14,14 +14,16 @@ class AnalyticsDashboardView extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.find<AnalyticsController>();
 
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFFAF9FF),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: colorScheme.surface,
         elevation: 0.5,
-        title: const Text(
+        title: Text(
           'Performance Insights',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: colorScheme.onSurface),
         ),
       ),
       body: Obx(() {
@@ -31,10 +33,10 @@ class AnalyticsDashboardView extends StatelessWidget {
 
         final stats = controller.studentAnalytics.value;
         if (stats == null) {
-          return const Center(
+          return Center(
             child: Text(
               "No analytics found. Start attempting tests!",
-              style: TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.bold),
+              style: TextStyle(color: colorScheme.onSurfaceVariant, fontWeight: FontWeight.bold),
             ),
           );
         }
@@ -54,23 +56,23 @@ class AnalyticsDashboardView extends StatelessWidget {
                   width: double.infinity,
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: colorScheme.surface,
                     borderRadius: BorderRadius.circular(24),
-                    border: Border.all(color: Colors.grey.shade100),
+                    border: Border.all(color: colorScheme.outline),
                   ),
                   child: Column(
                     children: [
                       ReadinessGauge(score: stats.readinessScore),
                       const SizedBox(height: 16),
-                      const Text(
+                      Text(
                         'TNPSC Exam Readiness Indicator',
-                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: colorScheme.onSurface),
                       ),
                       const SizedBox(height: 4),
-                      const Text(
+                      Text(
                         'Readiness represents your average accuracy across recent tests.',
                         textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 10, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
+                        style: TextStyle(fontSize: 10, color: colorScheme.onSurfaceVariant, fontWeight: FontWeight.w500),
                       ),
                     ],
                   ),
@@ -82,6 +84,7 @@ class AnalyticsDashboardView extends StatelessWidget {
                   children: [
                     Expanded(
                       child: _buildMetricCard(
+                        context,
                         Icons.local_fire_department,
                         '${stats.learningStreak} Days',
                         'Learning Streak',
@@ -92,6 +95,7 @@ class AnalyticsDashboardView extends StatelessWidget {
                     const SizedBox(width: 12),
                     Expanded(
                       child: _buildMetricCard(
+                        context,
                         Icons.access_time_filled,
                         '${stats.studyHours} Hours',
                         'Study Activity',
@@ -104,13 +108,13 @@ class AnalyticsDashboardView extends StatelessWidget {
                 const SizedBox(height: 24),
 
                 // Historical Progress Trend Section
-                _buildSectionHeader('Performance Trends'),
+                _buildSectionHeader(context, 'Performance Trends'),
                 const SizedBox(height: 12),
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: colorScheme.surface,
                     borderRadius: BorderRadius.circular(24),
-                    border: Border.all(color: Colors.grey.shade100),
+                    border: Border.all(color: colorScheme.outline),
                   ),
                   child: TrendChart(trends: controller.trendsList),
                 ),
@@ -118,6 +122,7 @@ class AnalyticsDashboardView extends StatelessWidget {
 
                 // Nav Links to deep-dives
                 _buildActionRow(
+                  context,
                   Icons.bar_chart,
                   'Subject-wise Analysis',
                   'View accuracy stats for each subject & topic',
@@ -125,6 +130,7 @@ class AnalyticsDashboardView extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 _buildActionRow(
+                  context,
                   Icons.track_changes,
                   'My Target Goals',
                   'Create and update revision target checklists',
@@ -140,18 +146,20 @@ class AnalyticsDashboardView extends StatelessWidget {
   }
 
   Widget _buildMetricCard(
+    BuildContext context,
     IconData icon,
     String value,
     String title,
     Color bg,
     Color accent,
   ) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.shade100),
+        border: Border.all(color: colorScheme.outline),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -164,40 +172,42 @@ class AnalyticsDashboardView extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             value,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: colorScheme.onSurface),
           ),
           const SizedBox(height: 2),
           Text(
             title,
-            style: const TextStyle(fontSize: 10, color: AppColors.textSecondary, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 10, color: colorScheme.onSurfaceVariant, fontWeight: FontWeight.bold),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildSectionHeader(String title) {
+  Widget _buildSectionHeader(BuildContext context, String title) {
     return Text(
       title,
-      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
     );
   }
 
   Widget _buildActionRow(
+    BuildContext context,
     IconData icon,
     String title,
     String subtitle,
     VoidCallback onTap,
   ) {
+    final colorScheme = Theme.of(context).colorScheme;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(20),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: colorScheme.surface,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.grey.shade100),
+          border: Border.all(color: colorScheme.outline),
         ),
         child: Row(
           children: [
@@ -213,17 +223,17 @@ class AnalyticsDashboardView extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: colorScheme.onSurface),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     subtitle,
-                    style: const TextStyle(fontSize: 9, color: AppColors.textSecondary, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 9, color: colorScheme.onSurfaceVariant, fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
             ),
-            Icon(icon, color: Colors.grey.shade300, size: 24),
+            Icon(icon, color: colorScheme.outline, size: 24),
           ],
         ),
       ),
