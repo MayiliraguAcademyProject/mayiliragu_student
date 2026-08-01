@@ -270,6 +270,8 @@ class DashboardHomeView extends GetView<DashboardController> {
         return Icons.analytics_outlined;
       case 'shopping_bag_outlined':
         return Icons.shopping_bag_outlined;
+      case 'bookmark':
+        return Icons.bookmark;
       default:
         return Icons.link;
     }

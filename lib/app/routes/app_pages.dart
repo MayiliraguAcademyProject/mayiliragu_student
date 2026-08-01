@@ -31,6 +31,8 @@ import '../../modules/analytics/views/analytics_dashboard_view.dart';
 import '../../modules/book_store/bindings/book_store_binding.dart';
 import '../../modules/book_store/views/book_store_dashboard_view.dart';
 import '../../modules/notifications/views/notification_inbox_view.dart';
+import '../../modules/bookmarks/bindings/bookmarked_questions_binding.dart';
+import '../../modules/bookmarks/views/bookmarked_questions_view.dart';
 import 'app_routes.dart';
 
 class AppPages {
@@ -122,6 +124,11 @@ class AppPages {
     GetPage(
       name: Routes.NOTIFICATIONS,
       page: () => const NotificationInboxView(),
+    ),
+    GetPage(
+      name: Routes.BOOKMARKS,
+      page: () => const BookmarkedQuestionsView(),
+      binding: BookmarkedQuestionsBinding(),
     ),
   ];
 }

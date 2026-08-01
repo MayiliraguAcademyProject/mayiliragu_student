@@ -53,15 +53,19 @@ class ModuleModel {
 class LessonModel {
   final String id;
   final String title;
+  final String description;
   final int duration;
   final bool downloadEnabled;
+  final bool isLocked;
   final LessonProgressModel? progress;
 
   LessonModel({
     required this.id,
     required this.title,
+    required this.description,
     required this.duration,
     required this.downloadEnabled,
+    this.isLocked = false,
     this.progress,
   });
 
@@ -69,8 +73,10 @@ class LessonModel {
     return LessonModel(
       id: json['id']?.toString() ?? '',
       title: json['title']?.toString() ?? '',
+      description: json['description']?.toString() ?? '',
       duration: json['duration'] as int? ?? 0,
       downloadEnabled: json['downloadEnabled'] as bool? ?? false,
+      isLocked: json['isLocked'] as bool? ?? false,
       progress: json['progress'] != null
           ? LessonProgressModel.fromJson(json['progress'] as Map<String, dynamic>)
           : null,

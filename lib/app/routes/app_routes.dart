@@ -17,4 +17,5 @@ abstract class Routes {
   static const BOOK_STORE = '/book-store';
   static const NOTIFICATIONS = '/notifications';
   static const SPLASH = '/splash';
+  static const BOOKMARKS = '/bookmarks';
 }

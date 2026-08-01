@@ -39,9 +39,15 @@ class TestsController extends GetxController {
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data['data'] ?? [];
         
-        final List<CategoryModel> loadedCategories = data
-            .map((item) => CategoryModel.fromJson(item))
-            .toList();
+        final List<CategoryModel> loadedCategories = [
+          CategoryModel(
+            id: 'all',
+            name: 'All',
+            description: 'All Categories',
+            subjects: [],
+          ),
+          ...data.map((item) => CategoryModel.fromJson(item)),
+        ];
             
         final Map<String, String> loadedSubjects = {};
         final Map<String, String> loadedTopics = {};
@@ -146,14 +152,11 @@ class TestsController extends GetxController {
   Map<String, Map<String, List<TestModel>>> get topicWiseTests {
     final Map<String, Map<String, List<TestModel>>> groups = {};
     for (var test in _searchedTests) {
-      // Include tests that have a topicId
-      if (test.topicId == null || test.topicId!.isEmpty) continue;
+      final String subId = test.subjectId ?? 'general_other';
+      final String subName = subjectNames[subId] ?? (test.subjectId == null ? 'General / Other' : subId);
 
-      final String subId = test.subjectId ?? 'General / Other';
-      final String subName = subjectNames[subId] ?? subId;
-
-      final String topId = test.topicId!;
-      final String topName = topicNames[topId] ?? topId;
+      final String topId = test.topicId ?? 'general_other';
+      final String topName = topicNames[topId] ?? (test.topicId == null ? 'General' : topId);
 
       if (!groups.containsKey(subName)) {
         groups[subName] = {};

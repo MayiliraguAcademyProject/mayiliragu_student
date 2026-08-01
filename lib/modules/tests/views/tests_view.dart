@@ -104,7 +104,7 @@ class TestsView extends GetView<TestsController> {
                       const SizedBox(height: 24),
 
                       // Tests List
-                      _buildTestsList(controller),
+                      _buildTestsList(context, controller),
                     ],
                   ),
                 ),
@@ -392,7 +392,7 @@ class TestsView extends GetView<TestsController> {
     );
   }
 
-  Widget _buildTestsList(TestsController controller) {
+  Widget _buildTestsList(BuildContext context, TestsController controller) {
     if (controller.testsList.isEmpty) {
       return Container(
         height: 200,
@@ -407,7 +407,7 @@ class TestsView extends GetView<TestsController> {
     if (controller.activeTab.value == FilterTab.subjectWise) {
       return _buildSubjectWiseList(controller);
     } else {
-      return _buildTopicWiseList(controller);
+      return _buildTopicWiseList(context, controller);
     }
   }
 
@@ -446,7 +446,7 @@ class TestsView extends GetView<TestsController> {
     );
   }
 
-  Widget _buildTopicWiseList(TestsController controller) {
+  Widget _buildTopicWiseList(BuildContext context, TestsController controller) {
     final groups = controller.topicWiseTests;
     if (groups.isEmpty) {
       return const Center(
@@ -460,50 +460,48 @@ class TestsView extends GetView<TestsController> {
       );
     }
 
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: groups.keys.length,
-      itemBuilder: (context, index) {
-        final subjectName = groups.keys.elementAt(index);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: groups.keys.map((subjectName) {
         final topics = groups[subjectName]!;
         final colorScheme = Theme.of(context).colorScheme;
 
-        return Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          decoration: BoxDecoration(
-            color: colorScheme.surface,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: colorScheme.outline),
-          ),
-          child: Theme(
-            data: ThemeData().copyWith(dividerColor: Colors.transparent),
-            child: ExpansionTile(
-              title: Text(
-                subjectName,
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                  color: colorScheme.onSurface,
-                ),
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 16.0, bottom: 8.0),
+              child: Row(
+                children: [
+                  const Icon(Icons.folder_open, size: 20, color: AppColors.brandPurple),
+                  const SizedBox(width: 8),
+                  Text(
+                    subjectName,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      color: colorScheme.onSurface,
+                    ),
+                  ),
+                ],
               ),
-              leading: const Icon(Icons.folder_open, color: AppColors.brandPurple),
-              childrenPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              children: topics.keys.map((topicName) {
-                final tests = topics[topicName]!;
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+            ),
+            ...topics.keys.map((topicName) {
+              final tests = topics[topicName]!;
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (topicName != subjectName && topicName != 'General')
                     Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 6.0),
+                      padding: const EdgeInsets.only(left: 4.0, top: 4.0, bottom: 4.0),
                       child: Row(
                         children: [
-                          const Icon(Icons.label_outline, size: 16, color: Colors.grey),
-                          const SizedBox(width: 8),
+                          const Icon(Icons.label_outline, size: 14, color: Colors.grey),
+                          const SizedBox(width: 6),
                           Text(
                             topicName,
                             style: const TextStyle(
-                              fontSize: 13,
+                              fontSize: 12,
                               fontWeight: FontWeight.bold,
                               color: Colors.grey,
                             ),
@@ -511,15 +509,13 @@ class TestsView extends GetView<TestsController> {
                         ],
                       ),
                     ),
-                    ...tests.map((test) => _buildTestCard(context, test)),
-                    const Divider(height: 16),
-                  ],
-                );
-              }).toList(),
-            ),
-          ),
+                  ...tests.map((test) => _buildTestCard(context, test)),
+                ],
+              );
+            }),
+          ],
         );
-      },
+      }).toList(),
     );
   }
 
