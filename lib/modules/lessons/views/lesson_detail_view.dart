@@ -599,47 +599,50 @@ class LessonDetailView extends GetView<LessonController> {
             controller.errorMessage.value.isNotEmpty) {
           return const SizedBox.shrink();
         }
-        return SafeArea(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            decoration: BoxDecoration(
-              color: colorScheme.surface,
-              border: Border(
-                top: BorderSide(color: colorScheme.outline, width: 1),
-              ),
-            ),
-            child: SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: controller.isCompleted.value
-                    ? null
-                    : () => controller.markLessonAsComplete(),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: controller.isCompleted.value
-                      ? Colors.green
-                      : colorScheme.primary,
-                  disabledBackgroundColor: Colors.green,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                  elevation: 0,
+        return Obx(()=>Visibility(
+          visible:  controller.isCompleted.value,
+          child: SafeArea(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              decoration: BoxDecoration(
+                color: colorScheme.surface,
+                border: Border(
+                  top: BorderSide(color: colorScheme.outline, width: 1),
                 ),
-                child: Text(
-                  controller.isCompleted.value
-                      ? 'Lesson Completed ✓'
-                      : 'Mark Lesson as Complete',
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+              ),
+              child: SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: controller.isCompleted.value
+                      ? null
+                      : () => controller.markLessonAsComplete(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: controller.isCompleted.value
+                        ? Colors.green
+                        : colorScheme.primary,
+                    disabledBackgroundColor: Colors.green,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: Text(
+                    controller.isCompleted.value
+                        ? 'Lesson Completed ✓'
+                        : 'Mark Lesson as Complete',
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-        );
-      }),
+        
+    )); }),
     );
   }
 }

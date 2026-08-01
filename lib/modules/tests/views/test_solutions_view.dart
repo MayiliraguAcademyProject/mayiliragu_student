@@ -4,6 +4,7 @@ import '../controllers/test_solutions_controller.dart';
 import '../../../core/utils/toast_helper.dart';
 import '../models/question_model.dart';
 import 'widgets/question_layouts.dart';
+import 'package:Mayiliragu/shared/widgets/custom_network_image.dart';
 
 
 class TestSolutionsView extends GetView<TestSolutionsController> {
@@ -379,8 +380,9 @@ class TestSolutionsView extends GetView<TestSolutionsController> {
 
             final explanationEn = q['explanation_en']?.toString();
             final explanationTa = q['explanation_ta']?.toString();
+            final explanationImageUrl = (q['explanation_image_url'] ?? q['explanationImageUrl'])?.toString();
 
-            if (explanationEn == null && explanationTa == null) {
+            if (explanationEn == null && explanationTa == null && (explanationImageUrl == null || explanationImageUrl.isEmpty)) {
               return const SizedBox.shrink();
             }
 
@@ -427,6 +429,17 @@ class TestSolutionsView extends GetView<TestSolutionsController> {
                     Text(
                       explanationTa,
                       style: TextStyle(fontSize: 12, color: colorScheme.onSurface, height: 1.4),
+                    ),
+                  ],
+                  if (explanationImageUrl != null && explanationImageUrl.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: CustomNetworkImage(
+                        imageUrl: explanationImageUrl,
+                        width: double.infinity,
+                        fit: BoxFit.contain,
+                      ),
                     ),
                   ],
                 ],

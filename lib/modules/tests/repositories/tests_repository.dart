@@ -12,7 +12,7 @@ class TestsRepository {
     String? topicId,
   }) async {
     final Map<String, dynamic> queryParams = {};
-    if (categoryId != null && categoryId.isNotEmpty) {
+    if (categoryId != null && categoryId.isNotEmpty && categoryId != 'all') {
       queryParams['categoryId'] = categoryId;
     }
     if (subjectId != null && subjectId.isNotEmpty) {
@@ -42,5 +42,26 @@ class TestsRepository {
 
   Future<dio_instance.Response> getCategories() async {
     return await _apiClient.get('/tests/categories');
+  }
+
+  Future<dio_instance.Response> toggleQuestionBookmark(String questionId) async {
+    return await _apiClient.post(
+      '/questions/bookmark',
+      data: {'questionId': questionId},
+    );
+  }
+
+  Future<dio_instance.Response> getBookmarkedQuestions() async {
+    return await _apiClient.get('/questions/bookmarks');
+  }
+
+  Future<dio_instance.Response> submitTestReview(String testId, int rating, String? suggestion) async {
+    return await _apiClient.post(
+      '/tests/$testId/reviews',
+      data: {
+        'rating': rating,
+        'suggestion': suggestion,
+      },
+    );
   }
 }

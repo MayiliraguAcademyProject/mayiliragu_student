@@ -75,6 +75,7 @@ class QuestionModel {
   final String difficulty;
   final String? explanationEn;
   final String? explanationTa;
+  final String? explanationImageUrl;
   final double marksCorrect;
   final double marksWrong;
   final List<QuestionOption>? options;
@@ -94,6 +95,9 @@ class QuestionModel {
   final List<List<String>>? tableData;
   final List<QuestionImage>? images;
 
+  final String? correctOptionId;
+  final List<String>? correctOptionIds;
+
   QuestionModel({
     required this.id,
     required this.type,
@@ -104,9 +108,12 @@ class QuestionModel {
     required this.difficulty,
     this.explanationEn,
     this.explanationTa,
+    this.explanationImageUrl,
     required this.marksCorrect,
     required this.marksWrong,
     this.options,
+    this.correctOptionId,
+    this.correctOptionIds,
     this.correctAnswer,
     this.acceptedAnswers,
     this.hint,
@@ -176,6 +183,32 @@ class QuestionModel {
     final List<dynamic>? optList = json['options'];
     final List<dynamic>? ansList = json['accepted_answers'];
 
+    final String? cOptId = (json['correct_option_id'] ?? json['correctOptionId'])?.toString();
+    final List<dynamic>? cOptIdsRaw = json['correct_option_ids'] ?? json['correctOptionIds'];
+    final List<String>? cOptIds = cOptIdsRaw != null
+        ? List<String>.from(cOptIdsRaw.map((e) => e.toString()))
+        : null;
+
+    final List<QuestionOption>? parsedOptions = optList?.map((o) {
+      final Map<String, dynamic> optMap = Map<String, dynamic>.from(o);
+      final String optId = optMap['id']?.toString() ?? '';
+      bool isCorrect = optMap['is_correct'] ?? false;
+      if (!isCorrect) {
+        if (cOptId != null && cOptId == optId) {
+          isCorrect = true;
+        } else if (cOptIds != null && cOptIds.contains(optId)) {
+          isCorrect = true;
+        }
+      }
+      return QuestionOption(
+        id: optId,
+        label: optMap['label'] ?? optId,
+        textEn: optMap['text_en'] ?? optMap['textEn'] ?? '',
+        textTa: optMap['text_ta'] ?? optMap['textTa'] ?? '',
+        isCorrect: isCorrect,
+      );
+    }).toList();
+
     // Parse tableData rows
     List<List<String>>? tData;
     if (json['table_data'] != null) {
@@ -202,9 +235,12 @@ class QuestionModel {
       difficulty: json['difficulty'] ?? 'medium',
       explanationEn: json['explanation_en'],
       explanationTa: json['explanation_ta'],
+      explanationImageUrl: json['explanation_image_url'],
       marksCorrect: (marks['correct'] as num?)?.toDouble() ?? 1.0,
       marksWrong: (marks['wrong'] as num?)?.toDouble() ?? 0.0,
-      options: optList?.map((o) => QuestionOption.fromJson(o)).toList(),
+      options: parsedOptions,
+      correctOptionId: cOptId,
+      correctOptionIds: cOptIds,
       correctAnswer: json['correct_answer'],
       acceptedAnswers: ansList?.map((a) => AcceptedAnswer.fromJson(a)).toList(),
       hint: json['hint'],

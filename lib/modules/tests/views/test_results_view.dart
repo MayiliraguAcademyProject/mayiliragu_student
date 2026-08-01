@@ -335,29 +335,35 @@ class TestResultsView extends GetView<TestResultsController> {
                         ),
                       ),
                     ),
-                    // const SizedBox(height: 12),
-                    // SizedBox(
-                    //   width: double.infinity,
-                    //   height: 52,
-                    //   child: OutlinedButton.icon(
-                    //     onPressed: () => controller.detailedAnalysis(),
-                    //     icon: const Icon(
-                    //       Icons.trending_up,
-                    //       color: Color(0xFF0F3CC9),
-                    //     ),
-                    //     label: const Text(
-                    //       'Detailed Analysis',
-                    //       style: TextStyle(
-                    //         fontSize: 14,
-                    //         fontWeight: FontWeight.bold,
-                    //         color: Color(0xFF0F3CC9),
-                    //       ),
-                    //     ),
-                    //     style: OutlinedButton.styleFrom(
-                    //       side: const BorderSide(
-                    //         color: Color(0xFF0F3CC9),
-                    //         width: 1.5,
-                    //       ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: OutlinedButton.icon(
+                        onPressed: () => controller.showFeedbackDialog(context),
+                        icon: const Icon(
+                          Icons.star_outline_rounded,
+                          color: Color(0xFF0F3CC9),
+                        ),
+                        label: const Text(
+                          'Rate & Review Exam',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF0F3CC9),
+                          ),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(
+                            color: Color(0xFF0F3CC9),
+                            width: 1.5,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
                     //       shape: RoundedRectangleBorder(
                     //         borderRadius: BorderRadius.circular(12),
                     //       ),

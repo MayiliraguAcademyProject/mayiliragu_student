@@ -38,12 +38,12 @@ class SingleChoiceLayout extends StatelessWidget {
             margin: const EdgeInsets.only(bottom: 12),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             decoration: BoxDecoration(
-              color: isSelected ? colorScheme.primary.withValues(alpha: 0.1) : colorScheme.surface,
+              color: isSelected
+                  ? colorScheme.primary.withValues(alpha: 0.1)
+                  : colorScheme.surface,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: isSelected
-                    ? colorScheme.primary
-                    : colorScheme.outline,
+                color: isSelected ? colorScheme.primary : colorScheme.outline,
                 width: isSelected ? 2 : 1,
               ),
             ),
@@ -151,12 +151,12 @@ class MultiChoiceLayout extends StatelessWidget {
             margin: const EdgeInsets.only(bottom: 12),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             decoration: BoxDecoration(
-              color: isSelected ? colorScheme.primary.withValues(alpha: 0.1) : colorScheme.surface,
+              color: isSelected
+                  ? colorScheme.primary.withValues(alpha: 0.1)
+                  : colorScheme.surface,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: isSelected
-                    ? colorScheme.primary
-                    : colorScheme.outline,
+                color: isSelected ? colorScheme.primary : colorScheme.outline,
                 width: isSelected ? 2 : 1,
               ),
             ),
@@ -280,7 +280,9 @@ class TrueFalseLayout extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 20),
         decoration: BoxDecoration(
-          color: isSelected ? activeColor.withValues(alpha: 0.1) : colorScheme.surface,
+          color: isSelected
+              ? activeColor.withValues(alpha: 0.1)
+              : colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected ? activeColor : colorScheme.outline,
@@ -535,10 +537,7 @@ class _DescriptiveLayoutState extends State<DescriptiveLayout> {
                   border: InputBorder.none,
                   hintStyle: TextStyle(color: Color(0xFF9CA3AF)),
                 ),
-                style: TextStyle(
-                  fontSize: 14,
-                  color: colorScheme.onSurface,
-                ),
+                style: TextStyle(fontSize: 14, color: colorScheme.onSurface),
               ),
               const Divider(height: 1),
               Padding(
@@ -721,7 +720,7 @@ class _SharedContextBlockState extends State<SharedContextBlock> {
                       Text(
                         textEn,
                         style: TextStyle(
-                          fontSize: 13,
+                          fontSize: 14,
                           height: 1.5,
                           color: colorScheme.onSurface,
                         ),
@@ -732,7 +731,7 @@ class _SharedContextBlockState extends State<SharedContextBlock> {
                       Text(
                         textTa,
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 14,
                           height: 1.5,
                           color: colorScheme.onSurface.withValues(alpha: 0.8),
                         ),
@@ -779,7 +778,9 @@ class DiTableWidget extends StatelessWidget {
 
             return TableRow(
               decoration: BoxDecoration(
-                color: isHeader ? colorScheme.surfaceContainerHighest : colorScheme.surface,
+                color: isHeader
+                    ? colorScheme.surfaceContainerHighest
+                    : colorScheme.surface,
               ),
               children: cells.map((cell) {
                 // Heuristic: right-align numbers
@@ -829,7 +830,7 @@ class QuestionImagesRow extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return SizedBox(
-      height:300,
+      height: 300,
 
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
@@ -849,9 +850,8 @@ class QuestionImagesRow extends StatelessWidget {
               child: CachedNetworkImage(
                 imageUrl: img.url,
                 fit: BoxFit.fill,
-                placeholder: (context, url) => const Center(
-                  child: CircularProgressIndicator(),
-                ),
+                placeholder: (context, url) =>
+                    const Center(child: CircularProgressIndicator()),
                 errorWidget: (context, url, error) => Container(
                   color: colorScheme.surfaceContainerHighest,
                   child: const Center(
