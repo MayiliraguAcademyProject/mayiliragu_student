@@ -25,6 +25,7 @@ class StudentProfileModel {
   final int? yearOfPassing;
   final double? percentage;
   final String? mediumOfEducation;
+  final bool isPremium;
 
   StudentProfileModel({
     required this.id,
@@ -53,6 +54,7 @@ class StudentProfileModel {
     this.yearOfPassing,
     this.percentage,
     this.mediumOfEducation,
+    this.isPremium = false,
   });
 
   factory StudentProfileModel.fromJson(Map<String, dynamic> json) {
@@ -83,6 +85,7 @@ class StudentProfileModel {
       yearOfPassing: json['yearOfPassing'] as int?,
       percentage: (json['percentage'] as num?)?.toDouble(),
       mediumOfEducation: json['mediumOfEducation'] as String?,
+      isPremium: json['isPremium'] as bool? ?? false,
     );
   }
 
@@ -114,6 +117,7 @@ class StudentProfileModel {
       'yearOfPassing': yearOfPassing,
       'percentage': percentage,
       'mediumOfEducation': mediumOfEducation,
+      'isPremium': isPremium,
     };
   }
 }

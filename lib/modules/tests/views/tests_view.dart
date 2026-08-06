@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/controllers/user_session_controller.dart';
+import '../widgets/premium_gate_sheet.dart';
+import '../widgets/scheduled_test_sheet.dart';
 import '../controllers/tests_controller.dart';
 import '../models/test_model.dart';
 
@@ -258,70 +261,81 @@ class TestsView extends GetView<TestsController> {
 
     // Select the first available test as the featured one
     final featuredTest = controller.testsList.first;
+    final isUserPremium = Get.isRegistered<UserSessionController>() ? Get.find<UserSessionController>().isPremium.value : false;
+    final isLocked = featuredTest.isPaid && !isUserPremium;
+    final isScheduled = _isScheduled(featuredTest);
 
     return Container(
-      width: double.infinity,
+     // margin: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFF0F3CC9), Color(0xFF1E60FF)],
+          colors: [Color(0xFF0F3CC9), Color(0xFF1E40AF)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: const [
           BoxShadow(
-            color: Color(0x1F0F3CC9),
-            blurRadius: 12,
-            offset: Offset(0, 6),
+            color: Color(0x250F3CC9),
+            blurRadius: 16,
+            offset: Offset(0, 8),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Text(
-              'FEATURED',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 0.5,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: isScheduled
+                      ? const Color(0xFF0D9488)
+                      : (isLocked ? const Color(0xFFF59E0B) : Colors.white.withValues(alpha: 0.2)),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  isScheduled
+                      ? 'SCHEDULED'
+                      : (isLocked ? 'PREMIUM' : 'FEATURED MOCK TEST'),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                  ),
+                ),
               ),
-            ),
+              Row(
+                children: [
+                  const Icon(Icons.timer_outlined, color: Colors.white70, size: 14),
+                  const SizedBox(width: 4),
+                  Text(
+                    '${featuredTest.duration} Mins',
+                    style: const TextStyle(color: Colors.white70, fontSize: 12),
+                  ),
+                ],
+              ),
+            ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
           Text(
             featuredTest.title,
-            style: const TextStyle(
+            style: AppTextStyles.subheading.copyWith(
               color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+              fontSize: 18,
             ),
           ),
-          if (featuredTest.description != null && featuredTest.description!.isNotEmpty) ...[
-            const SizedBox(height: 6),
-            Text(
-              featuredTest.description!,
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.8),
-                fontSize: 12,
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           Text(
-            '${featuredTest.questionCount} Questions • ${featuredTest.duration} Min • ${featuredTest.totalMarks.toInt()} Marks',
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.9),
+            featuredTest.description ?? 'Comprehensive practice test with section wise analytics.',
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: Colors.white70,
               fontSize: 12,
               fontWeight: FontWeight.w500,
             ),
@@ -340,50 +354,72 @@ class TestsView extends GetView<TestsController> {
                   ),
                 ],
               ),
-              ElevatedButton(
-                onPressed: () {
-                  if (featuredTest.hasAttempted) {
-                    final args = Map<String, dynamic>.from(featuredTest.latestAttempt ?? {});
-                    args['test_id'] = featuredTest.id;
-                    args['test_title'] = featuredTest.title;
-                    Get.toNamed('/test-results', arguments: args);
-                  } else {
-                    if (featuredTest.isSectioned) {
-                      Get.toNamed(
-                        '/test-sections',
-                        arguments: featuredTest.id,
-                      )?.then((_) => controller.fetchTests());
-                    } else {
-                      Get.toNamed(
-                        '/test-runner',
-                        arguments: featuredTest.id,
-                      )?.then((_) => controller.fetchTests());
-                    }
-                  }
+              Builder(
+                builder: (context) {
+                  return ElevatedButton(
+                    onPressed: () {
+                      if (isScheduled) {
+                        ScheduledTestSheet.show(context, testTitle: featuredTest.title, scheduledAt: featuredTest.scheduledAt!);
+                        return;
+                      }
+                      if (isLocked) {
+                        PremiumGateSheet.show(context);
+                        return;
+                      }
+                      if (featuredTest.hasAttempted) {
+                        final args = Map<String, dynamic>.from(featuredTest.latestAttempt ?? {});
+                        args['test_id'] = featuredTest.id;
+                        args['test_title'] = featuredTest.title;
+                        Get.toNamed('/test-results', arguments: args);
+                      } else {
+                        if (featuredTest.isSectioned) {
+                          Get.toNamed(
+                            '/test-sections',
+                            arguments: featuredTest.id,
+                          )?.then((_) => controller.fetchTests());
+                        } else {
+                          Get.toNamed(
+                            '/test-runner',
+                            arguments: featuredTest.id,
+                          )?.then((_) => controller.fetchTests());
+                        }
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: isScheduled
+                          ? const Color(0xFF0D9488)
+                          : (isLocked ? const Color(0xFFF59E0B) : Colors.white),
+                      foregroundColor: isScheduled || isLocked ? Colors.white : const Color(0xFF0F3CC9),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    ),
+                    child: Row(
+                      children: [
+                        Text(
+                          isScheduled
+                              ? 'Opens ${_formatScheduleDate(featuredTest.scheduledAt!)}'
+                              : (isLocked
+                                  ? 'Unlock'
+                                  : (featuredTest.hasAttempted ? 'Results' : 'Start Test')),
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(width: 6),
+                        Icon(
+                          isScheduled
+                              ? Icons.schedule_outlined
+                              : (isLocked
+                                  ? Icons.lock_outline
+                                  : (featuredTest.hasAttempted ? Icons.assessment_outlined : Icons.arrow_forward)),
+                          size: 14,
+                          color: isScheduled || isLocked ? Colors.white : const Color(0xFF0F3CC9),
+                        ),
+                      ],
+                    ),
+                  );
                 },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: const Color(0xFF0F3CC9),
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                ),
-                child: Row(
-                  children: [
-                    Text(
-                      featuredTest.hasAttempted ? 'Results' : 'Start Test',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(width: 6),
-                    Icon(
-                      featuredTest.hasAttempted ? Icons.assessment_outlined : Icons.arrow_forward,
-                      size: 14,
-                      color: const Color(0xFF0F3CC9),
-                    ),
-                  ],
-                ),
               ),
             ],
           ),
@@ -519,7 +555,21 @@ class TestsView extends GetView<TestsController> {
     );
   }
 
+  bool _isScheduled(TestModel test) {
+    return test.scheduledAt != null && test.scheduledAt!.isAfter(DateTime.now());
+  }
+
+  String _formatScheduleDate(DateTime dt) {
+    final local = dt.toLocal();
+    final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return '${months[local.month - 1]} ${local.day}';
+  }
+
   Widget _buildTestCard(BuildContext context, TestModel test) {
+    final isUserPremium = Get.isRegistered<UserSessionController>() ? Get.find<UserSessionController>().isPremium.value : false;
+    final isLocked = test.isPaid && !isUserPremium;
+    final isScheduled = _isScheduled(test);
+
     // Generate difficulty colors
     Color diffBgColor = const Color(0xFFEBFDF2);
     Color diffTextColor = const Color(0xFF10B981);
@@ -539,173 +589,269 @@ class TestsView extends GetView<TestsController> {
     final isProgressTest = test.title.toLowerCase().contains('history'); // Simulate progress for demo
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: colorScheme.outline, width: 1),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x03000000),
-            blurRadius: 10,
-            offset: Offset(0, 4),
+    return GestureDetector(
+      onTap: isScheduled
+          ? () => ScheduledTestSheet.show(context, testTitle: test.title, scheduledAt: test.scheduledAt!)
+          : (isLocked ? () => PremiumGateSheet.show(context) : null),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: (isScheduled || isLocked) ? colorScheme.surface.withValues(alpha: 0.7) : colorScheme.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isScheduled
+                ? const Color(0xFF0D9488).withValues(alpha: 0.4)
+                : (isLocked ? const Color(0xFFF59E0B).withValues(alpha: 0.3) : colorScheme.outline),
+            width: 1,
           ),
-        ],
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        test.title,
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: colorScheme.onSurface,
-                        ),
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        // Bookmark action
-                      },
-                      child: const Icon(Icons.bookmark_border, color: Color(0xFFD1D5DB), size: 20),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: diffBgColor,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        difficultyText,
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          color: diffTextColor,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    if (test.subjectId != null)
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF3E8FF),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x03000000),
+              blurRadius: 10,
+              offset: Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
                         child: Text(
-                          controller.subjectNames[test.subjectId] ?? test.subjectId ?? '',
-                          style: const TextStyle(
-                            fontSize: 10,
+                          test.title,
+                          style: TextStyle(
+                            fontSize: 14,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF7C3AED),
+                            color: (isScheduled || isLocked) ? colorScheme.onSurface.withValues(alpha: 0.8) : colorScheme.onSurface,
                           ),
                         ),
                       ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                if (isProgressTest) ...[
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
-                      Text(
-                        'Progress',
-                        style: TextStyle(fontSize: 11, color: Colors.grey),
-                      ),
-                      Text(
-                        '67%',
-                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey),
+                      if (isScheduled) ...[
+                        const SizedBox(width: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFCCFBF1),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(color: const Color(0xFF99F6E4), width: 0.8),
+                          ),
+                          child: const Row(
+                            children: [
+                              Icon(Icons.schedule_outlined, size: 11, color: Color(0xFF0F766E)),
+                              SizedBox(width: 3),
+                              Text(
+                                'SCHEDULED',
+                                style: TextStyle(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF0F766E),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ] else if (test.isPaid) ...[
+                        const SizedBox(width: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFFF7ED),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(color: const Color(0xFFFDCA8C), width: 0.8),
+                          ),
+                          child: const Row(
+                            children: [
+                              Icon(Icons.workspace_premium, size: 11, color: Color(0xFFD97706)),
+                              SizedBox(width: 3),
+                              Text(
+                                'PRO',
+                                style: TextStyle(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFFD97706),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                      const SizedBox(width: 8),
+                      GestureDetector(
+                        onTap: () {
+                          // Bookmark action
+                        },
+                        child: const Icon(Icons.bookmark_border, color: Color(0xFFD1D5DB), size: 20),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 4),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
-                    child: const LinearProgressIndicator(
-                      value: 0.67,
-                      minHeight: 6,
-                      backgroundColor: Color(0xFFECEEF5),
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.orange),
-                    ),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: diffBgColor,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          difficultyText,
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: diffTextColor,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      if (test.subjectId != null)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF3E8FF),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            controller.subjectNames[test.subjectId] ?? test.subjectId ?? '',
+                            style: const TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF7C3AED),
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                   const SizedBox(height: 12),
-                ],
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      '${test.questionCount} Q • ${test.duration} Min',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    OutlinedButton(
-                      onPressed: () {
-                        if (test.hasAttempted) {
-                          final args = Map<String, dynamic>.from(test.latestAttempt ?? {});
-                          args['test_id'] = test.id;
-                          args['test_title'] = test.title;
-                          Get.toNamed('/test-results', arguments: args);
-                        } else {
-                          if (test.isSectioned) {
-                            Get.toNamed(
-                              '/test-sections',
-                              arguments: test.id,
-                            )?.then((_) => controller.fetchTests());
-                          } else {
-                            Get.toNamed(
-                              '/test-runner',
-                              arguments: test.id,
-                            )?.then((_) => controller.fetchTests());
-                          }
-                        }
-                      },
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: test.hasAttempted
-                            ? const Color(0xFF065F46)
-                            : (isProgressTest ? Colors.white : const Color(0xFF0F3CC9)),
-                        backgroundColor: test.hasAttempted
-                            ? const Color(0xFFD1FAE5)
-                            : (isProgressTest ? const Color(0xFFF97316) : Colors.transparent),
-                        side: (isProgressTest || test.hasAttempted)
-                            ? BorderSide.none
-                            : const BorderSide(color: Color(0xFF0F3CC9), width: 1),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                  if (isProgressTest) ...[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: const [
+                        Text(
+                          'Progress',
+                          style: TextStyle(fontSize: 11, color: Colors.grey),
                         ),
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                      ),
-                      child: Text(
-                        test.hasAttempted
-                            ? 'Results'
-                            : (isProgressTest ? 'Resume' : 'Start'),
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                        Text(
+                          '67%',
+                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: const LinearProgressIndicator(
+                        value: 0.67,
+                        minHeight: 6,
+                        backgroundColor: Color(0xFFECEEF5),
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.orange),
                       ),
                     ),
+                    const SizedBox(height: 12),
                   ],
-                ),
-              ],
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '${test.questionCount} Q • ${test.duration} Min',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: colorScheme.onSurfaceVariant,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      OutlinedButton(
+                        onPressed: () {
+                          if (isScheduled) {
+                            ScheduledTestSheet.show(context, testTitle: test.title, scheduledAt: test.scheduledAt!);
+                            return;
+                          }
+                          if (isLocked) {
+                            PremiumGateSheet.show(context);
+                            return;
+                          }
+                          if (test.hasAttempted) {
+                            final args = Map<String, dynamic>.from(test.latestAttempt ?? {});
+                            args['test_id'] = test.id;
+                            args['test_title'] = test.title;
+                            Get.toNamed('/test-results', arguments: args);
+                          } else {
+                            if (test.isSectioned) {
+                              Get.toNamed(
+                                '/test-sections',
+                                arguments: test.id,
+                              )?.then((_) => controller.fetchTests());
+                            } else {
+                              Get.toNamed(
+                                '/test-runner',
+                                arguments: test.id,
+                              )?.then((_) => controller.fetchTests());
+                            }
+                          }
+                        },
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: isScheduled
+                              ? const Color(0xFF0F766E)
+                              : (isLocked
+                                  ? const Color(0xFFD97706)
+                                  : (test.hasAttempted
+                                      ? const Color(0xFF065F46)
+                                      : (isProgressTest ? Colors.white : const Color(0xFF0F3CC9)))),
+                          backgroundColor: isScheduled
+                              ? const Color(0xFFCCFBF1)
+                              : (isLocked
+                                  ? const Color(0xFFFFF7ED)
+                                  : (test.hasAttempted
+                                      ? const Color(0xFFD1FAE5)
+                                      : (isProgressTest ? const Color(0xFFF97316) : Colors.transparent))),
+                          side: isScheduled
+                              ? const BorderSide(color: Color(0xFF99F6E4), width: 1)
+                              : (isLocked
+                                  ? const BorderSide(color: Color(0xFFFDCA8C), width: 1)
+                                  : ((isProgressTest || test.hasAttempted)
+                                      ? BorderSide.none
+                                      : const BorderSide(color: Color(0xFF0F3CC9), width: 1))),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (isScheduled) ...[
+                              const Icon(Icons.schedule_outlined, size: 13, color: Color(0xFF0F766E)),
+                              const SizedBox(width: 4),
+                            ] else if (isLocked) ...[
+                              const Icon(Icons.lock_outline, size: 13, color: Color(0xFFD97706)),
+                              const SizedBox(width: 4),
+                            ],
+                            Text(
+                              isScheduled
+                                  ? 'Opens ${_formatScheduleDate(test.scheduledAt!)}'
+                                  : (isLocked
+                                      ? 'Locked'
+                                      : (test.hasAttempted
+                                          ? 'Results'
+                                          : (isProgressTest ? 'Resume' : 'Start'))),
+                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

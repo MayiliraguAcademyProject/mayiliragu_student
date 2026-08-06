@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../core/services/secure_storage_service.dart';
 import '../../../../core/services/notification_service.dart';
+import '../../../../core/controllers/user_session_controller.dart';
 import '../../../../app/routes/app_routes.dart';
 import '../repositories/auth_repository.dart';
 import '../../../shared/models/student_profile_model.dart';
@@ -80,6 +81,10 @@ class AuthController extends GetxController {
           } catch (e) {
             debugPrint('Error parsing profile completion on login: $e');
           }
+        }
+
+        if (Get.isRegistered<UserSessionController>()) {
+          await Get.find<UserSessionController>().loadSession();
         }
 
         if (isCompleted) {

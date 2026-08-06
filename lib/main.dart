@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'app/routes/app_pages.dart';
 import 'core/theme/app_theme.dart';
 import 'core/services/app_initializer.dart';
+import 'core/controllers/user_session_controller.dart';
 
 class ThemeController extends GetxController {
   final rxThemeMode = ThemeMode.system.obs;
@@ -23,9 +24,41 @@ void main() async {
   runApp(const MyApp(initialRoute: AppPages.INITIAL));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   final String initialRoute;
   const MyApp({super.key, required this.initialRoute});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    // Initial session load if user is logged in
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (Get.isRegistered<UserSessionController>()) {
+        Get.find<UserSessionController>().loadSession();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      if (Get.isRegistered<UserSessionController>()) {
+        Get.find<UserSessionController>().loadSession();
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +71,7 @@ class MyApp extends StatelessWidget {
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,
         themeMode: themeController.rxThemeMode.value,
-        initialRoute: initialRoute,
+        initialRoute: widget.initialRoute,
         getPages: AppPages.routes,
       ),
     );
