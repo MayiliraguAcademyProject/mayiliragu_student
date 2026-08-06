@@ -25,17 +25,49 @@ class TestResultsView extends GetView<TestResultsController> {
             fontSize: 18,
           ),
         ),
-        actions: [
-          // IconButton(
-          //   icon: const Icon(Icons.timer_outlined, color: Colors.white),
-          //   onPressed: () {},
-          // ),
-          // IconButton(
-          //   icon: const Icon(Icons.account_circle_outlined, color: Colors.white),
-          //   onPressed: () {},
-          // ),
-        ],
       ),
+      bottomNavigationBar: Obx(() {
+        final result = controller.result.value;
+        if (result == null) return const SizedBox.shrink();
+        return Container(
+          padding: EdgeInsets.fromLTRB(16, 12, 16, 12 + MediaQuery.of(context).viewPadding.bottom),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            border: Border(top: BorderSide(color: Theme.of(context).colorScheme.outline)),
+            boxShadow: const [
+              BoxShadow(color: Color(0x0A000000), blurRadius: 8, offset: Offset(0, -2)),
+            ],
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () => Get.back(),
+                  icon: const Icon(Icons.arrow_back, size: 18),
+                  label: const Text('Back'),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () => controller.retakeTest(),
+                  icon: const Icon(Icons.replay, color: Colors.white, size: 18),
+                  label: const Text('Retake Test', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF0F3CC9),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      }),
       body: Obx(() {
         if (controller.isLoading.value || controller.result.value == null) {
           return const Center(

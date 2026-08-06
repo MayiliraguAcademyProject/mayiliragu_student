@@ -259,10 +259,9 @@ class TestsView extends GetView<TestsController> {
   Widget _buildFeaturedCard(TestsController controller) {
     if (controller.testsList.isEmpty) return const SizedBox.shrink();
 
-    // Select the first available test as the featured one
     final featuredTest = controller.testsList.first;
     final isUserPremium = Get.isRegistered<UserSessionController>() ? Get.find<UserSessionController>().isPremium.value : false;
-    final isLocked = featuredTest.isPaid && !isUserPremium;
+    final isLocked = featuredTest.isLocked || (featuredTest.isPaid && !isUserPremium);
     final isScheduled = _isScheduled(featuredTest);
 
     return Container(
@@ -357,34 +356,7 @@ class TestsView extends GetView<TestsController> {
               Builder(
                 builder: (context) {
                   return ElevatedButton(
-                    onPressed: () {
-                      if (isScheduled) {
-                        ScheduledTestSheet.show(context, testTitle: featuredTest.title, scheduledAt: featuredTest.scheduledAt!);
-                        return;
-                      }
-                      if (isLocked) {
-                        PremiumGateSheet.show(context);
-                        return;
-                      }
-                      if (featuredTest.hasAttempted) {
-                        final args = Map<String, dynamic>.from(featuredTest.latestAttempt ?? {});
-                        args['test_id'] = featuredTest.id;
-                        args['test_title'] = featuredTest.title;
-                        Get.toNamed('/test-results', arguments: args);
-                      } else {
-                        if (featuredTest.isSectioned) {
-                          Get.toNamed(
-                            '/test-sections',
-                            arguments: featuredTest.id,
-                          )?.then((_) => controller.fetchTests());
-                        } else {
-                          Get.toNamed(
-                            '/test-runner',
-                            arguments: featuredTest.id,
-                          )?.then((_) => controller.fetchTests());
-                        }
-                      }
-                    },
+                    onPressed: () => _handleTestTap(context, controller, featuredTest),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: isScheduled
                           ? const Color(0xFF0D9488)
@@ -556,7 +528,114 @@ class TestsView extends GetView<TestsController> {
   }
 
   bool _isScheduled(TestModel test) {
-    return test.scheduledAt != null && test.scheduledAt!.isAfter(DateTime.now());
+    if (test.scheduledAt == null) return false;
+    return test.scheduledAt!.toLocal().isAfter(DateTime.now());
+  }
+
+  void _handleTestTap(BuildContext context, TestsController controller, TestModel test) {
+    final isUserPremium = Get.isRegistered<UserSessionController>() ? Get.find<UserSessionController>().isPremium.value : false;
+    final isLocked = test.isLocked || (test.isPaid && !isUserPremium);
+    final isScheduled = _isScheduled(test);
+
+    if (isScheduled) {
+      ScheduledTestSheet.show(context, testTitle: test.title, scheduledAt: test.scheduledAt!);
+      return;
+    }
+
+    if (isLocked) {
+      PremiumGateSheet.show(context);
+      return;
+    }
+
+    if (test.hasAttempted) {
+      showModalBottomSheet(
+        context: context,
+        useRootNavigator: true,
+        backgroundColor: Colors.transparent,
+        builder: (ctx) {
+          final colorScheme = Theme.of(ctx).colorScheme;
+          return Container(
+            padding: EdgeInsets.fromLTRB(24, 20, 24, 20 + MediaQuery.of(ctx).viewPadding.bottom),
+            decoration: BoxDecoration(
+              color: colorScheme.surface,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  test.title,
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: colorScheme.onSurface),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'You have already attempted this test. Choose an action:',
+                  style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant),
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.of(ctx).pop();
+                      if (test.isSectioned) {
+                        Get.toNamed('/test-sections', arguments: test.id)?.then((_) => controller.fetchTests());
+                      } else {
+                        Get.toNamed('/test-runner', arguments: test.id)?.then((_) => controller.fetchTests());
+                      }
+                    },
+                    icon: const Icon(Icons.play_arrow_rounded, color: Colors.white),
+                    label: const Text('Retake Test', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF0F3CC9),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.of(ctx).pop();
+                      final args = Map<String, dynamic>.from(test.latestAttempt ?? {});
+                      args['test_id'] = test.id;
+                      args['test_title'] = test.title;
+                      Get.toNamed('/test-results', arguments: args);
+                    },
+                    icon: const Icon(Icons.analytics_outlined, color: Color(0xFF0F3CC9)),
+                    label: const Text('View Detailed Analytics', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0F3CC9))),
+                    style: OutlinedButton.styleFrom(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    } else {
+      if (test.isSectioned) {
+        Get.toNamed('/test-sections', arguments: test.id)?.then((_) => controller.fetchTests());
+      } else {
+        Get.toNamed('/test-runner', arguments: test.id)?.then((_) => controller.fetchTests());
+      }
+    }
   }
 
   String _formatScheduleDate(DateTime dt) {
@@ -567,7 +646,7 @@ class TestsView extends GetView<TestsController> {
 
   Widget _buildTestCard(BuildContext context, TestModel test) {
     final isUserPremium = Get.isRegistered<UserSessionController>() ? Get.find<UserSessionController>().isPremium.value : false;
-    final isLocked = test.isPaid && !isUserPremium;
+    final isLocked = test.isLocked || (test.isPaid && !isUserPremium);
     final isScheduled = _isScheduled(test);
 
     // Generate difficulty colors
@@ -590,9 +669,7 @@ class TestsView extends GetView<TestsController> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return GestureDetector(
-      onTap: isScheduled
-          ? () => ScheduledTestSheet.show(context, testTitle: test.title, scheduledAt: test.scheduledAt!)
-          : (isLocked ? () => PremiumGateSheet.show(context) : null),
+      onTap: () => _handleTestTap(context, controller, test),
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
@@ -767,34 +844,7 @@ class TestsView extends GetView<TestsController> {
                         ),
                       ),
                       OutlinedButton(
-                        onPressed: () {
-                          if (isScheduled) {
-                            ScheduledTestSheet.show(context, testTitle: test.title, scheduledAt: test.scheduledAt!);
-                            return;
-                          }
-                          if (isLocked) {
-                            PremiumGateSheet.show(context);
-                            return;
-                          }
-                          if (test.hasAttempted) {
-                            final args = Map<String, dynamic>.from(test.latestAttempt ?? {});
-                            args['test_id'] = test.id;
-                            args['test_title'] = test.title;
-                            Get.toNamed('/test-results', arguments: args);
-                          } else {
-                            if (test.isSectioned) {
-                              Get.toNamed(
-                                '/test-sections',
-                                arguments: test.id,
-                              )?.then((_) => controller.fetchTests());
-                            } else {
-                              Get.toNamed(
-                                '/test-runner',
-                                arguments: test.id,
-                              )?.then((_) => controller.fetchTests());
-                            }
-                          }
-                        },
+                        onPressed: () => _handleTestTap(context, controller, test),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: isScheduled
                               ? const Color(0xFF0F766E)
