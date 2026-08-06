@@ -56,6 +56,8 @@ class TestModel {
   final bool hasAttempted;
   final Map<String, dynamic>? latestAttempt;
   final bool isSectioned;
+  final bool isPaid;
+  final DateTime? scheduledAt;
   final List<TestSectionModel>? sections;
   final List<QuestionModel>? questions;
 
@@ -77,6 +79,8 @@ class TestModel {
     this.hasAttempted = false,
     this.latestAttempt,
     this.isSectioned = false,
+    this.isPaid = false,
+    this.scheduledAt,
     this.sections,
     this.questions,
   });
@@ -108,6 +112,8 @@ class TestModel {
       hasAttempted: json['has_attempted'] ?? false,
       latestAttempt: json['latest_attempt'],
       isSectioned: json['is_sectioned'] ?? false,
+      isPaid: json['is_paid'] ?? false,
+      scheduledAt: json['scheduled_at'] != null ? DateTime.tryParse(json['scheduled_at'].toString()) : null,
       sections: parsedSections,
       questions: parsedQuestions,
     );
