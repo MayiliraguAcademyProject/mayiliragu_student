@@ -76,4 +76,15 @@ class SecureStorageService extends GetxService {
   Future<void> markTestFeedbackCompleted(String testId) async {
     await _storage.write(key: 'test_feedback_$testId', value: 'true');
   }
+
+  static const _deviceIdKey = 'unique_device_id';
+
+  Future<String> getOrCreateDeviceId() async {
+    String? deviceId = await _storage.read(key: _deviceIdKey);
+    if (deviceId == null || deviceId.isEmpty) {
+      deviceId = 'MAYILIRAGU-DEV-${DateTime.now().millisecondsSinceEpoch}';
+      await _storage.write(key: _deviceIdKey, value: deviceId);
+    }
+    return deviceId;
+  }
 }

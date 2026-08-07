@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import '../../../../core/services/secure_storage_service.dart';
 import '../../../../core/services/notification_service.dart';
@@ -37,9 +38,13 @@ class AuthController extends GetxController {
     errorMessage.value = '';
 
     try {
+      final deviceId = await _storage.getOrCreateDeviceId();
+
       final response = await _authRepository.login(
         email: email,
         password: password,
+        deviceId: deviceId,
+        deviceName: 'Mayiliragu Mobile App',
       );
       if (response.statusCode == 200) {
         final responseData = response.data['data'] as Map<String, dynamic>;
@@ -98,7 +103,19 @@ class AuthController extends GetxController {
         errorMessage.value = response.data['message'] ?? 'Login failed';
       }
     } catch (e) {
-      errorMessage.value = 'Invalid email or password';
+      if (e is DioException) {
+        final resData = e.response?.data;
+        if (resData is Map && (resData['code'] == 'DEVICE_BOUND_MISMATCH' || e.response?.statusCode == 403)) {
+          errorMessage.value = resData['message'] ??
+              'This account is registered on another device. Contact support to transfer device.';
+          return;
+        }
+        errorMessage.value = (resData is Map && resData['message'] != null)
+            ? resData['message'].toString()
+            : 'Invalid email or password';
+      } else {
+        errorMessage.value = 'Invalid email or password';
+      }
     } finally {
       isLoading.value = false;
     }
