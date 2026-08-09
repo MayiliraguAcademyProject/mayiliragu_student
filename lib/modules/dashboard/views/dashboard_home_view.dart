@@ -84,13 +84,13 @@ class DashboardHomeView extends GetView<DashboardController> {
                   _buildQuickActions(),
                   const SizedBox(height: 24),
 
-                  // 3. Enrolled Courses Section
-                  if (data?.enrolledCourses != null &&
-                      data!.enrolledCourses.isNotEmpty) ...[
+                  // 3. Courses Section
+                  if (data?.allCourses != null &&
+                      data!.allCourses.isNotEmpty) ...[
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        _buildSectionTitle(context, AppStrings.enrolledCourses),
+                        _buildSectionTitle(context, 'Explore Courses'),
                         TextButton(
                           onPressed: () {
                             Get.toNamed(Routes.COURSES);
@@ -107,7 +107,7 @@ class DashboardHomeView extends GetView<DashboardController> {
                       ],
                     ),
                     const SizedBox(height: 12),
-                    _buildEnrolledCoursesList(data.enrolledCourses),
+                    _buildEnrolledCoursesList(data.allCourses),
                     const SizedBox(height: 24),
                   ],
 
@@ -398,39 +398,89 @@ class DashboardHomeView extends GetView<DashboardController> {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
-                            const SizedBox(height: 6),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  '${course.totalLessons} Lessons',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    color: colorScheme.onSurfaceVariant,
+                            if (!course.isEnrolled) ...[
+                              const SizedBox(height: 6),
+                              if (course.enrollmentRequestStatus == 'PENDING')
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                  decoration: BoxDecoration(
+                                    color: Colors.amber.shade100,
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.hourglass_empty_rounded, size: 12, color: Colors.amber.shade900),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        'Request Pending',
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.amber.shade900,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              else
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.brandPurple.withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: const Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.shopping_bag_outlined, size: 12, color: AppColors.brandPurple),
+                                      SizedBox(width: 4),
+                                      Text(
+                                        'Purchase Course',
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                          color: AppColors.brandPurple,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                                Text(
-                                  '${course.progressPercentage.toInt()}%',
-                                  style: const TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.brandPurple,
+                            ] else ...[
+                              const SizedBox(height: 6),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    '${course.totalLessons} Lessons',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: colorScheme.onSurfaceVariant,
+                                    ),
                                   ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 6),
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(2),
-                              child: LinearProgressIndicator(
-                                value: course.progressPercentage / 100,
-                                backgroundColor: colorScheme.outline.withValues(alpha: 0.2),
-                                valueColor: const AlwaysStoppedAnimation<Color>(
-                                  AppColors.brandPurple,
-                                ),
-                                minHeight: 4,
+                                  Text(
+                                    '${course.progressPercentage.toInt()}%',
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.brandPurple,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
+                              const SizedBox(height: 6),
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(2),
+                                child: LinearProgressIndicator(
+                                  value: course.progressPercentage / 100,
+                                  backgroundColor: colorScheme.outline.withValues(alpha: 0.2),
+                                  valueColor: const AlwaysStoppedAnimation<Color>(
+                                    AppColors.brandPurple,
+                                  ),
+                                  minHeight: 4,
+                                ),
+                              ),
+                            ],
                           ],
                         ),
                       ),
