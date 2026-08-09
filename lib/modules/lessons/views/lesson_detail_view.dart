@@ -67,10 +67,7 @@ class LessonDetailView extends GetView<LessonController> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(
-                    color: colorScheme.primary,
-                    width: 2,
-                  ),
+                  borderSide: BorderSide(color: colorScheme.primary, width: 2),
                 ),
               ),
             ),
@@ -344,11 +341,13 @@ class LessonDetailView extends GetView<LessonController> {
             }
             final lessonId = lesson['id']?.toString() ?? '';
             final downloadService = Get.find<VideoDownloadService>();
-            
+
             return Obx(() {
               final isDownloaded = downloadService.isDownloaded(lessonId);
-              final isDownloading = downloadService.isDownloading[lessonId] ?? false;
-              final progress = downloadService.downloadProgress[lessonId] ?? 0.0;
+              final isDownloading =
+                  downloadService.isDownloading[lessonId] ?? false;
+              final progress =
+                  downloadService.downloadProgress[lessonId] ?? 0.0;
 
               if (isDownloading) {
                 return Center(
@@ -379,12 +378,15 @@ class LessonDetailView extends GetView<LessonController> {
                       AlertDialog(
                         title: const Text('Offline Video Actions'),
                         content: const Text(
-                            'Choose an action for this downloaded video.'),
+                          'Choose an action for this downloaded video.',
+                        ),
                         actions: [
                           TextButton(
                             onPressed: () => Get.back(),
-                            child: const Text('Cancel',
-                                style: TextStyle(color: Colors.grey)),
+                            child: const Text(
+                              'Cancel',
+                              style: TextStyle(color: Colors.grey),
+                            ),
                           ),
                           TextButton(
                             onPressed: () async {
@@ -392,16 +394,20 @@ class LessonDetailView extends GetView<LessonController> {
                               await controller.deleteDownloadedVideo();
                               controller.startVideoDownload();
                             },
-                            child: Text('Redownload',
-                                style: TextStyle(color: colorScheme.primary)),
+                            child: Text(
+                              'Redownload',
+                              style: TextStyle(color: colorScheme.primary),
+                            ),
                           ),
                           TextButton(
                             onPressed: () {
                               controller.deleteDownloadedVideo();
                               Get.back();
                             },
-                            child: const Text('Delete',
-                                style: TextStyle(color: Colors.red)),
+                            child: const Text(
+                              'Delete',
+                              style: TextStyle(color: Colors.red),
+                            ),
                           ),
                         ],
                       ),
@@ -490,7 +496,6 @@ class LessonDetailView extends GetView<LessonController> {
                   AspectRatio(
                     aspectRatio: 16 / 9,
                     child: BetterPlayer(
-                      
                       controller: controller.betterPlayerController!,
                     ),
                   )
@@ -596,53 +601,49 @@ class LessonDetailView extends GetView<LessonController> {
       ),
       bottomNavigationBar: Obx(() {
         if (controller.isLoading.value ||
-            controller.errorMessage.value.isNotEmpty) {
+            controller.errorMessage.value.isNotEmpty ||
+            controller.lessonData.value == null) {
           return const SizedBox.shrink();
         }
-        return Obx(()=>Visibility(
-          visible:  controller.isCompleted.value,
-          child: SafeArea(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              decoration: BoxDecoration(
-                color: colorScheme.surface,
-                border: Border(
-                  top: BorderSide(color: colorScheme.outline, width: 1),
-                ),
+        final isComp = controller.isCompleted.value;
+        return SafeArea(
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 20,
+              vertical: 12,
+            ),
+            decoration: BoxDecoration(
+              color: colorScheme.surface,
+              border: Border(
+                top: BorderSide(color: colorScheme.outline, width: 1),
               ),
-              child: SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: controller.isCompleted.value
-                      ? null
-                      : () => controller.markLessonAsComplete(),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: controller.isCompleted.value
-                        ? Colors.green
-                        : colorScheme.primary,
-                    disabledBackgroundColor: Colors.green,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                    elevation: 0,
+            ),
+            child: SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: isComp ? null : () => controller.markLessonAsComplete(),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isComp ? Colors.green : colorScheme.primary,
+                  disabledBackgroundColor: Colors.green,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(25),
                   ),
-                  child: Text(
-                    controller.isCompleted.value
-                        ? 'Lesson Completed ✓'
-                        : 'Mark Lesson as Complete',
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+                  elevation: 0,
+                ),
+                child: Text(
+                  isComp ? 'Lesson Completed ✓' : 'Mark Lesson as Complete',
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
                 ),
               ),
             ),
           ),
-        
-    )); }),
+        );
+      }),
     );
   }
 }

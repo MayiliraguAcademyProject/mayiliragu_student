@@ -3,6 +3,7 @@ class CourseDetailModel {
   final String title;
   final String description;
   final String thumbnail;
+  final bool isEnrolled;
   final List<ModuleModel> modules;
 
   CourseDetailModel({
@@ -10,6 +11,7 @@ class CourseDetailModel {
     required this.title,
     required this.description,
     required this.thumbnail,
+    this.isEnrolled = true,
     required this.modules,
   });
 
@@ -20,6 +22,7 @@ class CourseDetailModel {
       title: json['title']?.toString() ?? '',
       description: json['description']?.toString() ?? '',
       thumbnail: json['thumbnail']?.toString() ?? '',
+      isEnrolled: json['isEnrolled'] as bool? ?? true,
       modules: modulesList
           .map((m) => ModuleModel.fromJson(m as Map<String, dynamic>))
           .toList(),
@@ -54,6 +57,7 @@ class LessonModel {
   final String id;
   final String title;
   final String description;
+  final String? image;
   final int duration;
   final bool downloadEnabled;
   final bool isLocked;
@@ -63,6 +67,7 @@ class LessonModel {
     required this.id,
     required this.title,
     required this.description,
+    this.image,
     required this.duration,
     required this.downloadEnabled,
     this.isLocked = false,
@@ -74,6 +79,7 @@ class LessonModel {
       id: json['id']?.toString() ?? '',
       title: json['title']?.toString() ?? '',
       description: json['description']?.toString() ?? '',
+      image: json['image']?.toString(),
       duration: json['duration'] as int? ?? 0,
       downloadEnabled: json['downloadEnabled'] as bool? ?? false,
       isLocked: json['isLocked'] as bool? ?? false,
