@@ -77,6 +77,9 @@ jobs:
       - name: Build APK
         run: flutter build apk --release --dart-define-from-file=.env.prod
 
+      - name: Build AppBundle
+        run: flutter build appbundle --release --dart-define-from-file=.env.prod
+
       - name: Upload artifact to Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1
         with:
@@ -94,3 +97,4 @@ jobs:
           prerelease: true
           files: |
             build/app/outputs/flutter-apk/app-release.apk
+            build/app/outputs/bundle/release/app-release.aab
