@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'package:get/get.dart';
 import 'package:better_player_enhanced/better_player.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import '../../../core/constants/app_colors.dart';
@@ -29,6 +31,8 @@ class LessonController extends GetxController {
   final isLoadingNotes = false.obs;
 
   BetterPlayerController? betterPlayerController;
+  YoutubePlayerController? youtubeController;
+  Timer? _youtubeSeekTimer;
 
   String? _currentLessonId;
   int _lastSyncedPosition = 0;
@@ -114,6 +118,30 @@ class LessonController extends GetxController {
   bool get isVideoPlayerSupported =>
       GetPlatform.isAndroid || GetPlatform.isIOS || GetPlatform.isWeb;
 
+  static String? extractYoutubeId(String? raw) {
+    if (raw == null || raw.trim().isEmpty) return null;
+    final clean = raw.trim();
+
+    // Comprehensive YouTube URL matching patterns (including watch, live, shorts, embeds, v, etc.)
+    final regExp = RegExp(
+      r'(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts|live)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})',
+      caseSensitive: false,
+    );
+
+    final match = regExp.firstMatch(clean);
+    if (match != null && match.groupCount >= 1) {
+      return match.group(1);
+    }
+
+    // If it's already a bare 11-character YouTube video ID
+    final bareRegExp = RegExp(r'^[a-zA-Z0-9_-]{11}$');
+    if (bareRegExp.hasMatch(clean)) {
+      return clean;
+    }
+
+    return null;
+  }
+
   Future<void> _initializeVideoPlayer(
     String driveFileId, {
     int startSeconds = 0,
@@ -122,10 +150,78 @@ class LessonController extends GetxController {
       return;
     }
 
+    // Safely dispose any active players first
+    betterPlayerController?.dispose();
+    betterPlayerController = null;
+    _youtubeSeekTimer?.cancel();
+    _youtubeSeekTimer = null;
+    youtubeController?.dispose();
+    youtubeController = null;
+
     final downloadService = Get.find<VideoDownloadService>();
     final isDownloadedOffline = downloadService.isDownloaded(
       _currentLessonId ?? '',
     );
+
+    // Branch to YouTube if online and valid YouTube ID/URL is found
+    final String? youtubeId = isDownloadedOffline
+        ? null
+        : extractYoutubeId(driveFileId);
+    debugPrint(
+      '[DEBUG_YOUTUBE] driveFileId: "$driveFileId", extracted youtubeId: "$youtubeId"',
+    );
+
+    if (youtubeId != null) {
+      youtubeController = YoutubePlayerController(
+        initialVideoId: youtubeId,
+        flags: YoutubePlayerFlags(
+          autoPlay: false,
+          mute: false,
+          disableDragSeek: false,
+          loop: false,
+          isLive: false,
+          forceHD: true,
+
+          enableCaption: false,
+          startAt: startSeconds,
+          showLiveFullscreenButton: false,
+        ),
+      );
+
+      _youtubeSeekTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+        if (youtubeController == null) return;
+        final currentPos = youtubeController!.value.position.inSeconds;
+        if (currentPos > 0) {
+          // Restrict seeking forward beyond watched limit
+          if (currentPos > maxWatchedSeconds + 3) {
+            youtubeController!.seekTo(Duration(seconds: maxWatchedSeconds));
+            AppToast.error('Skipping forward is restricted');
+          } else {
+            if (currentPos > maxWatchedSeconds) {
+              maxWatchedSeconds = currentPos;
+            }
+            _latestPosition = currentPos;
+            if ((currentPos - _lastSyncedPosition).abs() >= 30) {
+              _syncProgress(currentPos);
+            }
+          }
+        }
+      });
+
+      youtubeController!.addListener(() {
+        if (youtubeController == null) return;
+        if (youtubeController!.value.playerState == PlayerState.ended) {
+          if (!isCompleted.value) {
+            markLessonAsComplete();
+          }
+        }
+      });
+
+      update();
+      return;
+    }
+
+    // BetterPlayer path for legacy Drive videos or offline downloads
     final BetterPlayerDataSource dataSource;
 
     if (isDownloadedOffline) {
@@ -224,17 +320,26 @@ class LessonController extends GetxController {
         if (videoPlayerController != null) {
           final currentPos = videoPlayerController.value.position.inSeconds;
           if (currentPos > 0) {
-            if (currentPos > maxWatchedSeconds) {
-              maxWatchedSeconds = currentPos;
-            }
-            _latestPosition = currentPos;
-            if ((currentPos - _lastSyncedPosition).abs() >= 30) {
-              _syncProgress(currentPos);
+            // Restrict seeking forward beyond watched limit
+            if (currentPos > maxWatchedSeconds + 3) {
+              betterPlayerController!.seekTo(
+                Duration(seconds: maxWatchedSeconds),
+              );
+              AppToast.error('Skipping forward is restricted');
+            } else {
+              if (currentPos > maxWatchedSeconds) {
+                maxWatchedSeconds = currentPos;
+              }
+              _latestPosition = currentPos;
+              if ((currentPos - _lastSyncedPosition).abs() >= 30) {
+                _syncProgress(currentPos);
+              }
             }
           }
         }
       }
     });
+    update();
   }
 
   Future<void> _syncProgress(int currentPos) async {
@@ -272,13 +377,18 @@ class LessonController extends GetxController {
   Future<void> addNote(String content) async {
     if (_currentLessonId == null || content.trim().isEmpty) return;
     try {
-      final currentPos =
-          betterPlayerController
-              ?.videoPlayerController
-              ?.value
-              .position
-              .inSeconds ??
-          0;
+      int currentPos = 0;
+      if (betterPlayerController != null) {
+        currentPos =
+            betterPlayerController
+                ?.videoPlayerController
+                ?.value
+                .position
+                .inSeconds ??
+            0;
+      } else if (youtubeController != null) {
+        currentPos = youtubeController?.value.position.inSeconds ?? 0;
+      }
       final response = await _notesRepository.createNote(
         lessonId: _currentLessonId!,
         timestamp: currentPos,
@@ -323,9 +433,14 @@ class LessonController extends GetxController {
   }
 
   void seekToTimestamp(int seconds) {
-    if (isVideoPlayerSupported && betterPlayerController != null) {
-      betterPlayerController!.seekTo(Duration(seconds: seconds));
-      betterPlayerController!.play();
+    if (isVideoPlayerSupported) {
+      if (betterPlayerController != null) {
+        betterPlayerController!.seekTo(Duration(seconds: seconds));
+        betterPlayerController!.play();
+      } else if (youtubeController != null) {
+        youtubeController!.seekTo(Duration(seconds: seconds));
+        youtubeController!.play();
+      }
     }
   }
 
@@ -432,13 +547,18 @@ class LessonController extends GetxController {
         }
         AppToast.success('Video downloaded successfully for offline viewing!');
         // Reload player with offline file source
-        final startSecs =
-            betterPlayerController
-                ?.videoPlayerController
-                ?.value
-                .position
-                .inSeconds ??
-            0;
+        int startSecs = 0;
+        if (betterPlayerController != null) {
+          startSecs =
+              betterPlayerController
+                  ?.videoPlayerController
+                  ?.value
+                  .position
+                  .inSeconds ??
+              0;
+        } else if (youtubeController != null) {
+          startSecs = youtubeController?.value.position.inSeconds ?? 0;
+        }
         betterPlayerController?.dispose();
         await _initializeVideoPlayer(driveFileId, startSeconds: startSecs);
         update();
@@ -456,13 +576,18 @@ class LessonController extends GetxController {
     AppToast.info('Local offline video deleted successfully.');
     // Reload player with network source
     final driveFileId = lessonData.value!['driveFileId']?.toString() ?? '';
-    final startSecs =
-        betterPlayerController
-            ?.videoPlayerController
-            ?.value
-            .position
-            .inSeconds ??
-        0;
+    int startSecs = 0;
+    if (betterPlayerController != null) {
+      startSecs =
+          betterPlayerController
+              ?.videoPlayerController
+              ?.value
+              .position
+              .inSeconds ??
+          0;
+    } else if (youtubeController != null) {
+      startSecs = youtubeController?.value.position.inSeconds ?? 0;
+    }
     betterPlayerController?.dispose();
     await _initializeVideoPlayer(driveFileId, startSeconds: startSecs);
     update();
@@ -503,7 +628,8 @@ class LessonController extends GetxController {
     if (!confirm) return false;
 
     try {
-      final String? selectedDirectory = await FilePicker.getDirectoryPath();
+      final String? selectedDirectory = await FilePicker.platform
+          .getDirectoryPath();
       if (selectedDirectory != null && selectedDirectory.isNotEmpty) {
         final success = await downloadService.setCustomDownloadDirectory(
           selectedDirectory,
@@ -522,9 +648,10 @@ class LessonController extends GetxController {
   @override
   void onClose() {
     _syncProgressOnClose();
+    _youtubeSeekTimer?.cancel();
     if (isVideoPlayerSupported) {
       betterPlayerController?.dispose();
-      betterPlayerController = null;
+      youtubeController?.dispose();
     }
     _currentLessonId = null;
     lessonData.value = null;
