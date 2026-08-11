@@ -112,6 +112,7 @@ class CourseListView extends GetView<CourseController> {
     final title = course['title'] ?? 'No Title';
     final thumbnail = course['thumbnail'] ?? '';
     final totalLessons = course['totalLessons'] ?? 0;
+    final isDemo = course['isDemo'] as bool? ?? false;
     final colorScheme = Theme.of(context).colorScheme;
 
     return Card(
@@ -129,12 +130,53 @@ class CourseListView extends GetView<CourseController> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            AspectRatio(
-              aspectRatio: 16 / 9,
-              child: CourseImage(
-                imageUrl: thumbnail,
-                fit: BoxFit.cover,
-              ),
+            Stack(
+              children: [
+                AspectRatio(
+                  aspectRatio: 16 / 9,
+                  child: CourseImage(
+                    imageUrl: thumbnail,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                if (isDemo)
+                  Positioned(
+                    top: 12,
+                    right: 12,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFFFF5722), Color(0xFFFF9800)],
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.3),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.play_circle_fill, color: Colors.white, size: 14),
+                          SizedBox(width: 4),
+                          Text(
+                            'DEMO COURSE',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
             ),
             Padding(
               padding: const EdgeInsets.all(16.0),

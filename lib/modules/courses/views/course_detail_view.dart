@@ -82,7 +82,64 @@ class CourseDetailView extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (!course.isEnrolled) ...[
+                      if (course.isDemo) ...[
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          margin: const EdgeInsets.only(bottom: 20),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                const Color(0xFF4CAF50).withValues(alpha: 0.15),
+                                const Color(0xFF2E7D32).withValues(alpha: 0.08),
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: const Color(0xFF4CAF50).withValues(alpha: 0.4),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFF4CAF50),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.play_arrow_rounded,
+                                  color: Colors.white,
+                                  size: 24,
+                                ),
+                              ),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      'Free Demo Course',
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF2E7D32),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      'All lessons in this demo course are unlocked for free preview playback.',
+                                      style: AppTextStyles.body.copyWith(
+                                        fontSize: 12,
+                                        color: textColorPrimary.withValues(alpha: 0.85),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ] else if (!course.isEnrolled) ...[
                         Container(
                           padding: const EdgeInsets.all(16),
                           margin: const EdgeInsets.only(bottom: 20),
@@ -165,7 +222,7 @@ class CourseDetailView extends StatelessWidget {
       ),
       bottomNavigationBar: Obx(() {
         final course = controller.courseData.value;
-        if (course == null || course.isEnrolled) {
+        if (course == null || course.isEnrolled || course.isDemo) {
           return const SizedBox.shrink();
         }
         return Container(
@@ -330,7 +387,8 @@ class CourseDetailView extends StatelessWidget {
     final durationMinutes = (durationSeconds / 60).toStringAsFixed(1);
     final watchedSeconds = lesson.progress?.watchedSeconds ?? 0;
     final isCompleted = lesson.progress?.completed == true;
-    final isLocked = !course.isEnrolled || lesson.isLocked;
+    final canPlayLesson = course.isEnrolled || course.isDemo;
+    final isLocked = !canPlayLesson || (course.isEnrolled && lesson.isLocked);
     final theme = Theme.of(context);
     
     final progressFraction = isCompleted
@@ -347,7 +405,7 @@ class CourseDetailView extends StatelessWidget {
     final durationFormatted = _formatDuration(durationSeconds);
 
     String subtitleText;
-    if (!course.isEnrolled) {
+    if (!canPlayLesson) {
       subtitleText = '$durationMinutes min';
     } else if (isLocked) {
       subtitleText = '$durationMinutes min';
@@ -359,7 +417,7 @@ class CourseDetailView extends StatelessWidget {
       subtitleText = '$durationFormatted min';
     }
 
-    final VoidCallback onItemTap = !course.isEnrolled
+    final VoidCallback onItemTap = !canPlayLesson
         ? () => _showPurchaseDialog(context, course)
         : (isLocked
             ? () {
@@ -571,7 +629,7 @@ class CourseDetailView extends StatelessWidget {
                       ),
                     ),
                   ],
-                  if (!course.isEnrolled) ...[
+                  if (!canPlayLesson) ...[
                     const SizedBox(height: 4),
                     Row(
                       children: [
