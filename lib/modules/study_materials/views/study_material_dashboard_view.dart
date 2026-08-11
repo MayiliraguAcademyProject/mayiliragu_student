@@ -144,39 +144,43 @@ class StudyMaterialDashboardView extends GetView<StudyMaterialsController> {
           return const Center(child: CircularProgressIndicator(strokeWidth: 2));
         }
 
+        final categories = controller.categoriesList;
         return ListView.builder(
           scrollDirection: Axis.horizontal,
-          itemCount: controller.categoriesList.length + 1,
+          itemCount: categories.length + 1,
           itemBuilder: (context, index) {
             if (index == 0) {
-              final active = controller.selectedCategoryId.value.isEmpty;
+              return Obx(() {
+                final active = controller.selectedCategoryId.value.isEmpty;
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: CategoryChip(
+                    label: "All Library",
+                    isSelected: active,
+                    onSelected: (selected) {
+                      controller.selectedCategoryId.value = "";
+                      controller.fetchMaterials();
+                    },
+                  ),
+                );
+              });
+            }
+
+            final cat = categories[index - 1];
+            return Obx(() {
+              final active = controller.selectedCategoryId.value == cat.id;
               return Padding(
                 padding: const EdgeInsets.only(right: 8.0),
                 child: CategoryChip(
-                  label: "All Library",
+                  label: cat.name,
                   isSelected: active,
                   onSelected: (selected) {
-                    controller.selectedCategoryId.value = "";
+                    controller.selectedCategoryId.value = cat.id;
                     controller.fetchMaterials();
                   },
                 ),
               );
-            }
-
-            final cat = controller.categoriesList[index - 1];
-            final active = controller.selectedCategoryId.value == cat.id;
-
-            return Padding(
-              padding: const EdgeInsets.only(right: 8.0),
-              child: CategoryChip(
-                label: cat.name,
-                isSelected: active,
-                onSelected: (selected) {
-                  controller.selectedCategoryId.value = cat.id;
-                  controller.fetchMaterials();
-                },
-              ),
-            );
+            });
           },
         );
       }),

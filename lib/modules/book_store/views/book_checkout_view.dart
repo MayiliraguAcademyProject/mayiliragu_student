@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_strings.dart';
 import '../../../../core/utils/toast_helper.dart';
 import '../controllers/book_store_controller.dart';
 import '../models/book_model.dart';
@@ -83,7 +84,6 @@ class _BookCheckoutViewState extends State<BookCheckoutView> {
     final addressStr = order.shippingAddress ?? '';
 
     try {
-      // 1. Extract PIN code (6 digits at the end)
       final pinReg = RegExp(r'-\s?(\d{6})$');
       final pinMatch = pinReg.firstMatch(addressStr);
       String pin = '';
@@ -97,7 +97,6 @@ class _BookCheckoutViewState extends State<BookCheckoutView> {
       }
       _pinController.text = pin;
 
-      // 2. Extract State (after the last remaining comma)
       final lastCommaIdx = mainAddress.lastIndexOf(',');
       String state = 'Tamil Nadu';
       if (lastCommaIdx != -1) {
@@ -106,7 +105,6 @@ class _BookCheckoutViewState extends State<BookCheckoutView> {
       }
       _stateController.text = state;
 
-      // 3. Extract City (after the last remaining comma after extracting state)
       final cityCommaIdx = mainAddress.lastIndexOf(',');
       String city = '';
       if (cityCommaIdx != -1) {
@@ -118,7 +116,6 @@ class _BookCheckoutViewState extends State<BookCheckoutView> {
       }
       _cityController.text = city;
 
-      // 4. Extract Landmark and Street
       String street = '';
       String landmark = '';
       final landmarkIdx = mainAddress.indexOf(', Landmark:');
@@ -141,13 +138,14 @@ class _BookCheckoutViewState extends State<BookCheckoutView> {
   }
 
   void _showSavedAddressesBottomSheet() {
+    final colorScheme = Theme.of(context).colorScheme;
     final savedAddresses = _getUniqueAddresses();
     Get.bottomSheet(
       Container(
         padding: const EdgeInsets.all(20),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
+        decoration: BoxDecoration(
+          color: colorScheme.surface,
+          borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(24),
             topRight: Radius.circular(24),
           ),
@@ -159,16 +157,16 @@ class _BookCheckoutViewState extends State<BookCheckoutView> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  "Saved Addresses",
+                Text(
+                  AppStrings.savedAddresses,
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                    color: colorScheme.onSurface,
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.close, size: 20),
+                  icon: Icon(Icons.close, size: 20, color: colorScheme.onSurface),
                   onPressed: () => Get.back(),
                 ),
               ],
@@ -185,9 +183,9 @@ class _BookCheckoutViewState extends State<BookCheckoutView> {
                     margin: const EdgeInsets.only(bottom: 12),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
-                      side: BorderSide(color: Colors.grey.shade100),
+                      side: BorderSide(color: colorScheme.outline.withAlpha(50)),
                     ),
-                    color: const Color(0xFFFAF9FF),
+                    color: colorScheme.surfaceContainerHighest,
                     child: InkWell(
                       borderRadius: BorderRadius.circular(16),
                       onTap: () {
@@ -205,30 +203,32 @@ class _BookCheckoutViewState extends State<BookCheckoutView> {
                               children: [
                                 Text(
                                   order.shippingName ?? '',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 13,
-                                    color: AppColors.textPrimary,
+                                    fontSize: 14,
+                                    color: colorScheme.onSurface,
                                   ),
                                 ),
                                 Text(
                                   order.shippingPhone ?? '',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
+                                  style: TextStyle(
                                     fontSize: 12,
-                                    color: AppColors.textSecondary,
+                                    color: colorScheme.onSurfaceVariant,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: 6),
                             Text(
                               order.shippingAddress ?? '',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 12,
-                                color: AppColors.textSecondary,
-                                height: 1.4,
+                                color: colorScheme.onSurfaceVariant,
+                                height: 1.3,
                               ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ],
                         ),
@@ -246,24 +246,29 @@ class _BookCheckoutViewState extends State<BookCheckoutView> {
   }
 
   double get subTotal {
-    final price = widget.format == 'HARD_COPY'
-        ? (widget.book.priceHardCopy ?? 0.0)
-        : (widget.book.priceSoftCopy ?? 0.0);
-    return price * widget.quantity;
+    if (widget.format == 'HARD_COPY') {
+      return (widget.book.priceHardCopy ?? 0) * widget.quantity.toDouble();
+    } else {
+      return (widget.book.priceSoftCopy ?? 0) * widget.quantity.toDouble();
+    }
   }
 
   double get shippingCharge => widget.format == 'HARD_COPY' ? 50.0 : 0.0;
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFFAF9FF),
       appBar: AppBar(
-        backgroundColor: Colors.white,
         elevation: 0.5,
-        title: const Text(
-          'Checkout',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+        title: Text(
+          AppStrings.checkout,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: colorScheme.onSurface,
+          ),
         ),
       ),
       body: SingleChildScrollView(
@@ -273,18 +278,21 @@ class _BookCheckoutViewState extends State<BookCheckoutView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Product details card
-              _buildProductSummary(),
+              _buildProductSummary(colorScheme),
               const SizedBox(height: 20),
 
-              // Shipping Address Form (Only for Hard Copy)
               if (widget.format == 'HARD_COPY') ...[
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text("Delivery Address",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 14)),
+                    Text(
+                      AppStrings.deliveryAddress,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: colorScheme.onSurface,
+                      ),
+                    ),
                     if (_getUniqueAddresses().isNotEmpty)
                       TextButton(
                         onPressed: _showSavedAddressesBottomSheet,
@@ -294,7 +302,7 @@ class _BookCheckoutViewState extends State<BookCheckoutView> {
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         ),
                         child: const Text(
-                          "Select from saved addresses",
+                          AppStrings.selectSavedAddress,
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
@@ -305,24 +313,35 @@ class _BookCheckoutViewState extends State<BookCheckoutView> {
                   ],
                 ),
                 const SizedBox(height: 10),
-                _buildAddressForm(),
+                _buildAddressForm(colorScheme),
                 const SizedBox(height: 20),
               ],
 
-              // Coupons field
-              const Text("Offers & Coupons", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+              Text(
+                AppStrings.offersAndCoupons,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  color: colorScheme.onSurface,
+                ),
+              ),
               const SizedBox(height: 10),
-              _buildCouponSection(),
+              _buildCouponSection(colorScheme),
               const SizedBox(height: 20),
 
-              // Order Total details
-              const Text("Payment Summary", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+              Text(
+                AppStrings.paymentSummary,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  color: colorScheme.onSurface,
+                ),
+              ),
               const SizedBox(height: 10),
-              _buildPaymentSummary(),
+              _buildPaymentSummary(colorScheme),
               const SizedBox(height: 24),
 
-              // COD note & Place Order Button
-              _buildCheckoutActions(),
+              _buildCheckoutActions(colorScheme),
             ],
           ),
         ),
@@ -330,13 +349,13 @@ class _BookCheckoutViewState extends State<BookCheckoutView> {
     );
   }
 
-  Widget _buildProductSummary() {
+  Widget _buildProductSummary(ColorScheme colorScheme) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.shade100),
+        border: Border.all(color: colorScheme.outline.withAlpha(50)),
       ),
       child: Row(
         children: [
@@ -352,17 +371,21 @@ class _BookCheckoutViewState extends State<BookCheckoutView> {
               children: [
                 Text(
                   widget.book.title,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: colorScheme.onSurface,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
                   "Format: ${widget.format == 'HARD_COPY' ? 'Physical Hard Copy' : 'Digital PDF Soft Copy'}",
-                  style: const TextStyle(fontSize: 11, color: Colors.grey),
+                  style: TextStyle(fontSize: 11, color: colorScheme.onSurfaceVariant),
                 ),
                 Text(
                   "Quantity: ${widget.quantity}",
-                  style: const TextStyle(fontSize: 11, color: Colors.grey),
+                  style: TextStyle(fontSize: 11, color: colorScheme.onSurfaceVariant),
                 ),
               ],
             ),
@@ -376,33 +399,33 @@ class _BookCheckoutViewState extends State<BookCheckoutView> {
     );
   }
 
-  Widget _buildAddressForm() {
+  Widget _buildAddressForm(ColorScheme colorScheme) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.shade100),
+        border: Border.all(color: colorScheme.outline.withAlpha(50)),
       ),
       child: Column(
         children: [
-          _buildInput(controller: _nameController, hint: "Full Name (e.g. John Doe)"),
+          _buildInput(controller: _nameController, hint: "Full Name (e.g. John Doe)", colorScheme: colorScheme),
           const SizedBox(height: 12),
-          _buildInput(controller: _phoneController, hint: "Mobile Number", keyboardType: TextInputType.phone),
+          _buildInput(controller: _phoneController, hint: "Mobile Number", keyboardType: TextInputType.phone, colorScheme: colorScheme),
           const SizedBox(height: 12),
-          _buildInput(controller: _streetController, hint: "Flat, House no., Street address"),
+          _buildInput(controller: _streetController, hint: "Flat, House no., Street address", colorScheme: colorScheme),
           const SizedBox(height: 12),
-          _buildInput(controller: _landmarkController, hint: "Landmark (optional)", isRequired: false),
+          _buildInput(controller: _landmarkController, hint: "Landmark (optional)", isRequired: false, colorScheme: colorScheme),
           const SizedBox(height: 12),
           Row(
             children: [
-              Expanded(child: _buildInput(controller: _cityController, hint: "Town/City")),
+              Expanded(child: _buildInput(controller: _cityController, hint: "Town/City", colorScheme: colorScheme)),
               const SizedBox(width: 12),
-              Expanded(child: _buildInput(controller: _pinController, hint: "Pincode", keyboardType: TextInputType.number)),
+              Expanded(child: _buildInput(controller: _pinController, hint: "Pincode", keyboardType: TextInputType.number, colorScheme: colorScheme)),
             ],
           ),
           const SizedBox(height: 12),
-          _buildInput(controller: _stateController, hint: "State"),
+          _buildInput(controller: _stateController, hint: "State", colorScheme: colorScheme),
         ],
       ),
     );
@@ -411,6 +434,7 @@ class _BookCheckoutViewState extends State<BookCheckoutView> {
   Widget _buildInput({
     required TextEditingController controller,
     required String hint,
+    required ColorScheme colorScheme,
     TextInputType keyboardType = TextInputType.text,
     bool isRequired = true,
   }) {
@@ -425,26 +449,26 @@ class _BookCheckoutViewState extends State<BookCheckoutView> {
       },
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: const TextStyle(fontSize: 12, color: Colors.grey),
+        hintStyle: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
         filled: true,
-        fillColor: const Color(0xFFFAF9FF),
+        fillColor: colorScheme.surfaceContainerHighest,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       ),
-      style: const TextStyle(fontSize: 13),
+      style: TextStyle(fontSize: 13, color: colorScheme.onSurface),
     );
   }
 
-  Widget _buildCouponSection() {
+  Widget _buildCouponSection(ColorScheme colorScheme) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.shade100),
+        border: Border.all(color: colorScheme.outline.withAlpha(50)),
       ),
       child: Obx(() {
         final couponApplied = controller.appliedCoupon.value != null;
@@ -457,13 +481,13 @@ class _BookCheckoutViewState extends State<BookCheckoutView> {
                   child: TextField(
                     controller: _couponController,
                     enabled: !couponApplied,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       hintText: "Enter Coupon Code",
-                      hintStyle: TextStyle(fontSize: 12, color: Colors.grey),
+                      hintStyle: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
                       border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 10),
                     ),
-                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: colorScheme.onSurface),
                   ),
                 ),
                 Obx(() => TextButton(
@@ -508,13 +532,13 @@ class _BookCheckoutViewState extends State<BookCheckoutView> {
     );
   }
 
-  Widget _buildPaymentSummary() {
+  Widget _buildPaymentSummary(ColorScheme colorScheme) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.shade100),
+        border: Border.all(color: colorScheme.outline.withAlpha(50)),
       ),
       child: Obx(() {
         final discount = controller.discountAmount.value;
@@ -522,24 +546,24 @@ class _BookCheckoutViewState extends State<BookCheckoutView> {
 
         return Column(
           children: [
-            _buildSummaryRow("Items Subtotal", "₹$subTotal"),
+            _buildSummaryRow("Items Subtotal", "₹$subTotal", colorScheme: colorScheme),
             if (widget.format == 'HARD_COPY') ...[
               const SizedBox(height: 10),
-              _buildSummaryRow("Shipping Fee (Flat)", "₹$shippingCharge"),
+              _buildSummaryRow("Shipping Fee (Flat)", "₹$shippingCharge", colorScheme: colorScheme),
             ],
             if (discount > 0) ...[
               const SizedBox(height: 10),
-              _buildSummaryRow("Coupon Discount", "-₹$discount", isDiscount: true),
+              _buildSummaryRow("Coupon Discount", "-₹$discount", isDiscount: true, colorScheme: colorScheme),
             ],
-            const Divider(height: 20),
-            _buildSummaryRow("Payable Amount", "₹$total", isTotal: true),
+            Divider(height: 20, color: colorScheme.outline.withAlpha(50)),
+            _buildSummaryRow("Payable Amount", "₹$total", isTotal: true, colorScheme: colorScheme),
           ],
         );
       }),
     );
   }
 
-  Widget _buildSummaryRow(String label, String val, {bool isDiscount = false, bool isTotal = false}) {
+  Widget _buildSummaryRow(String label, String val, {required ColorScheme colorScheme, bool isDiscount = false, bool isTotal = false}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -548,7 +572,7 @@ class _BookCheckoutViewState extends State<BookCheckoutView> {
           style: TextStyle(
             fontSize: isTotal ? 14 : 12,
             fontWeight: isTotal ? FontWeight.w900 : FontWeight.normal,
-            color: isTotal ? AppColors.textPrimary : AppColors.textSecondary,
+            color: isTotal ? colorScheme.onSurface : colorScheme.onSurfaceVariant,
           ),
         ),
         Text(
@@ -560,20 +584,20 @@ class _BookCheckoutViewState extends State<BookCheckoutView> {
                 ? Colors.green
                 : isTotal
                     ? AppColors.brandPurple
-                    : AppColors.textPrimary,
+                    : colorScheme.onSurface,
           ),
         ),
       ],
     );
   }
 
-  Widget _buildCheckoutActions() {
+  Widget _buildCheckoutActions(ColorScheme colorScheme) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.brandPurple.withValues(alpha: 0.04),
+        color: AppColors.brandPurple.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.brandPurple.withValues(alpha: 0.1)),
+        border: Border.all(color: AppColors.brandPurple.withValues(alpha: 0.15)),
       ),
       child: Column(
         children: [
@@ -586,7 +610,7 @@ class _BookCheckoutViewState extends State<BookCheckoutView> {
                   widget.format == 'HARD_COPY'
                       ? "Payment Mode: Cash on Delivery (COD)"
                       : "Pay offline at center to unlock soft copy",
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: colorScheme.onSurface),
                 ),
               ),
             ],
@@ -620,6 +644,8 @@ class _BookCheckoutViewState extends State<BookCheckoutView> {
                           if (order != null) {
                             Get.defaultDialog(
                               title: "Order Created!",
+                              titleStyle: TextStyle(color: colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 16),
+                              backgroundColor: colorScheme.surface,
                               content: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
@@ -628,23 +654,23 @@ class _BookCheckoutViewState extends State<BookCheckoutView> {
                                         ? "Would you like to pay online now via QR Code or choose Cash on Delivery?"
                                         : "Would you like to pay online now via QR Code to unlock it instantly, or pay offline later at the center?",
                                     textAlign: TextAlign.center,
-                                    style: const TextStyle(fontSize: 13),
+                                    style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant),
                                   ),
                                   const SizedBox(height: 20),
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                     children: [
-                                      TextButton(
-                                        onPressed: () {
-                                          Get.back(); // close dialog
-                                          Get.back(); // close checkout
-                                          Get.back(); // close detail
-                                        },
-                                        child: Text(
-                                          widget.format == 'HARD_COPY' ? 'COD' : 'Pay Offline',
-                                          style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
-                                        ),
-                                      ),
+                                      // TextButton(
+                                      //   onPressed: () {
+                                      //     Get.back(); // close dialog
+                                      //     Get.back(); // close checkout
+                                      //     Get.back(); // close detail
+                                      //   },
+                                      //   child: Text(
+                                      //     widget.format == 'HARD_COPY' ? 'COD' : 'Pay Offline',
+                                      //     style: TextStyle(color: colorScheme.onSurfaceVariant, fontWeight: FontWeight.bold),
+                                      //   ),
+                                      // ),
                                       ElevatedButton(
                                         onPressed: () {
                                           Get.back(); // close dialog
@@ -662,7 +688,6 @@ class _BookCheckoutViewState extends State<BookCheckoutView> {
                               ),
                             );
                           }
-
                         },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.brandPurple,
@@ -671,7 +696,7 @@ class _BookCheckoutViewState extends State<BookCheckoutView> {
                   child: controller.isPlacingOrder.value
                       ? const CircularProgressIndicator(color: Colors.white)
                       : const Text(
-                          "Place Order",
+                          AppStrings.placeOrder,
                           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
                         ),
                 ),

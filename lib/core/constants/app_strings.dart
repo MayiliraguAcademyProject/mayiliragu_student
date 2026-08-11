@@ -141,4 +141,26 @@ class AppStrings {
   static const String tryAgainLater = 'Please try again later.';
   static const String noDataAvailable = 'No data available at this time.';
   static const String sessionExpired = 'Your session has expired. Please log in again.';
+
+  // Book Store & Orders
+  static const String bookStore = 'Book Store';
+  static const String bookDetails = 'Book Details';
+  static const String checkout = 'Checkout';
+  static const String tabCatalog = 'Catalog';
+  static const String tabMyBooks = 'My Books';
+  static const String tabOrderHistory = 'Order History';
+  static const String purchaseOptions = 'Purchase Options';
+  static const String hardCopy = 'Hard Copy';
+  static const String softCopy = 'Soft Copy';
+  static const String instantDownload = 'Instant download';
+  static const String quantity = 'Quantity';
+  static const String aboutThisBook = 'About this book';
+  static const String buyNow = 'Buy Now';
+  static const String placeOrder = 'Place Order';
+  static const String deliveryAddress = 'Delivery Address';
+  static const String offersAndCoupons = 'Offers & Coupons';
+  static const String paymentSummary = 'Payment Summary';
+  static const String savedAddresses = 'Saved Addresses';
+  static const String selectSavedAddress = 'Select from saved addresses';
+  static const String uploadPaymentProof = 'Upload Payment Proof';
 }

@@ -267,7 +267,7 @@ class BookStoreController extends GetxController {
         shippingAddress: shippingAddress,
       );
 
-      if (response.statusCode == 201) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         final order = BookOrderModel.fromJson(response.data['data']);
         fetchMyOrders();
         return order;
