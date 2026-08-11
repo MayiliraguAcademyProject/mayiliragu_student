@@ -15,20 +15,17 @@ class ProfileView extends GetView<ProfileController> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final onSurfaceColor = theme.colorScheme.onSurface;
-    final cardBackgroundColor = theme.brightness == Brightness.dark ? Colors.grey[900]! : Colors.white;
+    final cardBackgroundColor = theme.colorScheme.surface;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
           'Profile Settings',
-          style: AppTextStyles.heading.copyWith(fontSize: 20, fontWeight: FontWeight.w800),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.bug_report, color: Colors.red),
-            onPressed: () => throw Exception('Test crash for Firebase Crashlytics'),
+          style: AppTextStyles.heading.copyWith(
+            fontSize: 20,
+            fontWeight: FontWeight.w800,
           ),
-        ],
+        ),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -54,10 +51,7 @@ class ProfileView extends GetView<ProfileController> {
                   gradient: const LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: [
-                      AppColors.primary,
-                      AppColors.accentDark,
-                    ],
+                    colors: [AppColors.primary, AppColors.accentDark],
                   ),
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
@@ -105,7 +99,10 @@ class ProfileView extends GetView<ProfileController> {
                     ),
                     const SizedBox(height: 16),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white.withAlpha(40),
                         borderRadius: BorderRadius.circular(20),
@@ -114,7 +111,11 @@ class ProfileView extends GetView<ProfileController> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.verified, color: Colors.greenAccent, size: 14),
+                          const Icon(
+                            Icons.verified,
+                            color: Colors.greenAccent,
+                            size: 14,
+                          ),
                           const SizedBox(width: 6),
                           Text(
                             '${controller.userRole.value.toUpperCase()} ACCOUNT',
@@ -142,7 +143,9 @@ class ProfileView extends GetView<ProfileController> {
                   elevation: 0,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
-                    side: BorderSide(color: theme.colorScheme.outline.withAlpha(40)),
+                    side: BorderSide(
+                      color: theme.colorScheme.outline.withAlpha(40),
+                    ),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(12.0),
@@ -152,7 +155,9 @@ class ProfileView extends GetView<ProfileController> {
                           context: context,
                           title: 'Demographics',
                           icon: Icons.badge_outlined,
-                          children: [DemographicsSection(controller: controller)],
+                          children: [
+                            DemographicsSection(controller: controller),
+                          ],
                         ),
                         const Divider(height: 1, indent: 56),
                         _buildExpansionItem(
@@ -177,14 +182,20 @@ class ProfileView extends GetView<ProfileController> {
                         ),
                         const SizedBox(height: 8),
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8.0,
+                            vertical: 4.0,
+                          ),
                           child: SizedBox(
                             width: double.infinity,
                             height: 48,
                             child: ElevatedButton(
-                              onPressed: controller.isUpdatingStudentProfile.value
+                              onPressed:
+                                  controller.isUpdatingStudentProfile.value
                                   ? null
-                                  : () => controller.updateStudentProfile(isOnboarding: false),
+                                  : () => controller.updateStudentProfile(
+                                      isOnboarding: false,
+                                    ),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.primary,
                                 foregroundColor: Colors.white,
@@ -197,11 +208,16 @@ class ProfileView extends GetView<ProfileController> {
                                   ? const SizedBox(
                                       height: 20,
                                       width: 20,
-                                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2,
+                                      ),
                                     )
                                   : const Text(
                                       'Save Profile Details',
-                                      style: TextStyle(fontWeight: FontWeight.bold),
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                             ),
                           ),
@@ -221,7 +237,9 @@ class ProfileView extends GetView<ProfileController> {
                 elevation: 0,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
-                  side: BorderSide(color: theme.colorScheme.outline.withAlpha(40)),
+                  side: BorderSide(
+                    color: theme.colorScheme.outline.withAlpha(40),
+                  ),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(20.0),
@@ -236,12 +254,19 @@ class ProfileView extends GetView<ProfileController> {
                               color: AppColors.primary.withAlpha(20),
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(Icons.edit_outlined, color: AppColors.primary, size: 20),
+                            child: const Icon(
+                              Icons.edit_outlined,
+                              color: AppColors.primary,
+                              size: 20,
+                            ),
                           ),
                           const SizedBox(width: 12),
                           const Text(
                             'Update Display Name',
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                            ),
                           ),
                         ],
                       ),
@@ -251,7 +276,9 @@ class ProfileView extends GetView<ProfileController> {
                         style: TextStyle(color: onSurfaceColor, fontSize: 13),
                         decoration: InputDecoration(
                           labelText: 'Full Name',
-                          labelStyle: TextStyle(color: onSurfaceColor.withAlpha(150)),
+                          labelStyle: TextStyle(
+                            color: onSurfaceColor.withAlpha(150),
+                          ),
                           prefixIcon: Icon(
                             Icons.person_outline,
                             color: onSurfaceColor.withAlpha(150),
@@ -269,7 +296,9 @@ class ProfileView extends GetView<ProfileController> {
                         width: double.infinity,
                         height: 48,
                         child: ElevatedButton(
-                          onPressed: controller.isUpdatingName.value ? null : controller.updateName,
+                          onPressed: controller.isUpdatingName.value
+                              ? null
+                              : controller.updateName,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.accentDark,
                             foregroundColor: Colors.white,
@@ -282,7 +311,10 @@ class ProfileView extends GetView<ProfileController> {
                               ? const SizedBox(
                                   height: 20,
                                   width: 20,
-                                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
                                 )
                               : const Text(
                                   'Save Name Changes',
@@ -304,7 +336,9 @@ class ProfileView extends GetView<ProfileController> {
                 elevation: 0,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
-                  side: BorderSide(color: theme.colorScheme.outline.withAlpha(40)),
+                  side: BorderSide(
+                    color: theme.colorScheme.outline.withAlpha(40),
+                  ),
                 ),
                 child: SwitchListTile(
                   title: const Text(
@@ -321,7 +355,11 @@ class ProfileView extends GetView<ProfileController> {
                       color: Colors.amber.withAlpha(20),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.wb_sunny_outlined, color: Colors.amber, size: 20),
+                    child: const Icon(
+                      Icons.wb_sunny_outlined,
+                      color: Colors.amber,
+                      size: 20,
+                    ),
                   ),
                   value: controller.isDarkMode.value,
                   onChanged: controller.toggleTheme,
@@ -338,7 +376,9 @@ class ProfileView extends GetView<ProfileController> {
                 elevation: 0,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
-                  side: BorderSide(color: theme.colorScheme.outline.withAlpha(40)),
+                  side: BorderSide(
+                    color: theme.colorScheme.outline.withAlpha(40),
+                  ),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(20.0),
@@ -353,12 +393,19 @@ class ProfileView extends GetView<ProfileController> {
                               color: AppColors.error.withAlpha(20),
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(Icons.lock_outline, color: AppColors.error, size: 20),
+                            child: const Icon(
+                              Icons.lock_outline,
+                              color: AppColors.error,
+                              size: 20,
+                            ),
                           ),
                           const SizedBox(width: 12),
                           const Text(
                             'Change Password',
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                            ),
                           ),
                         ],
                       ),
@@ -369,17 +416,22 @@ class ProfileView extends GetView<ProfileController> {
                         style: TextStyle(color: onSurfaceColor, fontSize: 13),
                         decoration: InputDecoration(
                           labelText: 'Current Password',
-                          labelStyle: TextStyle(color: onSurfaceColor.withAlpha(150)),
+                          labelStyle: TextStyle(
+                            color: onSurfaceColor.withAlpha(150),
+                          ),
                           prefixIcon: Icon(
                             Icons.lock_outline,
                             color: onSurfaceColor.withAlpha(150),
                           ),
                           suffixIcon: IconButton(
                             icon: Icon(
-                              controller.obscureCurrentPassword.value ? Icons.visibility_off : Icons.visibility,
+                              controller.obscureCurrentPassword.value
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
                               color: onSurfaceColor.withAlpha(150),
                             ),
-                            onPressed: () => controller.obscureCurrentPassword.toggle(),
+                            onPressed: () =>
+                                controller.obscureCurrentPassword.toggle(),
                           ),
                           filled: true,
                           fillColor: onSurfaceColor.withAlpha(12),
@@ -396,17 +448,22 @@ class ProfileView extends GetView<ProfileController> {
                         style: TextStyle(color: onSurfaceColor, fontSize: 13),
                         decoration: InputDecoration(
                           labelText: 'New Password',
-                          labelStyle: TextStyle(color: onSurfaceColor.withAlpha(150)),
+                          labelStyle: TextStyle(
+                            color: onSurfaceColor.withAlpha(150),
+                          ),
                           prefixIcon: Icon(
                             Icons.vpn_key_outlined,
                             color: onSurfaceColor.withAlpha(150),
                           ),
                           suffixIcon: IconButton(
                             icon: Icon(
-                              controller.obscureNewPassword.value ? Icons.visibility_off : Icons.visibility,
+                              controller.obscureNewPassword.value
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
                               color: onSurfaceColor.withAlpha(150),
                             ),
-                            onPressed: () => controller.obscureNewPassword.toggle(),
+                            onPressed: () =>
+                                controller.obscureNewPassword.toggle(),
                           ),
                           filled: true,
                           fillColor: onSurfaceColor.withAlpha(12),
@@ -423,17 +480,22 @@ class ProfileView extends GetView<ProfileController> {
                         style: TextStyle(color: onSurfaceColor, fontSize: 13),
                         decoration: InputDecoration(
                           labelText: 'Confirm New Password',
-                          labelStyle: TextStyle(color: onSurfaceColor.withAlpha(150)),
+                          labelStyle: TextStyle(
+                            color: onSurfaceColor.withAlpha(150),
+                          ),
                           prefixIcon: Icon(
                             Icons.vpn_key_outlined,
                             color: onSurfaceColor.withAlpha(150),
                           ),
                           suffixIcon: IconButton(
                             icon: Icon(
-                              controller.obscureConfirmPassword.value ? Icons.visibility_off : Icons.visibility,
+                              controller.obscureConfirmPassword.value
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
                               color: onSurfaceColor.withAlpha(150),
                             ),
-                            onPressed: () => controller.obscureConfirmPassword.toggle(),
+                            onPressed: () =>
+                                controller.obscureConfirmPassword.toggle(),
                           ),
                           filled: true,
                           fillColor: onSurfaceColor.withAlpha(12),
@@ -448,7 +510,9 @@ class ProfileView extends GetView<ProfileController> {
                         width: double.infinity,
                         height: 48,
                         child: ElevatedButton(
-                          onPressed: controller.isChangingPassword.value ? null : controller.changePassword,
+                          onPressed: controller.isChangingPassword.value
+                              ? null
+                              : controller.changePassword,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.accentDark,
                             foregroundColor: Colors.white,
@@ -461,7 +525,10 @@ class ProfileView extends GetView<ProfileController> {
                               ? const SizedBox(
                                   height: 20,
                                   width: 20,
-                                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
                                 )
                               : const Text(
                                   'Update Account Password',
@@ -484,21 +551,32 @@ class ProfileView extends GetView<ProfileController> {
                     Get.dialog(
                       AlertDialog(
                         backgroundColor: cardBackgroundColor,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
                         title: Text(
                           'Logout Account',
-                          style: AppTextStyles.heading.copyWith(fontSize: 18, fontWeight: FontWeight.bold),
+                          style: AppTextStyles.heading.copyWith(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         content: Text(
                           'Are you sure you want to end your active session?',
-                          style: AppTextStyles.body.copyWith(color: theme.colorScheme.onSurface.withAlpha(150)),
+                          style: AppTextStyles.body.copyWith(
+                            color: theme.colorScheme.onSurface.withAlpha(150),
+                          ),
                         ),
                         actions: [
                           TextButton(
                             onPressed: () => Get.back(),
                             child: Text(
                               'Cancel',
-                              style: AppTextStyles.body.copyWith(color: theme.colorScheme.onSurface.withAlpha(150)),
+                              style: AppTextStyles.body.copyWith(
+                                color: theme.colorScheme.onSurface.withAlpha(
+                                  150,
+                                ),
+                              ),
                             ),
                           ),
                           TextButton(
@@ -518,7 +596,10 @@ class ProfileView extends GetView<ProfileController> {
                       ),
                     );
                   },
-                  icon: const Icon(Icons.logout_rounded, color: AppColors.error),
+                  icon: const Icon(
+                    Icons.logout_rounded,
+                    color: AppColors.error,
+                  ),
                   label: const Text(
                     'Logout Account',
                     style: TextStyle(
@@ -534,8 +615,79 @@ class ProfileView extends GetView<ProfileController> {
                   ),
                 ),
               ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    Get.dialog(
+                      AlertDialog(
+                        backgroundColor: cardBackgroundColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        title: Text(
+                          'Delete Account',
+                          style: AppTextStyles.heading.copyWith(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.error,
+                          ),
+                        ),
+                        content: Text(
+                          'Are you sure you want to delete your account? This action is permanent and cannot be undone. All your progress, enrollment, and history will be deleted.',
+                          style: AppTextStyles.body.copyWith(
+                            color: theme.colorScheme.onSurface.withAlpha(150),
+                          ),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Get.back(),
+                            child: Text(
+                              'Cancel',
+                              style: AppTextStyles.body.copyWith(
+                                color: theme.colorScheme.onSurface.withAlpha(150),
+                              ),
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Get.back();
+                              controller.deleteAccount();
+                            },
+                            child: Text(
+                              'Delete',
+                              style: AppTextStyles.body.copyWith(
+                                color: AppColors.error,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                  icon: const Icon(
+                    Icons.delete_forever_rounded,
+                    color: AppColors.error,
+                  ),
+                  label: const Text(
+                    'Delete Account',
+                    style: TextStyle(
+                      color: AppColors.error,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: AppColors.error, width: 1.5),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                ),
+              ),
               const SizedBox(height: 32),
-
 
               Center(
                 child: Text(
@@ -548,7 +700,6 @@ class ProfileView extends GetView<ProfileController> {
                   ),
                 ),
               ),
-              
             ],
           ),
         );

@@ -5,7 +5,7 @@ import './profile_fields.dart';
 
 class ContactSection extends StatelessWidget {
   final ProfileController controller;
-  const ContactSection({Key? key, required this.controller}) : super(key: key);
+  const ContactSection({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {

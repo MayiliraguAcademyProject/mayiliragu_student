@@ -4,6 +4,7 @@ import '../controllers/test_solutions_controller.dart';
 import '../../../core/utils/toast_helper.dart';
 import '../models/question_model.dart';
 import 'widgets/question_layouts.dart';
+import 'package:Mayiliragu/shared/widgets/custom_network_image.dart';
 
 
 class TestSolutionsView extends GetView<TestSolutionsController> {
@@ -12,7 +13,7 @@ class TestSolutionsView extends GetView<TestSolutionsController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF3F4F6),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: const Color(0xFF0F3CC9),
         elevation: 0,
@@ -66,15 +67,15 @@ class TestSolutionsView extends GetView<TestSolutionsController> {
           children: [
             // Sub-Header: Filter Chips
             Container(
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.surface,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Row(
                 children: [
-                  _buildFilterChip('all', 'All (${controller.totalCount})'),
+                  _buildFilterChip(context, 'all', 'All (${controller.totalCount})'),
                   const SizedBox(width: 8),
-                  _buildFilterChip('correct', 'Correct (${controller.correctCount})'),
+                  _buildFilterChip(context, 'correct', 'Correct (${controller.correctCount})'),
                   const SizedBox(width: 8),
-                  _buildFilterChip('wrong', 'Wrong (${controller.wrongCount})'),
+                  _buildFilterChip(context, 'wrong', 'Wrong (${controller.wrongCount})'),
                 ],
               ),
             ),
@@ -86,24 +87,25 @@ class TestSolutionsView extends GetView<TestSolutionsController> {
                 itemCount: controller.filteredQuestions.length,
                 itemBuilder: (context, index) {
                   final q = controller.filteredQuestions[index];
-                  return _buildQuestionCard(q, index + 1);
+                  return _buildQuestionCard(context, q, index + 1);
                 },
               ),
             ),
           ],
         );
       }),
-      bottomNavigationBar: _buildBottomNavBar(),
+      bottomNavigationBar: _buildBottomNavBar(context),
     );
   }
 
-  Widget _buildFilterChip(String filterKey, String label) {
+  Widget _buildFilterChip(BuildContext context, String filterKey, String label) {
     return Obx(() {
       final bool isActive = controller.activeFilter.value == filterKey;
+      final colorScheme = Theme.of(context).colorScheme;
 
-      Color chipBg = Colors.white;
-      Color chipBorder = const Color(0xFFD1D5DB);
-      Color textColor = const Color(0xFF1F2937);
+      Color chipBg = colorScheme.surface;
+      Color chipBorder = colorScheme.outline;
+      Color textColor = colorScheme.onSurface;
       Widget? leadingIcon;
 
       if (isActive) {
@@ -156,7 +158,7 @@ class TestSolutionsView extends GetView<TestSolutionsController> {
     });
   }
 
-  Widget _buildQuestionCard(Map<String, dynamic> q, int displayIndex) {
+  Widget _buildQuestionCard(BuildContext context, Map<String, dynamic> q, int displayIndex) {
     final String qId = q['id']?.toString() ?? '';
     final ua = q['user_answer'];
     final bool isCorrect = ua != null && ua['is_correct'] == true;
@@ -190,7 +192,7 @@ class TestSolutionsView extends GetView<TestSolutionsController> {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border(
           left: BorderSide(color: leftBarColor, width: 5),
@@ -253,7 +255,7 @@ class TestSolutionsView extends GetView<TestSolutionsController> {
                 // Question Title
                 Text(
                   'Question $displayIndex',
-                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF1F2937)),
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
                 ),
                 const SizedBox(height: 12),
 
@@ -288,10 +290,10 @@ class TestSolutionsView extends GetView<TestSolutionsController> {
                             if (questionModel.questionTextEn.isNotEmpty)
                               Text(
                                 questionModel.questionTextEn,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
-                                  color: Color(0xFF1F2937),
+                                  color: Theme.of(context).colorScheme.onSurface,
                                   height: 1.4,
                                 ),
                               ),
@@ -303,9 +305,9 @@ class TestSolutionsView extends GetView<TestSolutionsController> {
                                 questionModel.questionTextTa!.isNotEmpty)
                               Text(
                                 questionModel.questionTextTa!,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 13,
-                                  color: Color(0xFF4B5563),
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                                   height: 1.4,
                                 ),
                               ),
@@ -318,7 +320,7 @@ class TestSolutionsView extends GetView<TestSolutionsController> {
 
                 // Options list or Fill-in-blank block
                 if (q['type'] == 'fill_in_blank')
-                  _buildFillInBlankBlock(q, ua)
+                  _buildFillInBlankBlock(context, q, ua)
                 else
                   _buildOptionsBlock(q, ua),
 
@@ -330,17 +332,18 @@ class TestSolutionsView extends GetView<TestSolutionsController> {
                   children: [
                     Obx(() {
                       final bool isExpanded = controller.expandedExplanations[qId] ?? false;
+                      final inactiveColor = Theme.of(context).colorScheme.onSurfaceVariant;
                       return TextButton.icon(
                         onPressed: () => controller.toggleExplanation(qId),
                         icon: Icon(
                           isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
-                          color: const Color(0xFF4B5563),
+                          color: inactiveColor,
                           size: 18,
                         ),
                         label: Text(
                           isExpanded ? 'HIDE EXPLANATION' : 'VIEW EXPLANATION',
-                          style: const TextStyle(
-                            color: Color(0xFF4B5563),
+                          style: TextStyle(
+                            color: inactiveColor,
                             fontWeight: FontWeight.bold,
                             fontSize: 11,
                           ),
@@ -377,31 +380,33 @@ class TestSolutionsView extends GetView<TestSolutionsController> {
 
             final explanationEn = q['explanation_en']?.toString();
             final explanationTa = q['explanation_ta']?.toString();
+            final explanationImageUrl = (q['explanation_image_url'] ?? q['explanationImageUrl'])?.toString();
 
-            if (explanationEn == null && explanationTa == null) {
+            if (explanationEn == null && explanationTa == null && (explanationImageUrl == null || explanationImageUrl.isEmpty)) {
               return const SizedBox.shrink();
             }
 
+            final colorScheme = Theme.of(context).colorScheme;
             return Container(
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
               decoration: BoxDecoration(
-                color: const Color(0xFFFFFEEB),
-                border: Border.all(color: const Color(0xFFFFF0B3), width: 1),
+                color: colorScheme.primaryContainer.withValues(alpha: 0.1),
+                border: Border.all(color: colorScheme.primary.withValues(alpha: 0.3), width: 1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
-                    children: const [
-                      Icon(Icons.lightbulb_outline, color: Color(0xFFD97706), size: 16),
-                      SizedBox(width: 6),
+                    children: [
+                      Icon(Icons.lightbulb_outline, color: colorScheme.primary, size: 16),
+                      const SizedBox(width: 6),
                       Text(
                         'EXPLANATION / விளக்கம்',
                         style: TextStyle(
-                          color: Color(0xFFB45309),
+                          color: colorScheme.primary,
                           fontWeight: FontWeight.bold,
                           fontSize: 11,
                         ),
@@ -412,18 +417,29 @@ class TestSolutionsView extends GetView<TestSolutionsController> {
                   if (explanationEn != null) ...[
                     Text(
                       explanationEn,
-                      style: const TextStyle(fontSize: 12, color: Color(0xFF78350F), height: 1.4),
+                      style: TextStyle(fontSize: 12, color: colorScheme.onSurface, height: 1.4),
                     ),
                   ],
                   if (explanationEn != null && explanationTa != null)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 6),
-                      child: Divider(color: Color(0xFFFFF0B3), thickness: 0.5),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 6),
+                      child: Divider(color: colorScheme.outline, thickness: 0.5),
                     ),
                   if (explanationTa != null) ...[
                     Text(
                       explanationTa,
-                      style: const TextStyle(fontSize: 12, color: Color(0xFF78350F), height: 1.4),
+                      style: TextStyle(fontSize: 12, color: colorScheme.onSurface, height: 1.4),
+                    ),
+                  ],
+                  if (explanationImageUrl != null && explanationImageUrl.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: CustomNetworkImage(
+                        imageUrl: explanationImageUrl,
+                        width: double.infinity,
+                        fit: BoxFit.contain,
+                      ),
                     ),
                   ],
                 ],
@@ -484,9 +500,10 @@ class TestSolutionsView extends GetView<TestSolutionsController> {
           isOptionSelected = selectedIds.contains(optId);
         }
 
-        Color tileBg = Colors.white;
-        Color tileBorder = const Color(0xFFE5E7EB);
-        Color textColor = const Color(0xFF1F2937);
+        final colorScheme = Theme.of(context).colorScheme;
+        Color tileBg = colorScheme.surface;
+        Color tileBorder = colorScheme.outline;
+        Color textColor = colorScheme.onSurface;
         Widget? trailingWidget;
 
         if (isOptionCorrect) {
@@ -521,8 +538,8 @@ class TestSolutionsView extends GetView<TestSolutionsController> {
           );
         }
 
-        Color circleBg = const Color(0xFFF3F4F6);
-        Color circleText = const Color(0xFF4B5563);
+        Color circleBg = Theme.of(context).colorScheme.surfaceContainerHighest;
+        Color circleText = Theme.of(context).colorScheme.onSurfaceVariant;
 
         if (isOptionCorrect) {
           circleBg = const Color(0xFF10B981);
@@ -605,7 +622,7 @@ class TestSolutionsView extends GetView<TestSolutionsController> {
     );
   }
 
-  Widget _buildFillInBlankBlock(Map<String, dynamic> q, dynamic ua) {
+  Widget _buildFillInBlankBlock(BuildContext context, Map<String, dynamic> q, dynamic ua) {
     final List<dynamic>? acceptedList = q['accepted_answers'] as List?;
     final String correctAnswers = acceptedList != null
         ? acceptedList.map((a) => a['value']?.toString() ?? '').join(', ')
@@ -694,11 +711,12 @@ class TestSolutionsView extends GetView<TestSolutionsController> {
     );
   }
 
-  Widget _buildBottomNavBar() {
+  Widget _buildBottomNavBar(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: Color(0xFFE5E7EB))),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        border: Border(top: BorderSide(color: colorScheme.outline)),
       ),
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       child: Row(
@@ -706,6 +724,7 @@ class TestSolutionsView extends GetView<TestSolutionsController> {
         children: [
           // Analytics Button
           _buildBottomActionItem(
+            context,
             icon: Icons.analytics_outlined,
             label: 'Analytics',
             onTap: () => Get.back(),
@@ -737,6 +756,7 @@ class TestSolutionsView extends GetView<TestSolutionsController> {
 
           // Share Button
           _buildBottomActionItem(
+            context,
             icon: Icons.share_outlined,
             label: 'Share',
             onTap: () {
@@ -751,11 +771,13 @@ class TestSolutionsView extends GetView<TestSolutionsController> {
     );
   }
 
-  Widget _buildBottomActionItem({
+  Widget _buildBottomActionItem(
+    BuildContext context, {
     required IconData icon,
     required String label,
     required VoidCallback onTap,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
     return InkWell(
       onTap: onTap,
       child: Padding(
@@ -763,13 +785,13 @@ class TestSolutionsView extends GetView<TestSolutionsController> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: const Color(0xFF4B5563), size: 20),
+            Icon(icon, color: colorScheme.onSurfaceVariant, size: 20),
             const SizedBox(height: 2),
             Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 10,
-                color: Color(0xFF4B5563),
+                color: colorScheme.onSurfaceVariant,
                 fontWeight: FontWeight.w500,
               ),
             ),

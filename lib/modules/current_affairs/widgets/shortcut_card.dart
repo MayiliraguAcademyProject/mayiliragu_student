@@ -29,7 +29,7 @@ class ShortcutCard extends StatelessWidget {
           border: Border.all(color: Colors.grey.shade100),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.02),
+              color: Colors.black.withValues(alpha: 0.02),
               blurRadius: 8,
               offset: const Offset(0, 4),
             )
@@ -40,7 +40,7 @@ class ShortcutCard extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 16,
-              backgroundColor: color.withOpacity(0.1),
+              backgroundColor: color.withValues(alpha: 0.1),
               child: Icon(icon, color: color, size: 16),
             ),
             const SizedBox(height: 10),

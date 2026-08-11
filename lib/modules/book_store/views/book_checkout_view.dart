@@ -571,9 +571,9 @@ class _BookCheckoutViewState extends State<BookCheckoutView> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.brandPurple.withOpacity(0.04),
+        color: AppColors.brandPurple.withValues(alpha: 0.04),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.brandPurple.withOpacity(0.1)),
+        border: Border.all(color: AppColors.brandPurple.withValues(alpha: 0.1)),
       ),
       child: Column(
         children: [

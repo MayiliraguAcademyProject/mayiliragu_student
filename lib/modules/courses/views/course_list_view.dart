@@ -11,22 +11,36 @@ class CourseListView extends GetView<CourseController> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
-        title: Text('My Courses', style: AppTextStyles.heading.copyWith(fontSize: 20)),
-        backgroundColor: AppColors.backgroundStart,
+        title: Text(
+          'My Courses',
+          style: AppTextStyles.heading.copyWith(
+            fontSize: 20,
+            color: colorScheme.onSurface,
+          ),
+        ),
+        backgroundColor: colorScheme.surface,
         elevation: 0,
+        iconTheme: IconThemeData(color: colorScheme.onSurface),
       ),
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              AppColors.backgroundStart,
-              AppColors.secondary,
-              AppColors.backgroundEnd,
-            ],
+            colors: Theme.of(context).brightness == Brightness.dark
+                ? [
+                    Theme.of(context).scaffoldBackgroundColor,
+                    colorScheme.surfaceContainerHighest,
+                    Theme.of(context).scaffoldBackgroundColor,
+                  ]
+                : [
+                    AppColors.backgroundStart,
+                    AppColors.secondary,
+                    AppColors.backgroundEnd,
+                  ],
           ),
         ),
         child: Obx(() {
@@ -62,7 +76,7 @@ class CourseListView extends GetView<CourseController> {
             return Center(
               child: Text(
                 'No courses available.',
-                style: AppTextStyles.body,
+                style: AppTextStyles.body.copyWith(color: colorScheme.onSurface),
               ),
             );
           }
@@ -98,9 +112,10 @@ class CourseListView extends GetView<CourseController> {
     final title = course['title'] ?? 'No Title';
     final thumbnail = course['thumbnail'] ?? '';
     final totalLessons = course['totalLessons'] ?? 0;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Card(
-      color: AppColors.cardBg,
+      color: colorScheme.surface,
       margin: const EdgeInsets.only(bottom: 16.0),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       elevation: 4,
@@ -128,7 +143,11 @@ class CourseListView extends GetView<CourseController> {
                 children: [
                   Text(
                     title,
-                    style: AppTextStyles.heading.copyWith(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: AppTextStyles.heading.copyWith(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.onSurface,
+                    ),
                   ),
                   if (course['completionPercentage'] != null) ...[
                     const SizedBox(height: 8),
@@ -136,7 +155,7 @@ class CourseListView extends GetView<CourseController> {
                       borderRadius: BorderRadius.circular(4),
                       child: LinearProgressIndicator(
                         value: (course['completionPercentage'] as num).toDouble() / 100,
-                        backgroundColor: Colors.white12,
+                        backgroundColor: colorScheme.surfaceContainerHighest,
                         valueColor: const AlwaysStoppedAnimation<Color>(AppColors.accent),
                         minHeight: 6,
                       ),
@@ -161,7 +180,10 @@ class CourseListView extends GetView<CourseController> {
                           const SizedBox(width: 6),
                           Text(
                             '$totalLessons Lessons',
-                            style: AppTextStyles.body.copyWith(fontSize: 14, color: AppColors.textSecondary),
+                            style: AppTextStyles.body.copyWith(
+                              fontSize: 14,
+                              color: colorScheme.onSurfaceVariant,
+                            ),
                           ),
                         ],
                       ),

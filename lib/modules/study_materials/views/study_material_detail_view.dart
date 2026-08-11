@@ -40,9 +40,12 @@ class _StudyMaterialDetailViewState extends State<StudyMaterialDetailView> {
     final result = await controller.downloadMaterial(id);
     if (result != null) {
       final fileUrl = result['fileUrl'] as String;
-      // Dynamically get domain base from active ApiConstants.baseUrl
-      final base = ApiConstants.baseUrl.replaceAll('/api', '');
-      final fullUrl = '$base$fileUrl';
+      String fullUrl = fileUrl;
+      if (!fileUrl.startsWith('http://') && !fileUrl.startsWith('https://')) {
+        // Dynamically get domain base from active ApiConstants.baseUrl
+        final base = ApiConstants.baseUrl.replaceAll('/api', '');
+        fullUrl = '$base$fileUrl';
+      }
       final uri = Uri.parse(fullUrl);
       try {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
@@ -56,23 +59,26 @@ class _StudyMaterialDetailViewState extends State<StudyMaterialDetailView> {
   Widget build(BuildContext context) {
     final controller = Get.find<StudyMaterialsController>();
 
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFFAF9FF),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: colorScheme.surface,
         elevation: 0.5,
-        title: const Text(
+        title: Text(
           'Resource Detail',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
         ),
         actions: [
           Obx(() {
             final mat = controller.currentMaterial.value;
             if (mat == null) return const SizedBox.shrink();
+            final onSurface = colorScheme.onSurface;
             return IconButton(
               icon: Icon(
                 mat.isBookmarked ? Icons.bookmark : Icons.bookmark_border,
-                color: mat.isBookmarked ? AppColors.brandPurple : AppColors.textPrimary,
+                color: mat.isBookmarked ? AppColors.brandPurple : onSurface,
               ),
               onPressed: () => controller.toggleBookmark(mat.id),
             );
@@ -99,9 +105,9 @@ class _StudyMaterialDetailViewState extends State<StudyMaterialDetailView> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: colorScheme.surface,
                   borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: Colors.grey.shade100),
+                  border: Border.all(color: colorScheme.outline),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -111,7 +117,7 @@ class _StudyMaterialDetailViewState extends State<StudyMaterialDetailView> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
-                            color: AppColors.brandPurple.withOpacity(0.08),
+                            color: AppColors.brandPurple.withValues(alpha: 0.08),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
@@ -144,20 +150,20 @@ class _StudyMaterialDetailViewState extends State<StudyMaterialDetailView> {
                     const SizedBox(height: 16),
                     Text(
                       mat.title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w900,
-                        color: AppColors.textPrimary,
+                        color: colorScheme.onSurface,
                       ),
                     ),
                     const SizedBox(height: 10),
                     if (mat.description != null && mat.description!.isNotEmpty) ...[
                       Text(
                         mat.description!,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
                           height: 1.5,
-                          color: AppColors.textSecondary,
+                          color: colorScheme.onSurfaceVariant,
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -203,12 +209,12 @@ class _StudyMaterialDetailViewState extends State<StudyMaterialDetailView> {
 
               // Version history title
               if (mat.versions.isNotEmpty) ...[
-                const Text(
+                Text(
                   "Version History Archives",
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w900,
-                    color: AppColors.textPrimary,
+                    color: colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -216,7 +222,7 @@ class _StudyMaterialDetailViewState extends State<StudyMaterialDetailView> {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: mat.versions.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 10),
+                  separatorBuilder: (_, _) => const SizedBox(height: 10),
                   itemBuilder: (context, index) {
                     final ver = mat.versions[index];
                     return VersionItem(
@@ -234,17 +240,18 @@ class _StudyMaterialDetailViewState extends State<StudyMaterialDetailView> {
   }
 
   Widget _buildMetaRow(IconData icon, String label, String value) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Row(
       children: [
-        Icon(icon, size: 16, color: AppColors.textSecondary),
+        Icon(icon, size: 16, color: colorScheme.onSurfaceVariant),
         const SizedBox(width: 8),
         Text(
           "$label: ",
-          style: const TextStyle(fontSize: 11, color: AppColors.textSecondary, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 11, color: colorScheme.onSurfaceVariant, fontWeight: FontWeight.bold),
         ),
         Text(
           value,
-          style: const TextStyle(fontSize: 11, color: AppColors.textPrimary, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 11, color: colorScheme.onSurface, fontWeight: FontWeight.bold),
         ),
       ],
     );

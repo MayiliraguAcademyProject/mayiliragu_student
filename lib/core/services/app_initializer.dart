@@ -12,6 +12,7 @@ import 'notification_service.dart';
 import 'video_download_service.dart';
 import 'app_config_service.dart';
 import 'internet_controller.dart';
+import '../controllers/user_session_controller.dart';
 
 class AppInitializer {
   static Future<ThemeMode> init() async {
@@ -44,6 +45,7 @@ class AppInitializer {
     Get.put(ApiClient());
     Get.put(AppConfigService());
     Get.put(InternetController(), permanent: true);
+    Get.put(UserSessionController(), permanent: true);
 
     final downloadService = Get.put(VideoDownloadService());
     await downloadService.init();
@@ -53,11 +55,13 @@ class AppInitializer {
 
     // 4. Load Theme Settings
     final savedThemeMode = await storage.getThemeMode();
-    return savedThemeMode == 'dark'
-        ? ThemeMode.dark
-        : savedThemeMode == 'light'
-            ? ThemeMode.light
-            : ThemeMode.system;
+    if (savedThemeMode == 'dark') {
+      return ThemeMode.dark;
+    } else if (savedThemeMode == 'light') {
+      return ThemeMode.light;
+    } else {
+      return ThemeMode.system;
+    }
   }
 }
 

@@ -7,13 +7,20 @@ class AuthRepository {
 
   AuthRepository(this._apiClient);
 
-  Future<Response> login({required String email, required String password}) async {
+  Future<Response> login({
+    required String email,
+    required String password,
+    String? deviceId,
+    String? deviceName,
+  }) async {
     return await _apiClient.post(
       ApiConstants.login,
       data: {
         'email': email,
         'password': password,
-      },
+        'deviceId': deviceId,
+        'deviceName': deviceName,
+      }..removeWhere((k, v) => v == null),
     );
   }
 

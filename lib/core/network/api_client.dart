@@ -25,16 +25,6 @@ class ApiClient {
     );
 
     dio.interceptors.add(
-      LogInterceptor(
-        requestHeader: true,
-        requestBody: true,
-        responseHeader: false,
-        responseBody: true,
-        error: true,
-      ),
-    );
-
-    dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
           final token = await _storage.getAccessToken();
@@ -44,6 +34,11 @@ class ApiClient {
           return handler.next(options);
         },
         onError: (DioException e, handler) async {
+          if (e.response?.statusCode == 404) {
+            await _storage.clearAll();
+            Get.offAllNamed(Routes.LOGIN);
+            return handler.next(e);
+          }
           if (e.response?.statusCode == 401) {
             final requestPath = e.requestOptions.path;
             if (requestPath != ApiConstants.login && requestPath != '/auth/refresh') {

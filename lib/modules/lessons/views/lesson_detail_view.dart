@@ -28,6 +28,7 @@ class LessonDetailView extends GetView<LessonController> {
     String? initialContent,
   }) {
     final textController = TextEditingController(text: initialContent);
+    final colorScheme = Theme.of(context).colorScheme;
     Get.bottomSheet(
       Container(
         padding: EdgeInsets.only(
@@ -36,9 +37,9 @@ class LessonDetailView extends GetView<LessonController> {
           top: 20,
           bottom: MediaQuery.of(context).viewInsets.bottom + 20,
         ),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
+        decoration: BoxDecoration(
+          color: colorScheme.surface,
+          borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(20),
             topRight: Radius.circular(20),
           ),
@@ -49,10 +50,10 @@ class LessonDetailView extends GetView<LessonController> {
           children: [
             Text(
               noteId == null ? 'Add Personal Note' : 'Edit Personal Note',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+                color: colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 12),
@@ -67,10 +68,7 @@ class LessonDetailView extends GetView<LessonController> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(
-                    color: Color(0xFF0D47A1),
-                    width: 2,
-                  ),
+                  borderSide: BorderSide(color: colorScheme.primary, width: 2),
                 ),
               ),
             ),
@@ -99,7 +97,7 @@ class LessonDetailView extends GetView<LessonController> {
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0D47A1),
+                    backgroundColor: colorScheme.primary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -141,12 +139,13 @@ class LessonDetailView extends GetView<LessonController> {
   }
 
   Widget _buildNoteCard(BuildContext context, Map<String, dynamic> note) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFFF1F4F9),
+        color: colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFD6E2F5), width: 1),
+        border: Border.all(color: colorScheme.outline, width: 1),
       ),
       child: Padding(
         padding: const EdgeInsets.all(14),
@@ -167,7 +166,7 @@ class LessonDetailView extends GetView<LessonController> {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF0D47A1),
+                      color: Theme.of(context).colorScheme.primary,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
@@ -240,7 +239,7 @@ class LessonDetailView extends GetView<LessonController> {
             Text(
               note['content'] ?? '',
               style: AppTextStyles.bodyMedium.copyWith(
-                color: const Color(0xFF1E293B),
+                color: Theme.of(context).colorScheme.onSurface,
                 fontSize: 14,
                 height: 1.4,
               ),
@@ -252,6 +251,7 @@ class LessonDetailView extends GetView<LessonController> {
   }
 
   Widget _buildEmptyNotesState(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
       child: Center(
@@ -260,45 +260,45 @@ class LessonDetailView extends GetView<LessonController> {
           children: [
             Container(
               padding: const EdgeInsets.all(16),
-              decoration: const BoxDecoration(
-                color: Color(0xFFF1F5F9),
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceContainerHighest,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.note_alt_outlined,
                 size: 48,
-                color: Color(0xFF94A3B8),
+                color: colorScheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               'No study notes yet',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF475569),
+                color: colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Create notes at specific video timestamps to easily recall key concepts during revision.',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 13,
-                color: Color(0xFF64748B),
+                color: colorScheme.onSurfaceVariant,
                 height: 1.4,
               ),
             ),
             const SizedBox(height: 16),
             TextButton.icon(
               onPressed: () => _showNoteBottomSheet(context),
-              icon: const Icon(Icons.add, size: 18, color: Color(0xFF0D47A1)),
-              label: const Text(
+              icon: Icon(Icons.add, size: 18, color: colorScheme.primary),
+              label: Text(
                 'Add Your First Note',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF0D47A1),
+                  color: colorScheme.primary,
                 ),
               ),
             ),
@@ -377,10 +377,10 @@ class LessonDetailView extends GetView<LessonController> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_rounded,
             size: 24,
-            color: Color(0xFF0D47A1),
+            color: colorScheme.primary,
           ),
           onPressed: () => Get.back(),
         ),
@@ -388,10 +388,10 @@ class LessonDetailView extends GetView<LessonController> {
           final data = controller.lessonData.value;
           return Text(
             data?['title'] ?? 'Lesson Playback',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF0D47A1),
+              color: colorScheme.primary,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -409,11 +409,13 @@ class LessonDetailView extends GetView<LessonController> {
             }
             final lessonId = lesson['id']?.toString() ?? '';
             final downloadService = Get.find<VideoDownloadService>();
-            
+
             return Obx(() {
               final isDownloaded = downloadService.isDownloaded(lessonId);
-              final isDownloading = downloadService.isDownloading[lessonId] ?? false;
-              final progress = downloadService.downloadProgress[lessonId] ?? 0.0;
+              final isDownloading =
+                  downloadService.isDownloading[lessonId] ?? false;
+              final progress =
+                  downloadService.downloadProgress[lessonId] ?? 0.0;
 
               if (isDownloading) {
                 return Center(
@@ -425,7 +427,7 @@ class LessonDetailView extends GetView<LessonController> {
                       child: CircularProgressIndicator(
                         value: progress,
                         strokeWidth: 2,
-                        color: const Color(0xFF0D47A1),
+                        color: colorScheme.primary,
                       ),
                     ),
                   ),
@@ -444,12 +446,15 @@ class LessonDetailView extends GetView<LessonController> {
                       AlertDialog(
                         title: const Text('Offline Video Actions'),
                         content: const Text(
-                            'Choose an action for this downloaded video.'),
+                          'Choose an action for this downloaded video.',
+                        ),
                         actions: [
                           TextButton(
                             onPressed: () => Get.back(),
-                            child: const Text('Cancel',
-                                style: TextStyle(color: Colors.grey)),
+                            child: const Text(
+                              'Cancel',
+                              style: TextStyle(color: Colors.grey),
+                            ),
                           ),
                           TextButton(
                             onPressed: () async {
@@ -457,16 +462,20 @@ class LessonDetailView extends GetView<LessonController> {
                               await controller.deleteDownloadedVideo();
                               controller.startVideoDownload();
                             },
-                            child: const Text('Redownload',
-                                style: TextStyle(color: Color(0xFF0D47A1))),
+                            child: Text(
+                              'Redownload',
+                              style: TextStyle(color: colorScheme.primary),
+                            ),
                           ),
                           TextButton(
                             onPressed: () {
                               controller.deleteDownloadedVideo();
                               Get.back();
                             },
-                            child: const Text('Delete',
-                                style: TextStyle(color: Colors.red)),
+                            child: const Text(
+                              'Delete',
+                              style: TextStyle(color: Colors.red),
+                            ),
                           ),
                         ],
                       ),
@@ -477,9 +486,9 @@ class LessonDetailView extends GetView<LessonController> {
               }
 
               return IconButton(
-                icon: const Icon(
+                icon: Icon(
                   Icons.file_download_outlined,
-                  color: Color(0xFF0D47A1),
+                  color: colorScheme.primary,
                   size: 24,
                 ),
                 onPressed: () => controller.startVideoDownload(),
@@ -488,15 +497,15 @@ class LessonDetailView extends GetView<LessonController> {
             });
           }),
         ],
-        backgroundColor: Colors.white,
+        backgroundColor: colorScheme.surface,
         elevation: 0.5,
       ),
       body: Container(
-        color: Colors.white,
+        color: colorScheme.surface,
         child: Obx(() {
           if (controller.isLoading.value) {
-            return const Center(
-              child: CircularProgressIndicator(color: Color(0xFF0D47A1)),
+            return Center(
+              child: CircularProgressIndicator(color: colorScheme.primary),
             );
           }
 
@@ -524,7 +533,7 @@ class LessonDetailView extends GetView<LessonController> {
                         }
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF0D47A1),
+                        backgroundColor: colorScheme.primary,
                       ),
                       child: const Text('Retry'),
                     ),
@@ -575,12 +584,12 @@ class LessonDetailView extends GetView<LessonController> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                    Text(
                       'Personal Study Notes',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF1E293B),
+                        color: colorScheme.onSurface,
                       ),
                     ),
                     ElevatedButton.icon(
@@ -595,7 +604,7 @@ class LessonDetailView extends GetView<LessonController> {
                         style: TextStyle(fontSize: 13, color: Colors.white),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF0D47A1),
+                        backgroundColor: colorScheme.primary,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
                         ),
@@ -614,9 +623,9 @@ class LessonDetailView extends GetView<LessonController> {
               Expanded(
                 child: Obx(() {
                   if (controller.isLoadingNotes.value) {
-                    return const Center(
+                    return Center(
                       child: CircularProgressIndicator(
-                        color: Color(0xFF0D47A1),
+                        color: colorScheme.primary,
                       ),
                     );
                   }
@@ -642,29 +651,30 @@ class LessonDetailView extends GetView<LessonController> {
       ),
       bottomNavigationBar: Obx(() {
         if (controller.isLoading.value ||
-            controller.errorMessage.value.isNotEmpty) {
+            controller.errorMessage.value.isNotEmpty ||
+            controller.lessonData.value == null) {
           return const SizedBox.shrink();
         }
+        final isComp = controller.isCompleted.value;
         return SafeArea(
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            decoration: const BoxDecoration(
-              color: Colors.white,
+            padding: const EdgeInsets.symmetric(
+              horizontal: 20,
+              vertical: 12,
+            ),
+            decoration: BoxDecoration(
+              color: colorScheme.surface,
               border: Border(
-                top: BorderSide(color: Color(0xFFECEFF1), width: 1),
+                top: BorderSide(color: colorScheme.outline, width: 1),
               ),
             ),
             child: SizedBox(
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
-                onPressed: controller.isCompleted.value
-                    ? null
-                    : () => controller.markLessonAsComplete(),
+                onPressed: isComp ? null : () => controller.markLessonAsComplete(),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: controller.isCompleted.value
-                      ? Colors.green
-                      : const Color(0xFF0D47A1),
+                  backgroundColor: isComp ? Colors.green : colorScheme.primary,
                   disabledBackgroundColor: Colors.green,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(25),
@@ -672,9 +682,7 @@ class LessonDetailView extends GetView<LessonController> {
                   elevation: 0,
                 ),
                 child: Text(
-                  controller.isCompleted.value
-                      ? 'Lesson Completed ✓'
-                      : 'Mark Lesson as Complete',
+                  isComp ? 'Lesson Completed ✓' : 'Mark Lesson as Complete',
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,

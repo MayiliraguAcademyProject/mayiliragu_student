@@ -37,9 +37,11 @@ class UpdateRequiredDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return PopScope(
       canPop: false,
       child: AlertDialog(
+        backgroundColor: colorScheme.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Row(
           children: [
@@ -49,9 +51,9 @@ class UpdateRequiredDialog extends StatelessWidget {
               size: 28,
             ),
             const SizedBox(width: 12),
-            const Text(
+            Text(
               'Update Required',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: colorScheme.onSurface),
             ),
           ],
         ),
@@ -61,22 +63,22 @@ class UpdateRequiredDialog extends StatelessWidget {
           children: [
             Text(
               'A newer version of Mayiliragu Academy (v$requiredVersion) is required to continue. Please download the update.',
-              style: const TextStyle(fontSize: 14, height: 1.4),
+              style: TextStyle(fontSize: 14, height: 1.4, color: colorScheme.onSurface),
             ),
             if (releaseNotes != null && releaseNotes!.trim().isNotEmpty) ...[
               const SizedBox(height: 16),
-              const Text(
+              Text(
                 "What's New:",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: colorScheme.onSurface),
               ),
               const SizedBox(height: 6),
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: AppColors.backgroundEnd.withAlpha(51),
+                  color: colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: AppColors.border.withAlpha(128)),
+                  border: Border.all(color: colorScheme.outline),
                 ),
                 constraints: const BoxConstraints(maxHeight: 150),
                 child: SingleChildScrollView(
@@ -84,7 +86,7 @@ class UpdateRequiredDialog extends StatelessWidget {
                     releaseNotes!,
                     style: TextStyle(
                       fontSize: 12,
-                      color: AppColors.textSecondary,
+                      color: colorScheme.onSurfaceVariant,
                       height: 1.4,
                     ),
                   ),
@@ -92,12 +94,12 @@ class UpdateRequiredDialog extends StatelessWidget {
               ),
             ],
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Note: Please enable "Install from Unknown Sources" if prompted during installation.',
               style: TextStyle(
                 fontSize: 11,
                 fontStyle: FontStyle.italic,
-                color: Colors.grey,
+                color: colorScheme.onSurfaceVariant,
               ),
             ),
           ],

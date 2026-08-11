@@ -23,13 +23,14 @@ class _SchemesViewState extends State<SchemesView> {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<CurrentAffairsController>();
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFAF9FF),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: colorScheme.surface,
         elevation: 0.5,
-        title: const Text("Government Schemes Tracker", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+        title: Text("Government Schemes Tracker", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: colorScheme.onSurface)),
       ),
       body: Column(
         children: [
@@ -47,14 +48,14 @@ class _SchemesViewState extends State<SchemesView> {
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
-                        color: isSelected ? Colors.white : AppColors.textSecondary,
+                        color: isSelected ? Colors.white : colorScheme.onSurfaceVariant,
                       ),
                     ),
                     selected: isSelected,
                     selectedColor: AppColors.brandPurple,
-                    backgroundColor: Colors.white,
+                    backgroundColor: colorScheme.surface,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    side: BorderSide(color: isSelected ? AppColors.brandPurple : Colors.grey.shade200),
+                    side: BorderSide(color: isSelected ? AppColors.brandPurple : colorScheme.outline),
                     onSelected: (val) {
                       setState(() {
                         _selectedFilter = type;
@@ -79,9 +80,9 @@ class _SchemesViewState extends State<SchemesView> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.account_balance_outlined, size: 48, color: Colors.grey.shade400),
+                      Icon(Icons.account_balance_outlined, size: 48, color: colorScheme.onSurfaceVariant),
                       const SizedBox(height: 12),
-                      const Text("No government schemes added yet.", style: TextStyle(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
+                      Text("No government schemes added yet.", style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant, fontWeight: FontWeight.bold)),
                     ],
                   ),
                 );
@@ -90,7 +91,7 @@ class _SchemesViewState extends State<SchemesView> {
               return ListView.separated(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 itemCount: controller.schemesList.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 12),
+                separatorBuilder: (_, _) => const SizedBox(height: 12),
                 itemBuilder: (context, idx) {
                   final sch = controller.schemesList[idx];
                   return GovernmentSchemeCard(scheme: sch);

@@ -44,13 +44,36 @@ class LessonController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    final String? lessonId = Get.parameters['id'] ?? Get.arguments?.toString();
+    final String? lessonId = _extractLessonId();
     if (lessonId != null) {
       fetchLessonDetail(lessonId);
     } else {
       errorMessage.value = 'No lesson ID provided';
       isLoading.value = false;
     }
+  }
+
+  @override
+  void onReady() {
+    super.onReady();
+    final String? lessonId = _extractLessonId();
+    if (lessonId != null &&
+        (lessonId != _currentLessonId || lessonData.value == null)) {
+      fetchLessonDetail(lessonId);
+    }
+  }
+
+  String? _extractLessonId() {
+    if (Get.parameters['id'] != null && Get.parameters['id']!.isNotEmpty) {
+      return Get.parameters['id'];
+    }
+    final args = Get.arguments;
+    if (args == null) return null;
+    if (args is String) return args.isNotEmpty ? args : null;
+    if (args is Map) {
+      return args['id']?.toString() ?? args['lessonId']?.toString();
+    }
+    return args.toString();
   }
 
   Future<void> fetchLessonDetail(String id) async {
@@ -265,10 +288,21 @@ class LessonController extends GetxController {
         placeholder: const Center(
           child: CircularProgressIndicator(color: AppColors.accent),
         ),
-        controlsConfiguration: const BetterPlayerControlsConfiguration(
-          enableSkips: false,
-          enableProgressText: false,
-          enableProgressBar: false,
+        controlsConfiguration: BetterPlayerControlsConfiguration(
+          enableSkips: true,
+          enableProgressText: true,
+          enableProgressBar: true,
+          enableProgressBarDrag: true,
+          enablePlayPause: true,
+          enableMute: true,
+          enableFullscreen: true,
+          enablePlaybackSpeed: true,
+          enableOverflowMenu: false,
+          enableQualities: false,
+          enableSubtitles: false,
+          controlBarColor: Colors.black.withValues(alpha: 0.7),
+          progressBarPlayedColor: AppColors.accent,
+          progressBarHandleColor: AppColors.accent,
         ),
       ),
       betterPlayerDataSource: dataSource,
@@ -406,6 +440,33 @@ class LessonController extends GetxController {
       } else if (youtubeController != null) {
         youtubeController!.seekTo(Duration(seconds: seconds));
         youtubeController!.play();
+      }
+    }
+  }
+
+  void seekBackward([int seconds = 10]) {
+    if (isVideoPlayerSupported && betterPlayerController != null) {
+      final videoPlayerController =
+          betterPlayerController!.videoPlayerController;
+      if (videoPlayerController != null) {
+        final currentPos = videoPlayerController.value.position.inSeconds;
+        final targetPos = (currentPos - seconds).clamp(
+          0,
+          videoPlayerController.value.duration?.inSeconds ?? currentPos,
+        );
+        betterPlayerController!.seekTo(Duration(seconds: targetPos));
+      }
+    }
+  }
+
+  void seekForward([int seconds = 10]) {
+    if (isVideoPlayerSupported && betterPlayerController != null) {
+      final videoPlayerController =
+          betterPlayerController!.videoPlayerController;
+      if (videoPlayerController != null) {
+        final currentPos = videoPlayerController.value.position.inSeconds;
+        final targetPos = currentPos + seconds;
+        betterPlayerController!.seekTo(Duration(seconds: targetPos));
       }
     }
   }
@@ -592,6 +653,8 @@ class LessonController extends GetxController {
       betterPlayerController?.dispose();
       youtubeController?.dispose();
     }
+    _currentLessonId = null;
+    lessonData.value = null;
     super.onClose();
   }
 }

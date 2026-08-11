@@ -8,7 +8,7 @@ import '../widgets/address_section.dart';
 import '../widgets/education_section.dart';
 
 class ProfileOnboardingView extends StatefulWidget {
-  const ProfileOnboardingView({Key? key}) : super(key: key);
+  const ProfileOnboardingView({super.key});
 
   @override
   State<ProfileOnboardingView> createState() => _ProfileOnboardingViewState();
@@ -57,11 +57,17 @@ class _ProfileOnboardingViewState extends State<ProfileOnboardingView> {
   @override
   Widget build(BuildContext context) {
     final primaryColor = AppColors.primary;
-    final borderColor = Theme.of(context).brightness == Brightness.dark ? AppColors.borderDark : AppColors.border;
+    final borderColor = Theme.of(context).colorScheme.outline;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Complete Your Profile', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(
+          'Complete Your Profile',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
+        ),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,

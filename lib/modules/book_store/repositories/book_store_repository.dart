@@ -53,10 +53,10 @@ class BookStoreRepository {
       '/books/orders',
       data: {
         'items': items,
-        if (couponCode != null) 'couponCode': couponCode,
-        if (shippingName != null) 'shippingName': shippingName,
-        if (shippingPhone != null) 'shippingPhone': shippingPhone,
-        if (shippingAddress != null) 'shippingAddress': shippingAddress,
+        'couponCode': ?couponCode,
+        'shippingName': ?shippingName,
+        'shippingPhone': ?shippingPhone,
+        'shippingAddress': ?shippingAddress,
       },
     );
   }

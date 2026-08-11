@@ -4,7 +4,7 @@ import '../controllers/section_selection_controller.dart';
 import '../models/test_model.dart';
 
 class SectionSelectionView extends GetView<SectionSelectionController> {
-  const SectionSelectionView({Key? key}) : super(key: key);
+  const SectionSelectionView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +87,7 @@ class SectionSelectionView extends GetView<SectionSelectionController> {
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF0F3CC9).withOpacity(0.2),
+                    color: const Color(0xFF0F3CC9).withValues(alpha: 0.2),
                     blurRadius: 15,
                     offset: const Offset(0, 8),
                   ),
@@ -119,7 +119,7 @@ class SectionSelectionView extends GetView<SectionSelectionController> {
                     Text(
                       test.description!,
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.8),
+                        color: Colors.white.withValues(alpha: 0.8),
                         fontSize: 12,
                         height: 1.4,
                       ),
@@ -154,7 +154,7 @@ class SectionSelectionView extends GetView<SectionSelectionController> {
               final isEnabled = controller.isSectionEnabled(section);
               
               return _buildSectionCard(section, idx, isLocked, isEnabled);
-            }).toList(),
+            }),
           ],
         );
       }),
@@ -197,7 +197,7 @@ class SectionSelectionView extends GetView<SectionSelectionController> {
           border: Border.all(color: borderCol, width: 1.5),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF0F3CC9).withOpacity(0.02),
+              color: const Color(0xFF0F3CC9).withValues(alpha: 0.02),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
