@@ -318,7 +318,6 @@ class LessonDetailView extends GetView<LessonController> {
               controller: controller.youtubeController!,
               showVideoProgressIndicator: true,
               progressIndicatorColor: const Color(0xFF0D47A1),
-              // Hide channel name, title bar and share icon in the overlay
               topActions: const [],
               bottomActions: [
                 const SizedBox(width: 8),
@@ -332,23 +331,33 @@ class LessonDetailView extends GetView<LessonController> {
               ],
             ),
             builder: (context, player) {
-              // Wrap in a Stack to cover the YouTube watermark logo
-              final playerWithOverlay = Stack(
-                children: [
-                  player,
-                  // Cover the YouTube watermark (bottom-right corner)
-                  Positioned(
-                    bottom: 34,
-                    right: 0,
-                    child: Container(
-                      width: 80,
-                      height: 22,
-                      color: Colors.black,
-                    ),
-                  ),
-                ],
+              if (controller.youtubeController == null) {
+                return _buildScaffold(context, controller, player);
+              }
+              return ValueListenableBuilder<YoutubePlayerValue>(
+                valueListenable: controller.youtubeController!,
+                builder: (context, value, child) {
+                  final playerWithOverlay = Stack(
+                    children: [
+                      player,
+                      // Cover/prevent clicking the YouTube share/more actions button (top-right corner)
+                      Positioned(
+                        top: 0,
+                        right: 0,
+                        child: GestureDetector(
+                          onTap: () {}, // Intercept gestures
+                          behavior: HitTestBehavior.opaque,
+                          child: const SizedBox(
+                            width: 70,
+                            height: 60,
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                  return _buildScaffold(context, controller, playerWithOverlay);
+                },
               );
-              return _buildScaffold(context, controller, playerWithOverlay);
             },
           );
         } else {
@@ -374,6 +383,7 @@ class LessonDetailView extends GetView<LessonController> {
   }
 
   Widget _buildScaffold(BuildContext context, LessonController controller, Widget playerWidget) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
