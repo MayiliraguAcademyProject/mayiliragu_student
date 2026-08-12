@@ -70,14 +70,16 @@ class _BookDetailViewState extends State<BookDetailView> {
         }
 
         // Set default format if one is not available
+        /*
         if (selectedFormat == 'HARD_COPY' &&
             book.priceHardCopy == null &&
             book.priceSoftCopy != null) {
           selectedFormat = 'SOFT_COPY';
         }
+        */
 
         final hasHard = book.priceHardCopy != null;
-        final hasSoft = book.priceSoftCopy != null;
+        // final hasSoft = false; // book.priceSoftCopy != null;
 
         return SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
@@ -214,6 +216,7 @@ class _BookDetailViewState extends State<BookDetailView> {
                         ),
                       ),
                     ),
+                  /*
                   if (hasHard && hasSoft) const SizedBox(width: 12),
                   if (hasSoft)
                     Expanded(
@@ -270,6 +273,7 @@ class _BookDetailViewState extends State<BookDetailView> {
                         ),
                       ),
                     ),
+                  */
                 ],
               ),
               const SizedBox(height: 20),

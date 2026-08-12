@@ -246,14 +246,17 @@ class _BookCheckoutViewState extends State<BookCheckoutView> {
   }
 
   double get subTotal {
+    return (widget.book.priceHardCopy ?? 0) * widget.quantity.toDouble();
+    /*
     if (widget.format == 'HARD_COPY') {
       return (widget.book.priceHardCopy ?? 0) * widget.quantity.toDouble();
     } else {
       return (widget.book.priceSoftCopy ?? 0) * widget.quantity.toDouble();
     }
+    */
   }
 
-  double get shippingCharge => widget.format == 'HARD_COPY' ? 50.0 : 0.0;
+  double get shippingCharge => 50.0; // widget.format == 'HARD_COPY' ? 50.0 : 0.0;
 
   @override
   Widget build(BuildContext context) {
