@@ -13,6 +13,7 @@ class CourseController extends GetxController {
   final currentPage = 1.obs;
   final hasMore = true.obs;
   final limit = 10;
+  final isDemoOnly = false.obs;
   final errorMessage = ''.obs;
 
   final scrollController = ScrollController();
@@ -20,6 +21,11 @@ class CourseController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    if (Get.arguments is Map && Get.arguments['isDemoOnly'] == true) {
+      isDemoOnly.value = true;
+    } else {
+      isDemoOnly.value = false;
+    }
     fetchCourses();
     scrollController.addListener(_scrollListener);
   }
@@ -48,6 +54,7 @@ class CourseController extends GetxController {
       final response = await _repository.getCourses(
         page: currentPage.value,
         limit: limit,
+        isDemo: isDemoOnly.value ? true : null,
       );
 
       if (response.statusCode == 200) {
@@ -77,6 +84,7 @@ class CourseController extends GetxController {
       final response = await _repository.getCourses(
         page: currentPage.value,
         limit: limit,
+        isDemo: isDemoOnly.value ? true : null,
       );
 
       if (response.statusCode == 200) {

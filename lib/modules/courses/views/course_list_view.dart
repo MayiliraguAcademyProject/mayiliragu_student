@@ -14,13 +14,13 @@ class CourseListView extends GetView<CourseController> {
     final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'My Courses',
+        title: Obx(() => Text(
+          controller.isDemoOnly.value ? 'Demo Classes' : 'My Courses',
           style: AppTextStyles.heading.copyWith(
             fontSize: 20,
             color: colorScheme.onSurface,
           ),
-        ),
+        )),
         backgroundColor: colorScheme.surface,
         elevation: 0,
         iconTheme: IconThemeData(color: colorScheme.onSurface),
@@ -75,7 +75,7 @@ class CourseListView extends GetView<CourseController> {
           if (controller.coursesList.isEmpty) {
             return Center(
               child: Text(
-                'No courses available.',
+                controller.isDemoOnly.value ? 'No demo classes available.' : 'No courses available.',
                 style: AppTextStyles.body.copyWith(color: colorScheme.onSurface),
               ),
             );

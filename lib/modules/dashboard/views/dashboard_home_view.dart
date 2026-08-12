@@ -247,6 +247,16 @@ class DashboardHomeView extends GetView<DashboardController> {
                 if (Get.isRegistered<TestsController>()) {
                   Get.find<TestsController>().fetchTests();
                 }
+              } else if (action.route == '/demo-courses' || action.route == '/demo-class') {
+                final demoCourses = controller.dashboardData.value?.allCourses
+                    .where((c) => c.isDemo)
+                    .toList() ?? [];
+
+                if (demoCourses.length == 1) {
+                  Get.to(() => CourseDetailView(courseId: demoCourses.first.id));
+                } else {
+                  Get.toNamed(Routes.COURSES, arguments: {'isDemoOnly': true});
+                }
               } else {
                 Get.toNamed(action.route);
               }
@@ -272,6 +282,10 @@ class DashboardHomeView extends GetView<DashboardController> {
         return Icons.shopping_bag_outlined;
       case 'bookmark':
         return Icons.bookmark;
+      case 'play_circle_outline':
+      case 'video_library':
+      case 'demo_class':
+        return Icons.play_circle_outline;
       default:
         return Icons.link;
     }
