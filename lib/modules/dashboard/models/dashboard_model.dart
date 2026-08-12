@@ -97,6 +97,7 @@ class EnrolledCourse {
   final double progressPercentage;
   final bool isEnrolled;
   final String? enrollmentRequestStatus;
+  final bool isDemo;
 
   EnrolledCourse({
     required this.id,
@@ -106,6 +107,7 @@ class EnrolledCourse {
     required this.progressPercentage,
     this.isEnrolled = true,
     this.enrollmentRequestStatus,
+    this.isDemo = false,
   });
 
   factory EnrolledCourse.fromJson(Map<String, dynamic> json) {
@@ -117,6 +119,7 @@ class EnrolledCourse {
       progressPercentage: (json['progressPercentage'] as num?)?.toDouble() ?? 0.0,
       isEnrolled: json['isEnrolled'] as bool? ?? true,
       enrollmentRequestStatus: json['enrollmentRequestStatus'] as String?,
+      isDemo: json['isDemo'] as bool? ?? false,
     );
   }
 }
