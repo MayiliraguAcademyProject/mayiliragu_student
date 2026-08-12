@@ -7,6 +7,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/widgets/course_image.dart';
 import '../../../app/routes/app_routes.dart';
+import '../../../app/routes/app_pages.dart';
 import '../controllers/dashboard_controller.dart';
 import '../models/dashboard_model.dart';
 import '../../courses/views/course_detail_view.dart';
@@ -242,12 +243,17 @@ class DashboardHomeView extends GetView<DashboardController> {
             _getIconData(action.icon),
             action.title,
             () {
-              if (action.route == '/tests') {
+              String targetRoute = action.route;
+              if (targetRoute == '/quiz') {
+                targetRoute = Routes.CURRENT_AFFAIRS;
+              }
+
+              if (targetRoute == '/tests') {
                 controller.tabController.jumpToTab(1);
                 if (Get.isRegistered<TestsController>()) {
                   Get.find<TestsController>().fetchTests();
                 }
-              } else if (action.route == '/demo-courses' || action.route == '/demo-class') {
+              } else if (targetRoute == '/demo-courses' || targetRoute == '/demo-class') {
                 final demoCourses = controller.dashboardData.value?.allCourses
                     .where((c) => c.isDemo)
                     .toList() ?? [];
@@ -258,7 +264,18 @@ class DashboardHomeView extends GetView<DashboardController> {
                   Get.toNamed(Routes.COURSES, arguments: {'isDemoOnly': true});
                 }
               } else {
-                Get.toNamed(action.route);
+                final isRegisteredRoute = AppPages.routes.any((page) => page.name == targetRoute);
+                if (isRegisteredRoute) {
+                  Get.toNamed(targetRoute);
+                } else {
+                  Get.snackbar(
+                    'Notice',
+                    'The feature "${action.title}" is currently unavailable.',
+                    snackPosition: SnackPosition.BOTTOM,
+                    backgroundColor: Theme.of(context).colorScheme.surface,
+                    colorText: Theme.of(context).colorScheme.onSurface,
+                  );
+                }
               }
             },
           );
