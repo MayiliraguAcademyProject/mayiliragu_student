@@ -1,3 +1,4 @@
+import 'package:Mayiliragu/shared/widgets/common_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/constants/app_colors.dart';
@@ -73,17 +74,14 @@ class TestsView extends GetView<TestsController> {
                         style: const TextStyle(color: Colors.red, fontSize: 14),
                       ),
                       const SizedBox(height: 12),
-                      ElevatedButton(
-                        onPressed: () => controller.fetchTests(),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.brandPurple,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: const Text('Retry'),
-                      ),
+                      CommonButton(
+                  text: 'Retry',
+                  onPressed: () => controller.fetchTests(),
+                  backgroundColor: AppColors.brandPurple,
+                  foregroundColor: Colors.white,
+                  borderRadius: 8,
+                  fullWidth: false,
+                ),
                     ],
                   ),
                 );
@@ -355,40 +353,27 @@ class TestsView extends GetView<TestsController> {
               ),
               Builder(
                 builder: (context) {
-                  return ElevatedButton(
+                  return CommonButton(
+                    text: isScheduled
+                        ? 'Opens ${_formatScheduleDate(featuredTest.scheduledAt!)}'
+                        : (isLocked
+                            ? 'Unlock'
+                            : (featuredTest.hasAttempted ? 'Results' : 'Start Test')),
                     onPressed: () => _handleTestTap(context, controller, featuredTest),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: isScheduled
-                          ? const Color(0xFF0D9488)
-                          : (isLocked ? const Color(0xFFF59E0B) : Colors.white),
-                      foregroundColor: isScheduled || isLocked ? Colors.white : const Color(0xFF0F3CC9),
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    ),
-                    child: Row(
-                      children: [
-                        Text(
-                          isScheduled
-                              ? 'Opens ${_formatScheduleDate(featuredTest.scheduledAt!)}'
-                              : (isLocked
-                                  ? 'Unlock'
-                                  : (featuredTest.hasAttempted ? 'Results' : 'Start Test')),
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(width: 6),
-                        Icon(
-                          isScheduled
-                              ? Icons.schedule_outlined
-                              : (isLocked
-                                  ? Icons.lock_outline
-                                  : (featuredTest.hasAttempted ? Icons.assessment_outlined : Icons.arrow_forward)),
-                          size: 14,
-                          color: isScheduled || isLocked ? Colors.white : const Color(0xFF0F3CC9),
-                        ),
-                      ],
+                    backgroundColor: isScheduled
+                        ? const Color(0xFF0D9488)
+                        : (isLocked ? const Color(0xFFF59E0B) : Colors.white),
+                    foregroundColor: isScheduled || isLocked ? Colors.white : const Color(0xFF0F3CC9),
+                    borderRadius: 10,
+                    fullWidth: false,
+                    suffixIcon: Icon(
+                      isScheduled
+                          ? Icons.schedule_outlined
+                          : (isLocked
+                              ? Icons.lock_outline
+                              : (featuredTest.hasAttempted ? Icons.assessment_outlined : Icons.arrow_forward)),
+                      size: 14,
+                      color: isScheduled || isLocked ? Colors.white : const Color(0xFF0F3CC9),
                     ),
                   );
                 },

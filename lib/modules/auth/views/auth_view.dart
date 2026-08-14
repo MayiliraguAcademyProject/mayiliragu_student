@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../shared/widgets/common_button.dart';
 import '../controllers/auth_controller.dart';
 
 class AuthView extends GetView<AuthController> {
@@ -231,44 +232,17 @@ class AuthView extends GetView<AuthController> {
                           );
                         }),
 
-                        // Login button
-                        SizedBox(
-                          width: double.infinity,
-                          height: 54,
-                          child: Obx(() {
-                            return ElevatedButton(
-                              onPressed: controller.isLoading.value
-                                  ? null
-                                  : controller.login,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.brandPurple,
-                                foregroundColor: Colors.white,
-                                disabledBackgroundColor: AppColors.brandPurple
-                                    .withAlpha(153),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(27),
-                                ),
-                                elevation: 0,
-                              ),
-                              child: controller.isLoading.value
-                                  ? const SizedBox(
-                                      height: 24,
-                                      width: 24,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: Colors.white,
-                                      ),
-                                    )
-                                  : const Text(
-                                      'Login',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                            );
-                          }),
-                        ),
+                        Obx(() {
+                          return CommonButton(
+                            text: 'Login',
+                            isLoading: controller.isLoading.value,
+                            onPressed: controller.login,
+                            backgroundColor: AppColors.brandPurple,
+                            foregroundColor: Colors.white,
+                            height: 54,
+                            borderRadius: 27,
+                          );
+                        }),
                       ],
                     ),
                   ),

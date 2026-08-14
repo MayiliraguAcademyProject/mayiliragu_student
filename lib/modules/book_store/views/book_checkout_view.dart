@@ -1,3 +1,4 @@
+import 'package:Mayiliragu/shared/widgets/common_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -619,90 +620,39 @@ class _BookCheckoutViewState extends State<BookCheckoutView> {
             ],
           ),
           const SizedBox(height: 16),
-          Obx(() => SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: ElevatedButton(
-                  onPressed: controller.isPlacingOrder.value
-                      ? null
-                      : () async {
-                          if (widget.format == 'HARD_COPY' && !_formKey.currentState!.validate()) {
-                            return;
-                          }
+          Obx(() => CommonButton(
+                text: widget.format == 'HARD_COPY' ? 'Place Order (COD)' : 'Place Order & Pay',
+                isLoading: controller.isPlacingOrder.value,
+                onPressed: () async {
+                  if (widget.format == 'HARD_COPY') {
+                    if (!_formKey.currentState!.validate()) {
+                      return;
+                    }
+                  }
+                  
+                  final order = await controller.placeOrder(
+                    bookId: widget.book.id,
+                    format: widget.format,
+                    quantity: widget.quantity,
+                    couponCode: controller.appliedCoupon.value?.code,
+                    shippingName: widget.format == 'HARD_COPY' ? _nameController.text.trim() : null,
+                    shippingPhone: widget.format == 'HARD_COPY' ? _phoneController.text.trim() : null,
+                    shippingAddress: widget.format == 'HARD_COPY'
+                        ? "${_streetController.text.trim()}, ${_landmarkController.text.trim()}, ${_cityController.text.trim()}, ${_stateController.text.trim()} - ${_pinController.text.trim()}"
+                        : null,
+                  );
 
-                          final address = widget.format == 'HARD_COPY'
-                              ? "${_streetController.text.trim()}, Landmark: ${_landmarkController.text.trim()}, ${_cityController.text.trim()}, ${_stateController.text.trim()} - ${_pinController.text.trim()}"
-                              : null;
-
-                          final order = await controller.placeOrder(
-                            bookId: widget.book.id,
-                            format: widget.format,
-                            quantity: widget.quantity,
-                            couponCode: controller.appliedCoupon.value?.code,
-                            shippingName: widget.format == 'HARD_COPY' ? _nameController.text.trim() : null,
-                            shippingPhone: widget.format == 'HARD_COPY' ? _phoneController.text.trim() : null,
-                            shippingAddress: address,
-                          );
-
-                          if (order != null) {
-                            Get.defaultDialog(
-                              title: "Order Created!",
-                              titleStyle: TextStyle(color: colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 16),
-                              backgroundColor: colorScheme.surface,
-                              content: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    widget.format == 'HARD_COPY'
-                                        ? "Would you like to pay online now via QR Code or choose Cash on Delivery?"
-                                        : "Would you like to pay online now via QR Code to unlock it instantly, or pay offline later at the center?",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant),
-                                  ),
-                                  const SizedBox(height: 20),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                    children: [
-                                      // TextButton(
-                                      //   onPressed: () {
-                                      //     Get.back(); // close dialog
-                                      //     Get.back(); // close checkout
-                                      //     Get.back(); // close detail
-                                      //   },
-                                      //   child: Text(
-                                      //     widget.format == 'HARD_COPY' ? 'COD' : 'Pay Offline',
-                                      //     style: TextStyle(color: colorScheme.onSurfaceVariant, fontWeight: FontWeight.bold),
-                                      //   ),
-                                      // ),
-                                      ElevatedButton(
-                                        onPressed: () {
-                                          Get.back(); // close dialog
-                                          Get.to(() => PaymentProofView(order: order));
-                                        },
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: AppColors.brandPurple,
-                                          foregroundColor: Colors.white,
-                                        ),
-                                        child: const Text('Pay Online (QR)', style: TextStyle(fontWeight: FontWeight.bold)),
-                                      ),
-                                    ],
-                                  )
-                                ],
-                              ),
-                            );
-                          }
-                        },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.brandPurple,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  ),
-                  child: controller.isPlacingOrder.value
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text(
-                          AppStrings.placeOrder,
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
-                        ),
-                ),
+                  if (order != null) {
+                    if (widget.format == 'HARD_COPY') {
+                      Get.back(); // Go back from checkout screen
+                      AppToast.success('Order placed successfully! Cash on Delivery.');
+                    } else {
+                      Get.off(() => PaymentProofView(order: order)); // Replace checkout with proof upload
+                    }
+                  }
+                },
+                backgroundColor: AppColors.brandPurple,
+                foregroundColor: Colors.white,
               )),
         ],
       ),

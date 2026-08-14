@@ -5,6 +5,7 @@ class CourseDetailModel {
   final String thumbnail;
   final bool isEnrolled;
   final bool isDemo;
+  final String? enrollmentRequestStatus;
   final List<ModuleModel> modules;
 
   CourseDetailModel({
@@ -14,6 +15,7 @@ class CourseDetailModel {
     required this.thumbnail,
     this.isEnrolled = true,
     this.isDemo = false,
+    this.enrollmentRequestStatus,
     required this.modules,
   });
 
@@ -26,6 +28,7 @@ class CourseDetailModel {
       thumbnail: json['thumbnail']?.toString() ?? '',
       isEnrolled: json['isEnrolled'] as bool? ?? true,
       isDemo: json['isDemo'] as bool? ?? false,
+      enrollmentRequestStatus: json['enrollmentRequestStatus'] as String?,
       modules: modulesList
           .map((m) => ModuleModel.fromJson(m as Map<String, dynamic>))
           .toList(),

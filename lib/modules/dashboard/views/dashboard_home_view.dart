@@ -1,3 +1,4 @@
+import 'package:Mayiliragu/shared/widgets/common_button.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:Mayiliragu/core/services/notification_service.dart';
@@ -13,6 +14,7 @@ import '../models/dashboard_model.dart';
 import '../../courses/views/course_detail_view.dart';
 import '../../tests/controllers/tests_controller.dart';
 import '../../../shared/widgets/custom_network_image.dart';
+import '../../../core/utils/toast_helper.dart';
 
 class DashboardHomeView extends GetView<DashboardController> {
   const DashboardHomeView({super.key});
@@ -42,14 +44,12 @@ class DashboardHomeView extends GetView<DashboardController> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: controller.fetchDashboardData,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.brandPurple,
-                    ),
-                    child: const Text(AppStrings.retry),
-                  ),
-                ],
+                  CommonButton(
+                  text: AppStrings.retry,
+                  onPressed: controller.fetchDashboardData,
+                  backgroundColor: AppColors.brandPurple,
+                  fullWidth: false,
+                )                ],
               ),
             );
           }
@@ -268,12 +268,9 @@ class DashboardHomeView extends GetView<DashboardController> {
                 if (isRegisteredRoute) {
                   Get.toNamed(targetRoute);
                 } else {
-                  Get.snackbar(
-                    'Notice',
+                  AppToast.validation(
                     'The feature "${action.title}" is currently unavailable.',
-                    snackPosition: SnackPosition.BOTTOM,
-                    backgroundColor: Theme.of(context).colorScheme.surface,
-                    colorText: Theme.of(context).colorScheme.onSurface,
+                    title: 'Notice',
                   );
                 }
               }
@@ -656,33 +653,19 @@ class DashboardHomeView extends GetView<DashboardController> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 48,
-                      child: ElevatedButton(
-                        onPressed: () {
+                    CommonButton(
+                  text: AppStrings.resumeLesson,
+                  onPressed: () {
                           Get.toNamed(
                             Routes.LESSON_DETAIL,
                             arguments: contLearn.lessonId,
                           );
                         },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.brandPurple,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          elevation: 0,
-                        ),
-                        child: const Text(
-                          AppStrings.resumeLesson,
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
+                  height: 48,
+                  backgroundColor: AppColors.brandPurple,
+                  foregroundColor: Colors.white,
+                  borderRadius: 12,
+                )
                   ],
                 ),
               ),
@@ -759,7 +742,9 @@ class _BannerCarouselState extends State<BannerCarousel> {
               final banner = widget.banners[index];
               return GestureDetector(
                 onTap: () {
-                  if (banner.linkUrl != null && banner.linkUrl!.isNotEmpty) {
+                  if (banner.linkType == 'COURSE' || banner.linkType == 'TEST') {
+                    Get.toNamed(Routes.BANNER_PRODUCT_DETAIL, arguments: banner);
+                  } else if (banner.linkUrl != null && banner.linkUrl!.isNotEmpty) {
                     Get.to(() => CourseDetailView(courseId: banner.linkUrl!));
                   }
                 },

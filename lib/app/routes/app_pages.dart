@@ -33,6 +33,10 @@ import '../../modules/book_store/views/book_store_dashboard_view.dart';
 import '../../modules/notifications/views/notification_inbox_view.dart';
 import '../../modules/bookmarks/bindings/bookmarked_questions_binding.dart';
 import '../../modules/bookmarks/views/bookmarked_questions_view.dart';
+import '../../modules/payment/bindings/payment_binding.dart';
+import '../../modules/payment/views/banner_product_detail_view.dart';
+import '../../modules/payment/views/payment_qr_view.dart';
+import '../../modules/payment/views/payment_confirmation_view.dart';
 import 'app_routes.dart';
 
 class AppPages {
@@ -129,6 +133,20 @@ class AppPages {
       name: Routes.BOOKMARKS,
       page: () => const BookmarkedQuestionsView(),
       binding: BookmarkedQuestionsBinding(),
+    ),
+    GetPage(
+      name: Routes.BANNER_PRODUCT_DETAIL,
+      page: () => BannerProductDetailView(banner: Get.arguments),
+      binding: PaymentBinding(),
+    ),
+    GetPage(
+      name: Routes.PAYMENT_QR,
+      page: () => const PaymentQrView(),
+      binding: PaymentBinding(),
+    ),
+    GetPage(
+      name: Routes.PAYMENT_CONFIRMATION,
+      page: () => const PaymentConfirmationView(),
     ),
   ];
 }

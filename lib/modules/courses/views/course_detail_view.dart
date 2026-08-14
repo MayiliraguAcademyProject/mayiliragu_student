@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/course_image.dart';
+import '../../../shared/widgets/common_button.dart';
 import '../repositories/course_repository.dart';
+import '../../../core/utils/toast_helper.dart';
 import '../models/course_detail_model.dart';
 import '../../../app/routes/app_routes.dart';
 import '../controllers/course_detail_controller.dart';
@@ -59,14 +61,12 @@ class CourseDetailView extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: controller.fetchCourseDetails,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: theme.colorScheme.secondary,
-                    ),
-                    child: const Text('Retry'),
-                  ),
-                ],
+                  CommonButton(
+                  text: 'Retry',
+                  onPressed: controller.fetchCourseDetails,
+                  backgroundColor: theme.colorScheme.secondary,
+                  fullWidth: false,
+                )                ],
               ),
             );
           }
@@ -225,6 +225,7 @@ class CourseDetailView extends StatelessWidget {
         if (course == null || course.isEnrolled || course.isDemo) {
           return const SizedBox.shrink();
         }
+        final isPending = course.enrollmentRequestStatus == 'PENDING';
         return Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -234,20 +235,11 @@ class CourseDetailView extends StatelessWidget {
             ),
           ),
           child: SafeArea(
-            child: ElevatedButton(
-              onPressed: () => _showPurchaseDialog(context, course),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: theme.colorScheme.secondary,
-                foregroundColor: theme.colorScheme.onSecondary,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: const Text(
-                'Request Access to Course',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-              ),
+            child: CommonButton(
+              text: isPending ? 'Request Pending Review' : 'Request Access to Course',
+              onPressed: isPending ? null : () => _showPurchaseDialog(context, course),
+              backgroundColor: isPending ? Colors.grey : theme.colorScheme.secondary,
+              foregroundColor: isPending ? Colors.white70 : theme.colorScheme.onSecondary,
             ),
           ),
         );
@@ -421,15 +413,9 @@ class CourseDetailView extends StatelessWidget {
         ? () => _showPurchaseDialog(context, course)
         : (isLocked
             ? () {
-                Get.snackbar(
-                  'Lesson Locked',
+                AppToast.validation(
                   'Please watch and complete the previous lesson to unlock this video.',
-                  snackPosition: SnackPosition.BOTTOM,
-                  margin: const EdgeInsets.all(16),
-                  backgroundColor: Colors.grey.shade900,
-                  colorText: Colors.white,
-                  icon: const Icon(Icons.lock, color: Colors.amber),
-                  duration: const Duration(seconds: 2),
+                  title: 'Lesson Locked',
                 );
               }
             : () async {
@@ -812,12 +798,11 @@ class CourseDetailView extends StatelessWidget {
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
             ),
-            const SizedBox(height: 24),
-            Row(
+            const SizedBox(height: 24),             Row(
               children: [
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: () => Get.back(),
+                    onPressed: () => Navigator.pop(context),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
@@ -830,33 +815,16 @@ class CourseDetailView extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Obx(() {
-                    return ElevatedButton(
-                      onPressed: controller.isRequesting.value
-                          ? null
-                          : () async {
-                              final success = await controller.requestEnrollment();
-                              if (success) {
-                                Get.back();
-                              }
-                            },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: theme.colorScheme.secondary,
-                        foregroundColor: theme.colorScheme.onSecondary,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: controller.isRequesting.value
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
-                          : const Text('Request Access'),
+                    return CommonButton(
+                      text: 'Request Access',
+                      isLoading: controller.isRequesting.value,
+                      onPressed: () async {
+                        final success = await controller.requestEnrollment();
+                        if (success && context.mounted) {
+                          Navigator.pop(context);
+                          controller.fetchCourseDetails();
+                        }
+                      },
                     );
                   }),
                 ),

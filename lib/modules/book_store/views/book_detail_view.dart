@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
+import '../../../../shared/widgets/common_button.dart';
 import '../controllers/book_store_controller.dart';
 import 'book_checkout_view.dart';
 import '../../../../shared/widgets/custom_network_image.dart';
@@ -362,33 +363,19 @@ class _BookDetailViewState extends State<BookDetailView> {
               ],
 
               // Buy Now Button
-              SizedBox(
-                width: double.infinity,
+              CommonButton(
+                text: AppStrings.buyNow,
+                onPressed: (selectedFormat == 'HARD_COPY' && book.stockHardCopy <= 0)
+                    ? null
+                    : () => Get.to(() => BookCheckoutView(
+                          book: book,
+                          format: selectedFormat,
+                          quantity: quantity,
+                        )),
+                backgroundColor: AppColors.brandPurple,
+                foregroundColor: Colors.white,
                 height: 52,
-                child: ElevatedButton(
-                  onPressed:
-                      (selectedFormat == 'HARD_COPY' && book.stockHardCopy <= 0)
-                          ? null
-                          : () => Get.to(() => BookCheckoutView(
-                                book: book,
-                                format: selectedFormat,
-                                quantity: quantity,
-                              )),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.brandPurple,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  child: const Text(
-                    AppStrings.buyNow,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
-                    ),
-                  ),
-                ),
+                borderRadius: 16,
               ),
             ],
           ),

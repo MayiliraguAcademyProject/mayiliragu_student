@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:file_picker/file_picker.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../shared/widgets/common_button.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/utils/toast_helper.dart';
 import '../controllers/book_store_controller.dart';
@@ -110,31 +111,18 @@ class _PaymentProofViewState extends State<PaymentProofView> {
                   ),
                 ),
                 const SizedBox(height: 36),
-                SizedBox(
-                  width: double.infinity,
+                CommonButton(
+                  text: 'Back to Bookstore',
+                  onPressed: () {
+                    // Navigate back to Bookstore dashboard
+                    Get.back();
+                    Get.back();
+                    Get.back();
+                  },
+                  backgroundColor: AppColors.brandPurple,
+                  foregroundColor: Colors.white,
                   height: 50,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      // Navigate back to Bookstore dashboard
-                      Get.back();
-                      Get.back();
-                      Get.back();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.brandPurple,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: const Text(
-                      'Back to Bookstore',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
+                  borderRadius: 14,
                 ),
               ],
             ),
@@ -338,27 +326,14 @@ class _PaymentProofViewState extends State<PaymentProofView> {
             const SizedBox(height: 36),
 
             // Submit Button
-            SizedBox(
-              width: double.infinity,
+            CommonButton(
+              text: 'Upload & Complete Order',
+              isLoading: _isUploading,
+              onPressed: _selectedImagePath == null ? null : _uploadProof,
+              backgroundColor: AppColors.brandPurple,
+              foregroundColor: Colors.white,
               height: 52,
-              child: ElevatedButton(
-                onPressed: (_selectedImagePath == null || _isUploading) ? null : _uploadProof,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.brandPurple,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  elevation: 0,
-                ),
-                child: _isUploading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text(
-                        'Upload & Complete Order',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                        ),
-                      ),
-              ),
+              borderRadius: 16,
             ),
             const SizedBox(height: 24),
           ],

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class DashboardModel {
   final List<BannerModel> banners;
   final List<EnrolledCourse> allCourses;
@@ -67,6 +69,14 @@ class BannerModel {
   final String? linkUrl;
   final bool isActive;
   final int order;
+  final String? linkType;
+  final String? linkId;
+  final double? price;
+  final double? offerPrice;
+  final DateTime? offerValidUntil;
+  final String? planDescription;
+  final int? validityDays;
+  final List<String>? curriculumJson;
 
   BannerModel({
     required this.id,
@@ -75,9 +85,34 @@ class BannerModel {
     this.linkUrl,
     required this.isActive,
     required this.order,
+    this.linkType,
+    this.linkId,
+    this.price,
+    this.offerPrice,
+    this.offerValidUntil,
+    this.planDescription,
+    this.validityDays,
+    this.curriculumJson,
   });
 
   factory BannerModel.fromJson(Map<String, dynamic> json) {
+    List<String>? curriculum;
+    if (json['curriculumJson'] != null) {
+      try {
+        final dynamic rawCurriculum = json['curriculumJson'];
+        final dynamic parsed = rawCurriculum is String 
+            ? jsonDecode(rawCurriculum) 
+            : rawCurriculum;
+        if (parsed is List) {
+          curriculum = parsed
+              .map((e) => e is Map ? (e['title'] ?? '').toString() : e.toString())
+              .toList();
+        }
+      } catch (e) {
+        print('Error parsing curriculumJson: $e');
+      }
+    }
+
     return BannerModel(
       id: json['id'] as String? ?? '',
       title: json['title'] as String? ?? '',
@@ -85,6 +120,20 @@ class BannerModel {
       linkUrl: json['linkUrl'] as String?,
       isActive: json['isActive'] as bool? ?? false,
       order: json['order'] as int? ?? 0,
+      linkType: json['linkType'] as String?,
+      linkId: json['linkId'] as String?,
+      price: json['price'] is num 
+          ? (json['price'] as num).toDouble() 
+          : (json['price'] is String ? double.tryParse(json['price'] as String) : null),
+      offerPrice: json['offerPrice'] is num 
+          ? (json['offerPrice'] as num).toDouble() 
+          : (json['offerPrice'] is String ? double.tryParse(json['offerPrice'] as String) : null),
+      offerValidUntil: json['offerValidUntil'] != null 
+          ? DateTime.tryParse(json['offerValidUntil'] as String) 
+          : null,
+      planDescription: json['planDescription'] as String?,
+      validityDays: json['validityDays'] as int?,
+      curriculumJson: curriculum,
     );
   }
 }

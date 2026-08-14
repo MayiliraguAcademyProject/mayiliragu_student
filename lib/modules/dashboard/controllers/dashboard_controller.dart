@@ -84,8 +84,10 @@ class DashboardController extends GetxController {
       if (Get.isRegistered<NotificationService>()) {
         Get.find<NotificationService>().fetchUnreadCount();
       }
-    } catch (e) {
-      errorMessage.value = 'Failed to connect to server';
+    } catch (e, stackTrace) {
+      print('Error fetching dashboard: $e');
+      print(stackTrace);
+      errorMessage.value = 'Failed to connect to server: $e';
     } finally {
       isLoading.value = false;
     }
@@ -101,9 +103,4 @@ class DashboardController extends GetxController {
     Get.offAllNamed(Routes.LOGIN);
   }
 
-  @override
-  void onClose() {
-    tabController.dispose();
-    super.onClose();
-  }
 }

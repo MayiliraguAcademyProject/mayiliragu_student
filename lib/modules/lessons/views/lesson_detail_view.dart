@@ -1,3 +1,4 @@
+import 'package:Mayiliragu/shared/widgets/common_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:better_player_enhanced/better_player.dart';
@@ -83,7 +84,8 @@ class LessonDetailView extends GetView<LessonController> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                ElevatedButton(
+                CommonButton(
+                  text: 'Save Note',
                   onPressed: () {
                     final text = textController.text.trim();
                     if (text.isNotEmpty) {
@@ -95,16 +97,9 @@ class LessonDetailView extends GetView<LessonController> {
                       Get.back();
                     }
                   },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: colorScheme.primary,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  child: const Text(
-                    'Save Note',
-                    style: TextStyle(color: Colors.white),
-                  ),
+                  backgroundColor: colorScheme.primary,
+                  borderRadius: 10,
+                  fullWidth: false,
                 ),
               ],
             ),
@@ -456,19 +451,18 @@ class LessonDetailView extends GetView<LessonController> {
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () {
+                    CommonButton(
+                  text: 'Retry',
+                  onPressed: () {
                         final String? lessonId =
                             Get.parameters['id'] ?? Get.arguments?.toString();
                         if (lessonId != null) {
                           controller.fetchLessonDetail(lessonId);
                         }
                       },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: colorScheme.primary,
-                      ),
-                      child: const Text('Retry'),
-                    ),
+                  backgroundColor: colorScheme.primary,
+                  fullWidth: false,
+                ),
                   ],
                 ),
               ),
@@ -618,29 +612,13 @@ class LessonDetailView extends GetView<LessonController> {
                 top: BorderSide(color: colorScheme.outline, width: 1),
               ),
             ),
-            child: SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: isComp ? null : () => controller.markLessonAsComplete(),
-                style: ElevatedButton.styleFrom(
+            child: CommonButton(
+                  text: isComp ? 'Lesson Completed ✓' : 'Mark Lesson as Complete',
+                  onPressed: isComp ? null : () => controller.markLessonAsComplete(),
+                  height: 50,
                   backgroundColor: isComp ? Colors.green : colorScheme.primary,
-                  disabledBackgroundColor: Colors.green,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                  elevation: 0,
+                  borderRadius: 25,
                 ),
-                child: Text(
-                  isComp ? 'Lesson Completed ✓' : 'Mark Lesson as Complete',
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
           ),
         );
       }),

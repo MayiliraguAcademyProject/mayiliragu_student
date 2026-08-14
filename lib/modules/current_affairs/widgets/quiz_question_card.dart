@@ -1,3 +1,4 @@
+import 'package:Mayiliragu/shared/widgets/common_button.dart';
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../models/current_affairs_models.dart';
@@ -107,18 +108,13 @@ class QuizQuestionCard extends StatelessWidget {
           }),
           if (!isSubmitted && selectedOption != null) ...[
             const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: onSubmit,
-                style: ElevatedButton.styleFrom(
+            CommonButton(
+                  text: "Submit Answer",
+                  onPressed: onSubmit,
                   backgroundColor: AppColors.brandPurple,
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  borderRadius: 12,
                 ),
-                child: const Text("Submit Answer", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-              ),
-            ),
           ],
           if (isSubmitted) ...[
             const SizedBox(height: 12),

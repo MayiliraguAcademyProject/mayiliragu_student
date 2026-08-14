@@ -15,5 +15,8 @@ class ApiConstants {
   static const notifications = '/notifications';
   static const notificationsUnreadCount = '/notifications/unread-count';
   static String markNotificationRead(String id) => '/notifications/$id/read';
+  static const paymentSettingsPublic = '/payment-settings/public';
+  static const paymentRequests = '/payment-requests';
+  static const myPaymentRequests = '/payment-requests/my';
 }
 

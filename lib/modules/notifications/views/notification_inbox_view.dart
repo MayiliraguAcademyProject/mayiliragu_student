@@ -1,3 +1,4 @@
+import 'package:Mayiliragu/shared/widgets/common_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/constants/app_colors.dart';
@@ -46,12 +47,11 @@ class NotificationInboxView extends GetView<NotificationInboxController> {
                   style: const TextStyle(color: Colors.redAccent, fontSize: 14),
                 ),
                 const SizedBox(height: 12),
-                ElevatedButton(
+                CommonButton(
+                  text: 'Retry',
                   onPressed: () => controller.fetchNotifications(isRefresh: true),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.brandPurple,
-                  ),
-                  child: const Text('Retry'),
+                  backgroundColor: AppColors.brandPurple,
+                  fullWidth: false,
                 ),
               ],
             ),

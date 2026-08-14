@@ -1,3 +1,4 @@
+import 'package:Mayiliragu/shared/widgets/common_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/constants/app_colors.dart';
@@ -60,13 +61,12 @@ class CourseListView extends GetView<CourseController> {
                     style: AppTextStyles.body.copyWith(color: AppColors.error),
                   ),
                   const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: controller.fetchCourses,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.accent,
-                    ),
-                    child: const Text('Retry'),
-                  ),
+                  CommonButton(
+                  text: 'Retry',
+                  onPressed: controller.fetchCourses,
+                  backgroundColor: AppColors.accent,
+                  fullWidth: false,
+                ),
                 ],
               ),
             );

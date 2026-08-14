@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../core/utils/toast_helper.dart';
 import '../../../core/services/secure_storage_service.dart';
 import '../models/question_model.dart';
 import '../models/student_answer_model.dart';
@@ -430,11 +431,9 @@ class TestRunnerController extends GetxController {
         
         if (currentSecIdx != -1 && currentSecIdx < sectionsList.length - 1) {
           if (isTimeOut) {
-            Get.snackbar(
-              'Time\'s Up!',
+            AppToast.validation(
               'Automatically moving to the next section.',
-              backgroundColor: Colors.amber,
-              colorText: Colors.black,
+              title: 'Time\'s Up!',
             );
           }
           Get.back(); 
