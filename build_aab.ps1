@@ -151,7 +151,7 @@ try {
 
     # 5. Build AAB release
     Write-Host "`n[5/5] Building Release App Bundle (flutter build appbundle --release)..." -ForegroundColor Yellow
-    flutter build appbundle --release
+    flutter build appbundle --release --dart-define=BASE_URL=https://api-mayiliragu.sathishdev.in/api --dart-define=ENV=prod
     if ($LASTEXITCODE -ne 0) {
         throw ("Flutter AAB build failed with exit code {0}" -f $LASTEXITCODE)
     }

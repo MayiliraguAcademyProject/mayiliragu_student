@@ -66,7 +66,7 @@ jobs:
       - name: Create Production Environment
         run: |
           cat > .env.prod <<EOF
-          BASE_URL=${{ secrets.BASE_URL_PROD }}
+          BASE_URL=${{ secrets.BASE_URL_PROD || 'https://api-mayiliragu.sathishdev.in/api' }}
           APP_NAME=Mayiliragu
           ENABLE_LOGS=false
           EOF
@@ -93,7 +93,7 @@ jobs:
         with:
           token: "${{ secrets.GITHUB_TOKEN }}"
           tag_name: "v${{ steps.get_version.outputs.version }}-${{ steps.get_version.outputs.build_number }}"
-          name: "Coconut Delivery v${{ steps.get_version.outputs.version }}-${{ steps.get_version.outputs.build_number }}"
+          name: "Mayiliragu Student v${{ steps.get_version.outputs.version }}-${{ steps.get_version.outputs.build_number }}"
           prerelease: true
           files: |
             build/app/outputs/flutter-apk/app-release.apk
