@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../shared/widgets/common_button.dart';
 import '../../../../core/utils/toast_helper.dart';
 import '../controllers/analytics_controller.dart';
 import '../widgets/goal_item.dart';
@@ -73,7 +74,8 @@ class GoalsTrackerView extends StatelessWidget {
               ),
             ),
           ),
-          ElevatedButton(
+          CommonButton(
+            text: 'Add Goal',
             onPressed: () {
               final title = titleController.text.trim();
               final target = double.tryParse(targetController.text) ?? 0;
@@ -87,19 +89,10 @@ class GoalsTrackerView extends StatelessWidget {
                 );
               }
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.brandPurple,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: const Text(
-              'Add Goal',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            backgroundColor: AppColors.brandPurple,
+            foregroundColor: Colors.white,
+            borderRadius: 12,
+            fullWidth: false,
           ),
         ],
       ),

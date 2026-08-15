@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:upgrader/upgrader.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../controllers/splash_controller.dart';
 
@@ -8,17 +9,22 @@ class SplashView extends GetView<SplashController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return UpgradeAlert(
+      upgrader: Upgrader(),
+      showIgnore: false,
+      showLater: false,
+      barrierDismissible: false,
+      child: Scaffold(
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              AppColors.backgroundStart,
-              AppColors.backgroundEnd,
+              Theme.of(context).colorScheme.surface,
+              Theme.of(context).colorScheme.surfaceContainerHighest,
             ],
           ),
         ),
@@ -35,29 +41,24 @@ class SplashView extends GetView<SplashController> {
                       width: 110,
                       height: 110,
                       decoration: BoxDecoration(
-                        color: AppColors.primary,
+                        //  color: AppColors.primary,
                         borderRadius: BorderRadius.circular(28),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.primary.withAlpha(76),
-                            blurRadius: 24,
-                            offset: const Offset(0, 8),
-                          ),
-                        ],
                       ),
-                      child: const Icon(
-                        Icons.school_rounded,
-                        color: Colors.white,
-                        size: 58,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Image.asset(
+                          'assets/images/app_logo.png',
+                          fit: BoxFit.contain,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 24),
-                    const Text(
+                    Text(
                       'Mayiliragu Academy',
                       style: TextStyle(
                         fontSize: 26,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
+                        color: Theme.of(context).colorScheme.onSurface,
                         letterSpacing: 0.5,
                       ),
                     ),
@@ -66,7 +67,7 @@ class SplashView extends GetView<SplashController> {
                       'Shaping Your Bright Future',
                       style: TextStyle(
                         fontSize: 14,
-                        color: AppColors.textSecondary.withAlpha(204),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(204),
                         letterSpacing: 0.2,
                       ),
                     ),
@@ -78,7 +79,9 @@ class SplashView extends GetView<SplashController> {
                       child: CircularProgressIndicator(
                         strokeWidth: 3,
                         color: AppColors.primary,
-                        valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          AppColors.primary,
+                        ),
                       ),
                     ),
                   ],
@@ -90,21 +93,23 @@ class SplashView extends GetView<SplashController> {
                 alignment: Alignment.bottomCenter,
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: 24.0),
-                  child: Obx(() => Text(
-                        controller.versionText.value,
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textSecondary.withAlpha(153),
-                          letterSpacing: 0.5,
-                        ),
-                      )),
+                  child: Obx(
+                    () => Text(
+                      controller.versionText.value,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(153),
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ],
           ),
         ),
       ),
-    );
+    ),);
   }
 }

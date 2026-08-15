@@ -56,9 +56,13 @@ class MonthlyMagazineCard extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.download_for_offline_outlined, color: AppColors.brandPurple, size: 26),
             onPressed: () async {
-              // Dynamically resolve backend host domain
-              final base = ApiConstants.baseUrl.replaceAll('/api', '');
-              final url = '$base${magazine.pdfUrl}';
+              final pdfUrl = magazine.pdfUrl;
+              String url = pdfUrl;
+              if (!pdfUrl.startsWith('http://') && !pdfUrl.startsWith('https://')) {
+                // Dynamically resolve backend host domain
+                final base = ApiConstants.baseUrl.replaceAll('/api', '');
+                url = '$base$pdfUrl';
+              }
               final uri = Uri.parse(url);
               try {
                 await launchUrl(uri, mode: LaunchMode.externalApplication);

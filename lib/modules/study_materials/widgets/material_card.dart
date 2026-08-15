@@ -68,19 +68,20 @@ class MaterialCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final typeIcon = _getFileIcon(material.fileType);
     final badgeColor = _getBadgeColor(material.accessType);
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 10,
             offset: const Offset(0, 4),
           )
         ],
-        border: Border.all(color: Colors.grey.shade100),
+        border: Border.all(color: colorScheme.outline),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20),
@@ -96,7 +97,7 @@ class MaterialCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: AppColors.brandPurple.withOpacity(0.05),
+                      color: AppColors.brandPurple.withValues(alpha: 0.05),
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Icon(typeIcon, color: AppColors.brandPurple, size: 28),
@@ -112,7 +113,7 @@ class MaterialCard extends StatelessWidget {
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 8, vertical: 3),
                               decoration: BoxDecoration(
-                                color: badgeColor.withOpacity(0.08),
+                                color: badgeColor.withValues(alpha: 0.08),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
@@ -128,10 +129,10 @@ class MaterialCard extends StatelessWidget {
                             if (material.category != null)
                               Text(
                                 material.category!.name,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 10,
                                   fontWeight: FontWeight.bold,
-                                  color: AppColors.textSecondary,
+                                  color: colorScheme.onSurfaceVariant,
                                 ),
                               ),
                           ],
@@ -139,10 +140,10 @@ class MaterialCard extends StatelessWidget {
                         const SizedBox(height: 6),
                         Text(
                           material.title,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w900,
-                            color: AppColors.textPrimary,
+                            color: colorScheme.onSurface,
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -152,9 +153,9 @@ class MaterialCard extends StatelessWidget {
                             material.description!.isNotEmpty)
                           Text(
                             material.description!,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 11,
-                              color: AppColors.textSecondary,
+                              color: colorScheme.onSurfaceVariant,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -162,26 +163,26 @@ class MaterialCard extends StatelessWidget {
                         const SizedBox(height: 8),
                         Row(
                           children: [
-                            const Icon(Icons.sd_storage_outlined,
-                                size: 12, color: AppColors.textSecondary),
+                            Icon(Icons.sd_storage_outlined,
+                                size: 12, color: colorScheme.onSurfaceVariant),
                             const SizedBox(width: 4),
                             Text(
                               _formatFileSize(material.fileSize),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 10,
-                                color: AppColors.textSecondary,
+                                color: colorScheme.onSurfaceVariant,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                             const SizedBox(width: 12),
-                            const Icon(Icons.history,
-                                size: 12, color: AppColors.textSecondary),
+                            Icon(Icons.history,
+                                size: 12, color: colorScheme.onSurfaceVariant),
                             const SizedBox(width: 4),
                             Text(
                               'v${material.version}',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 10,
-                                color: AppColors.textSecondary,
+                                color: colorScheme.onSurfaceVariant,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -197,7 +198,7 @@ class MaterialCard extends StatelessWidget {
                           : Icons.bookmark_border,
                       color: material.isBookmarked
                           ? AppColors.brandPurple
-                          : AppColors.textSecondary,
+                          : colorScheme.onSurfaceVariant,
                     ),
                     onPressed: onBookmarkTap,
                   ),

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/section_selection_controller.dart';
+import '../../../shared/widgets/common_button.dart';
 import '../models/test_model.dart';
 
 class SectionSelectionView extends GetView<SectionSelectionController> {
-  const SectionSelectionView({Key? key}) : super(key: key);
+  const SectionSelectionView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -50,15 +51,12 @@ class SectionSelectionView extends GetView<SectionSelectionController> {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 24),
-                  ElevatedButton(
+                  CommonButton(
+                    text: 'Retry',
                     onPressed: controller.loadTestDetails,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0F3CC9),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: const Text('Retry'),
+                    backgroundColor: const Color(0xFF0F3CC9),
+                    borderRadius: 12,
+                    fullWidth: false,
                   ),
                 ],
               ),
@@ -87,7 +85,7 @@ class SectionSelectionView extends GetView<SectionSelectionController> {
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF0F3CC9).withOpacity(0.2),
+                    color: const Color(0xFF0F3CC9).withValues(alpha: 0.2),
                     blurRadius: 15,
                     offset: const Offset(0, 8),
                   ),
@@ -119,7 +117,7 @@ class SectionSelectionView extends GetView<SectionSelectionController> {
                     Text(
                       test.description!,
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.8),
+                        color: Colors.white.withValues(alpha: 0.8),
                         fontSize: 12,
                         height: 1.4,
                       ),
@@ -154,7 +152,7 @@ class SectionSelectionView extends GetView<SectionSelectionController> {
               final isEnabled = controller.isSectionEnabled(section);
               
               return _buildSectionCard(section, idx, isLocked, isEnabled);
-            }).toList(),
+            }),
           ],
         );
       }),
@@ -197,7 +195,7 @@ class SectionSelectionView extends GetView<SectionSelectionController> {
           border: Border.all(color: borderCol, width: 1.5),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF0F3CC9).withOpacity(0.02),
+              color: const Color(0xFF0F3CC9).withValues(alpha: 0.02),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -249,44 +247,28 @@ class SectionSelectionView extends GetView<SectionSelectionController> {
                 ],
               ),
               const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: (!isEnabled || isLocked)
-                      ? null
-                      : () {
-                          Get.toNamed(
-                            '/test-runner',
-                            arguments: {
-                              'test_id': controller.testId,
-                              'section_id': section.id,
-                              'section_index': index,
-                            },
-                          )?.then((_) => controller.loadDraftState());
-                        },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: isLocked
-                        ? const Color(0xFFE2E8F0)
-                        : (isEnabled ? const Color(0xFF0F3CC9) : const Color(0xFF94A3B8)),
-                    foregroundColor: Colors.white,
-                    disabledBackgroundColor: const Color(0xFFE2E8F0),
-                    disabledForegroundColor: const Color(0xFF94A3B8),
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
-                  child: Text(
-                    isLocked
-                        ? 'Section Completed'
-                        : (isEnabled ? 'Start Section' : 'Locked'),
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w900,
-                      fontSize: 13,
-                    ),
-                  ),
-                ),
+              CommonButton(
+                text: isLocked
+                    ? 'Section Completed'
+                    : (isEnabled ? 'Start Section' : 'Locked'),
+                onPressed: (!isEnabled || isLocked)
+                    ? null
+                    : () {
+                        Get.toNamed(
+                          '/test-runner',
+                          arguments: {
+                            'test_id': controller.testId,
+                            'section_id': section.id,
+                            'section_index': index,
+                          },
+                        )?.then((_) => controller.loadDraftState());
+                      },
+                backgroundColor: isLocked
+                    ? const Color(0xFFE2E8F0)
+                    : (isEnabled ? const Color(0xFF0F3CC9) : const Color(0xFF94A3B8)),
+                foregroundColor: Colors.white,
+                height: 48,
+                borderRadius: 12,
               ),
             ],
           ),

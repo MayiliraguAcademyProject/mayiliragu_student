@@ -14,19 +14,21 @@ class StudyMaterialDashboardView extends GetView<StudyMaterialsController> {
   Widget build(BuildContext context) {
     final controller = Get.find<StudyMaterialsController>();
 
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFFAF9FF),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: colorScheme.surface,
         elevation: 0.5,
         title: Text(
           'Library Hub',
-          style: AppTextStyles.heading.copyWith(fontSize: 20, color: AppColors.textPrimary),
+          style: AppTextStyles.heading.copyWith(fontSize: 20, color: colorScheme.onSurface),
         ),
         centerTitle: false,
         actions: [
           IconButton(
-            icon: const Icon(Icons.bookmark_outline, color: AppColors.textPrimary),
+            icon: Icon(Icons.bookmark_outline, color: colorScheme.onSurface),
             onPressed: () {
               controller.fetchBookmarks();
               _showBookmarksSheet(context, controller);
@@ -52,12 +54,12 @@ class StudyMaterialDashboardView extends GetView<StudyMaterialsController> {
               const SizedBox(height: 20),
 
               // Categories Filter Header
-              const Text(
+              Text(
                 "Categories",
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w900,
-                  color: AppColors.textPrimary,
+                  color: colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 10),
@@ -70,20 +72,20 @@ class StudyMaterialDashboardView extends GetView<StudyMaterialsController> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     "Trending Resources",
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w900,
-                      color: AppColors.textPrimary,
+                      color: colorScheme.onSurface,
                     ),
                   ),
                   Obx(() => Text(
                         "${controller.materialsList.length} items",
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.textSecondary,
+                          color: colorScheme.onSurfaceVariant,
                         ),
                       )),
                 ],
@@ -91,7 +93,7 @@ class StudyMaterialDashboardView extends GetView<StudyMaterialsController> {
               const SizedBox(height: 12),
 
               // Materials List
-              _buildMaterialsFeed(controller),
+              _buildMaterialsFeed(context, controller),
             ],
           ),
         ),
@@ -100,31 +102,37 @@ class StudyMaterialDashboardView extends GetView<StudyMaterialsController> {
   }
 
   Widget _buildSearchBar(StudyMaterialsController controller) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          )
-        ],
-      ),
-      child: TextField(
-        onChanged: (val) {
-          controller.searchQuery.value = val;
-          controller.fetchMaterials();
-        },
-        decoration: const InputDecoration(
-          hintText: "Search notes, e-books, categories...",
-          hintStyle: TextStyle(fontSize: 13, color: AppColors.textSecondary),
-          prefixIcon: Icon(Icons.search, color: AppColors.textSecondary),
-          border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        ),
-      ),
+    return Builder(
+      builder: (context) {
+        final colorScheme = Theme.of(context).colorScheme;
+        return Container(
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.03),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              )
+            ],
+          ),
+          child: TextField(
+            onChanged: (val) {
+              controller.searchQuery.value = val;
+              controller.fetchMaterials();
+            },
+            decoration: InputDecoration(
+              hintText: "Search notes, e-books, categories...",
+              hintStyle: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant),
+              prefixIcon: Icon(Icons.search, color: colorScheme.onSurfaceVariant),
+              border: InputBorder.none,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            ),
+            style: TextStyle(color: colorScheme.onSurface),
+          ),
+        );
+      }
     );
   }
 
@@ -136,46 +144,50 @@ class StudyMaterialDashboardView extends GetView<StudyMaterialsController> {
           return const Center(child: CircularProgressIndicator(strokeWidth: 2));
         }
 
+        final categories = controller.categoriesList;
         return ListView.builder(
           scrollDirection: Axis.horizontal,
-          itemCount: controller.categoriesList.length + 1,
+          itemCount: categories.length + 1,
           itemBuilder: (context, index) {
             if (index == 0) {
-              final active = controller.selectedCategoryId.value.isEmpty;
+              return Obx(() {
+                final active = controller.selectedCategoryId.value.isEmpty;
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: CategoryChip(
+                    label: "All Library",
+                    isSelected: active,
+                    onSelected: (selected) {
+                      controller.selectedCategoryId.value = "";
+                      controller.fetchMaterials();
+                    },
+                  ),
+                );
+              });
+            }
+
+            final cat = categories[index - 1];
+            return Obx(() {
+              final active = controller.selectedCategoryId.value == cat.id;
               return Padding(
                 padding: const EdgeInsets.only(right: 8.0),
                 child: CategoryChip(
-                  label: "All Library",
+                  label: cat.name,
                   isSelected: active,
                   onSelected: (selected) {
-                    controller.selectedCategoryId.value = "";
+                    controller.selectedCategoryId.value = cat.id;
                     controller.fetchMaterials();
                   },
                 ),
               );
-            }
-
-            final cat = controller.categoriesList[index - 1];
-            final active = controller.selectedCategoryId.value == cat.id;
-
-            return Padding(
-              padding: const EdgeInsets.only(right: 8.0),
-              child: CategoryChip(
-                label: cat.name,
-                isSelected: active,
-                onSelected: (selected) {
-                  controller.selectedCategoryId.value = cat.id;
-                  controller.fetchMaterials();
-                },
-              ),
-            );
+            });
           },
         );
       }),
     );
   }
 
-  Widget _buildMaterialsFeed(StudyMaterialsController controller) {
+  Widget _buildMaterialsFeed(BuildContext context, StudyMaterialsController controller) {
     return Obx(() {
       if (controller.isMaterialsLoading.value) {
         return const Padding(
@@ -187,17 +199,18 @@ class StudyMaterialDashboardView extends GetView<StudyMaterialsController> {
       }
 
       if (controller.materialsList.isEmpty) {
+        final colorScheme = Theme.of(context).colorScheme;
         return Container(
           width: double.infinity,
           padding: const EdgeInsets.symmetric(vertical: 40.0),
           child: Column(
             children: [
-              Icon(Icons.library_books_outlined, size: 48, color: Colors.grey.shade400),
+              Icon(Icons.library_books_outlined, size: 48, color: colorScheme.onSurfaceVariant),
               const SizedBox(height: 12),
-              const Text(
+              Text(
                 "No materials found in this category.",
                 style: TextStyle(
-                    fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.bold),
+                    fontSize: 12, color: colorScheme.onSurfaceVariant, fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -208,7 +221,7 @@ class StudyMaterialDashboardView extends GetView<StudyMaterialsController> {
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         itemCount: controller.materialsList.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 12),
+        separatorBuilder: (_, _) => const SizedBox(height: 12),
         itemBuilder: (context, index) {
           final mat = controller.materialsList[index];
           return MaterialCard(
@@ -224,11 +237,12 @@ class StudyMaterialDashboardView extends GetView<StudyMaterialsController> {
   void _showBookmarksSheet(BuildContext context, StudyMaterialsController controller) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFFFAF9FF),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       builder: (context) {
+        final colorScheme = Theme.of(context).colorScheme;
         return Container(
           padding: const EdgeInsets.all(20),
           child: Column(
@@ -237,10 +251,10 @@ class StudyMaterialDashboardView extends GetView<StudyMaterialsController> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     "My Saved Materials",
                     style: TextStyle(
-                        fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
+                        fontSize: 16, fontWeight: FontWeight.w900, color: colorScheme.onSurface),
                   ),
                   IconButton(
                     icon: const Icon(Icons.close),
@@ -256,10 +270,10 @@ class StudyMaterialDashboardView extends GetView<StudyMaterialsController> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.bookmark_outline, size: 40, color: Colors.grey.shade400),
+                          Icon(Icons.bookmark_outline, size: 40, color: colorScheme.onSurfaceVariant),
                           const SizedBox(height: 8),
-                          const Text("No saved resources yet.",
-                              style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                          Text("No saved resources yet.",
+                              style: TextStyle(fontSize: 11, color: colorScheme.onSurfaceVariant)),
                         ],
                       ),
                     );
@@ -271,19 +285,19 @@ class StudyMaterialDashboardView extends GetView<StudyMaterialsController> {
                       return ListTile(
                         contentPadding: EdgeInsets.zero,
                         leading: CircleAvatar(
-                          backgroundColor: AppColors.brandPurple.withOpacity(0.08),
+                          backgroundColor: AppColors.brandPurple.withValues(alpha: 0.08),
                           child: const Icon(Icons.folder_zip, color: AppColors.brandPurple, size: 18),
                         ),
                         title: Text(
                           mat.title,
-                          style: const TextStyle(
-                              fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                          style: TextStyle(
+                              fontSize: 12, fontWeight: FontWeight.bold, color: colorScheme.onSurface),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                         subtitle: Text(
                           mat.category?.name ?? 'Material',
-                          style: const TextStyle(fontSize: 10, color: AppColors.textSecondary),
+                          style: TextStyle(fontSize: 10, color: colorScheme.onSurfaceVariant),
                         ),
                         trailing: const Icon(Icons.chevron_right, size: 16),
                         onTap: () {

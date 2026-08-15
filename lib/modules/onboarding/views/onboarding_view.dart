@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../shared/widgets/common_button.dart';
 import '../controllers/onboarding_controller.dart';
 
 class OnboardingView extends GetView<OnboardingController> {
@@ -8,8 +9,9 @@ class OnboardingView extends GetView<OnboardingController> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: AppColors.onPrimary,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         bottom: false,
         child: Column(
@@ -24,10 +26,10 @@ class OnboardingView extends GetView<OnboardingController> {
                 ),
                 child: TextButton(
                   onPressed: controller.finishOnboarding,
-                  child: const Text(
+                  child: Text(
                     'Skip',
                     style: TextStyle(
-                      color: Color(0xFF6E7191),
+                      color: theme.colorScheme.onSurfaceVariant,
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                     ),
@@ -57,13 +59,13 @@ class OnboardingView extends GetView<OnboardingController> {
               flex: 5,
               child: Container(
                 width: double.infinity,
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surface,
+                  borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(32),
                     topRight: Radius.circular(32),
                   ),
-                  boxShadow: [
+                  boxShadow: const [
                     BoxShadow(
                       color: Color(0x0F000000),
                       blurRadius: 20,
@@ -95,10 +97,10 @@ class OnboardingView extends GetView<OnboardingController> {
                                 Text(
                                   slide['title'] ?? '',
                                   textAlign: TextAlign.center,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 22,
                                     fontWeight: FontWeight.bold,
-                                    color: Color(0xFF0F0F0F),
+                                    color: theme.colorScheme.onSurface,
                                     height: 1.3,
                                   ),
                                 ),
@@ -106,9 +108,9 @@ class OnboardingView extends GetView<OnboardingController> {
                                 Text(
                                   slide['subtitle'] ?? '',
                                   textAlign: TextAlign.center,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 14,
-                                    color: Color(0xFF6E7191),
+                                    color: theme.colorScheme.onSurfaceVariant,
                                     height: 1.5,
                                   ),
                                 ),
@@ -150,40 +152,20 @@ class OnboardingView extends GetView<OnboardingController> {
                       const Spacer(),
 
                       // Bottom Next/GetStarted button
-                      SizedBox(
-                        width: double.infinity,
-                        height: 56,
-                        child: Obx(() {
-                          final isLast =
-                              controller.currentPage.value ==
-                              controller.slides.length - 1;
-                          return ElevatedButton(
-                            onPressed: controller.nextPage,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.brandPurple,
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(28),
-                              ),
-                              elevation: 0,
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  isLast ? 'Get Started' : 'Next',
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                const Icon(Icons.arrow_forward, size: 20),
-                              ],
-                            ),
-                          );
-                        }),
-                      ),
+                      Obx(() {
+                        final isLast =
+                            controller.currentPage.value ==
+                            controller.slides.length - 1;
+                        return CommonButton(
+                          text: isLast ? 'Get Started' : 'Next',
+                          onPressed: controller.nextPage,
+                          backgroundColor: AppColors.brandPurple,
+                          foregroundColor: Colors.white,
+                          height: 56,
+                          borderRadius: 28,
+                          suffixIcon: const Icon(Icons.arrow_forward, size: 20),
+                        );
+                      }),
                       const SizedBox(height: 12),
                     ],
                   ),

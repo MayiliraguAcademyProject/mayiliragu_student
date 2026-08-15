@@ -6,7 +6,7 @@ import './profile_fields.dart';
 
 class DemographicsSection extends StatelessWidget {
   final ProfileController controller;
-  const DemographicsSection({Key? key, required this.controller}) : super(key: key);
+  const DemographicsSection({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {

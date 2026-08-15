@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import '../../../../core/services/secure_storage_service.dart';
 import '../../../../core/services/notification_service.dart';
+import '../../../../core/controllers/user_session_controller.dart';
 import '../../../../app/routes/app_routes.dart';
 import '../repositories/auth_repository.dart';
 import '../../../shared/models/student_profile_model.dart';
@@ -36,7 +38,14 @@ class AuthController extends GetxController {
     errorMessage.value = '';
 
     try {
-      final response = await _authRepository.login(email: email, password: password);
+      final deviceId = await _storage.getOrCreateDeviceId();
+
+      final response = await _authRepository.login(
+        email: email,
+        password: password,
+        deviceId: deviceId,
+        deviceName: 'Mayiliragu Mobile App',
+      );
       if (response.statusCode == 200) {
         final responseData = response.data['data'] as Map<String, dynamic>;
         final accessToken = responseData['accessToken'] as String;
@@ -61,22 +70,26 @@ class AuthController extends GetxController {
 
         emailController.clear();
         passwordController.clear();
-        
-        // Check student profile completion status using repository and model
+
+        // Check student profile completion status using the returned profile in response
         bool isCompleted = false;
-        try {
-          final profileRes = await _authRepository.getStudentProfile(responseData['user']['id']);
-          if (profileRes.statusCode == 200 && profileRes.data['data'] != null) {
-            final profileModel = StudentProfileModel.fromJson(profileRes.data['data']);
-            if (profileModel.gender != null && 
-                profileModel.gender!.isNotEmpty && 
-                profileModel.mobileNumber != null && 
+        final profileData = responseData['profile'];
+        if (profileData != null) {
+          try {
+            final profileModel = StudentProfileModel.fromJson(profileData);
+            if (profileModel.gender != null &&
+                profileModel.gender!.isNotEmpty &&
+                profileModel.mobileNumber != null &&
                 profileModel.mobileNumber!.isNotEmpty) {
               isCompleted = true;
             }
+          } catch (e) {
+            debugPrint('Error parsing profile completion on login: $e');
           }
-        } catch (e) {
-          debugPrint('Error checking profile completion on login: $e');
+        }
+
+        if (Get.isRegistered<UserSessionController>()) {
+          await Get.find<UserSessionController>().loadSession();
         }
 
         if (isCompleted) {
@@ -90,7 +103,19 @@ class AuthController extends GetxController {
         errorMessage.value = response.data['message'] ?? 'Login failed';
       }
     } catch (e) {
-      errorMessage.value = 'Invalid email or password';
+      if (e is DioException) {
+        final resData = e.response?.data;
+        if (resData is Map && (resData['code'] == 'DEVICE_BOUND_MISMATCH' || e.response?.statusCode == 403)) {
+          errorMessage.value = resData['message'] ??
+              'This account is registered on another device. Contact support to transfer device.';
+          return;
+        }
+        errorMessage.value = (resData is Map && resData['message'] != null)
+            ? resData['message'].toString()
+            : 'Invalid email or password';
+      } else {
+        errorMessage.value = 'Invalid email or password';
+      }
     } finally {
       isLoading.value = false;
     }

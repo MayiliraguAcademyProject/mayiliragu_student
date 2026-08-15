@@ -17,4 +17,8 @@ abstract class Routes {
   static const BOOK_STORE = '/book-store';
   static const NOTIFICATIONS = '/notifications';
   static const SPLASH = '/splash';
+  static const BOOKMARKS = '/bookmarks';
+  static const BANNER_PRODUCT_DETAIL = '/banner-product-detail';
+  static const PAYMENT_QR = '/payment-qr';
+  static const PAYMENT_CONFIRMATION = '/payment-confirmation';
 }

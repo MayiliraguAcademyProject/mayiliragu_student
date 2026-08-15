@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:url_launcher/url_launcher.dart';
+// import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/api_constants.dart';
+// import '../../../../core/constants/api_constants.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../study_materials/widgets/category_chip.dart';
 import '../controllers/book_store_controller.dart';
-import '../../../../core/utils/toast_helper.dart';
+// import '../../../../core/utils/toast_helper.dart';
 import '../models/book_model.dart';
 import 'book_detail_view.dart';
 import '../../../../shared/widgets/custom_network_image.dart';
@@ -18,7 +18,8 @@ class BookStoreDashboardView extends StatefulWidget {
   State<BookStoreDashboardView> createState() => _BookStoreDashboardViewState();
 }
 
-class _BookStoreDashboardViewState extends State<BookStoreDashboardView> with SingleTickerProviderStateMixin {
+class _BookStoreDashboardViewState extends State<BookStoreDashboardView>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final controller = Get.find<BookStoreController>();
 
@@ -36,14 +37,18 @@ class _BookStoreDashboardViewState extends State<BookStoreDashboardView> with Si
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: const Color(0xFFFAF9FF),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: colorScheme.surface,
         elevation: 0.5,
         title: Text(
           'Book Store',
-          style: AppTextStyles.heading.copyWith(fontSize: 20, color: AppColors.textPrimary),
+          style: AppTextStyles.heading.copyWith(
+            fontSize: 20,
+            color: colorScheme.onSurface,
+          ),
         ),
         centerTitle: false,
         bottom: PreferredSize(
@@ -51,7 +56,7 @@ class _BookStoreDashboardViewState extends State<BookStoreDashboardView> with Si
           child: Container(
             margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
             decoration: BoxDecoration(
-              color: const Color(0xFFF1EFFC),
+              color: colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(12),
             ),
             child: TabBar(
@@ -63,16 +68,22 @@ class _BookStoreDashboardViewState extends State<BookStoreDashboardView> with Si
                 borderRadius: BorderRadius.circular(10),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.brandPurple.withOpacity(0.2),
+                    color: AppColors.brandPurple.withValues(alpha: 0.2),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
-                  )
+                  ),
                 ],
               ),
               labelColor: Colors.white,
-              unselectedLabelColor: AppColors.textSecondary,
-              labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-              unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+              unselectedLabelColor: colorScheme.onSurfaceVariant,
+              labelStyle: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
+              ),
+              unselectedLabelStyle: const TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+              ),
               tabs: const [
                 Tab(text: "Catalog"),
                 Tab(text: "My Books"),
@@ -84,11 +95,7 @@ class _BookStoreDashboardViewState extends State<BookStoreDashboardView> with Si
       ),
       body: TabBarView(
         controller: _tabController,
-        children: [
-          _buildCatalogTab(),
-          _buildMyBooksTab(),
-          _buildOrdersTab(),
-        ],
+        children: [_buildCatalogTab(), _buildMyBooksTab(), _buildOrdersTab()],
       ),
     );
   }
@@ -111,9 +118,13 @@ class _BookStoreDashboardViewState extends State<BookStoreDashboardView> with Si
             const SizedBox(height: 20),
 
             // Categories Filter Header
-            const Text(
+            Text(
               "Categories",
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w900,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
             ),
             const SizedBox(height: 10),
 
@@ -124,20 +135,33 @@ class _BookStoreDashboardViewState extends State<BookStoreDashboardView> with Si
             // Books Grid
             Obx(() {
               if (controller.isBooksLoading.value) {
-                return const Center(child: CircularProgressIndicator(color: AppColors.brandPurple));
+                return const Center(
+                  child: CircularProgressIndicator(
+                    color: AppColors.brandPurple,
+                  ),
+                );
               }
 
               if (controller.booksList.isEmpty) {
+                final colorScheme = Theme.of(context).colorScheme;
                 return Container(
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 40.0),
                   child: Column(
                     children: [
-                      Icon(Icons.menu_book_outlined, size: 48, color: Colors.grey.shade400),
+                      Icon(
+                        Icons.menu_book_outlined,
+                        size: 48,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
                       const SizedBox(height: 12),
-                      const Text(
+                      Text(
                         "No books found.",
-                        style: TextStyle(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: colorScheme.onSurfaceVariant,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
@@ -172,16 +196,25 @@ class _BookStoreDashboardViewState extends State<BookStoreDashboardView> with Si
       color: AppColors.brandPurple,
       child: Obx(() {
         if (controller.myBooksList.isEmpty) {
-          return const Center(
+          final colorScheme = Theme.of(context).colorScheme;
+          return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.lock_outline, size: 48, color: Colors.grey),
-                SizedBox(height: 12),
+                Icon(
+                  Icons.lock_outline,
+                  size: 48,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(height: 12),
                 Text(
                   "No paid digital books yet.\nSoft copies appear here after admin approves payment.",
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
@@ -191,15 +224,16 @@ class _BookStoreDashboardViewState extends State<BookStoreDashboardView> with Si
         return ListView.separated(
           padding: const EdgeInsets.all(16.0),
           itemCount: controller.myBooksList.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 12),
+          separatorBuilder: (_, _) => const SizedBox(height: 12),
           itemBuilder: (context, index) {
             final book = controller.myBooksList[index];
+            final colorScheme = Theme.of(context).colorScheme;
             return Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: colorScheme.surface,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.grey.shade100),
+                border: Border.all(color: colorScheme.outline),
               ),
               child: Row(
                 children: [
@@ -220,26 +254,50 @@ class _BookStoreDashboardViewState extends State<BookStoreDashboardView> with Si
                       children: [
                         Text(
                           book.title,
-                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: colorScheme.onSurface,
+                          ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                         if (book.author != null)
-                          Text("by ${book.author}", style: const TextStyle(fontSize: 11, color: Colors.grey)),
+                          Text(
+                            "by ${book.author}",
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                          ),
                       ],
                     ),
                   ),
                   const SizedBox(width: 8),
+                  /*
                   ElevatedButton.icon(
                     onPressed: () => _handlePdfRead(book.id),
-                    icon: const Icon(Icons.chrome_reader_mode, size: 14, color: Colors.white),
-                    label: const Text("Read", style: TextStyle(fontSize: 11, color: Colors.white)),
+                    icon: const Icon(
+                      Icons.chrome_reader_mode,
+                      size: 14,
+                      color: Colors.white,
+                    ),
+                    label: const Text(
+                      "Read",
+                      style: TextStyle(fontSize: 11, color: Colors.white),
+                    ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.brandPurple,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
                     ),
                   ),
+                  */
                 ],
               ),
             );
@@ -255,14 +313,19 @@ class _BookStoreDashboardViewState extends State<BookStoreDashboardView> with Si
       color: AppColors.brandPurple,
       child: Obx(() {
         if (controller.isOrdersLoading.value) {
-          return const Center(child: CircularProgressIndicator(color: AppColors.brandPurple));
+          return const Center(
+            child: CircularProgressIndicator(color: AppColors.brandPurple),
+          );
         }
 
         if (controller.myOrdersList.isEmpty) {
-          return const Center(
+          return Center(
             child: Text(
               "No orders placed yet.",
-              style: TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           );
         }
@@ -270,15 +333,16 @@ class _BookStoreDashboardViewState extends State<BookStoreDashboardView> with Si
         return ListView.separated(
           padding: const EdgeInsets.all(16.0),
           itemCount: controller.myOrdersList.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 12),
+          separatorBuilder: (_, _) => const SizedBox(height: 12),
           itemBuilder: (context, index) {
             final order = controller.myOrdersList[index];
+            final colorScheme = Theme.of(context).colorScheme;
             return Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: colorScheme.surface,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.grey.shade100),
+                border: Border.all(color: colorScheme.outline),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -288,16 +352,23 @@ class _BookStoreDashboardViewState extends State<BookStoreDashboardView> with Si
                     children: [
                       Text(
                         "Order #${order.id.substring(0, 8)}",
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                          color: colorScheme.onSurface,
+                        ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: order.orderStatus == 'DELIVERED'
                               ? Colors.green.shade50
                               : order.orderStatus == 'CANCELLED'
-                                  ? Colors.red.shade50
-                                  : Colors.orange.shade50,
+                              ? Colors.red.shade50
+                              : Colors.orange.shade50,
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
@@ -308,8 +379,8 @@ class _BookStoreDashboardViewState extends State<BookStoreDashboardView> with Si
                             color: order.orderStatus == 'DELIVERED'
                                 ? Colors.green.shade700
                                 : order.orderStatus == 'CANCELLED'
-                                    ? Colors.red.shade700
-                                    : Colors.orange.shade700,
+                                ? Colors.red.shade700
+                                : Colors.orange.shade700,
                           ),
                         ),
                       ),
@@ -318,7 +389,10 @@ class _BookStoreDashboardViewState extends State<BookStoreDashboardView> with Si
                   const SizedBox(height: 8),
                   Text(
                     "Date: ${order.orderDate.day}/${order.orderDate.month}/${order.orderDate.year}",
-                    style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
                   ),
                   const Divider(height: 16),
                   ListView.builder(
@@ -335,12 +409,22 @@ class _BookStoreDashboardViewState extends State<BookStoreDashboardView> with Si
                             Expanded(
                               child: Text(
                                 "${item.book?.title ?? 'Book'} (${item.format == 'HARD_COPY' ? 'Hard Copy' : 'Soft Copy'})",
-                                style: const TextStyle(fontSize: 12),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: colorScheme.onSurface,
+                                ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            Text("x${item.quantity}  ₹${item.price}", style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                            Text(
+                              "x${item.quantity}  ₹${item.price}",
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: colorScheme.onSurface,
+                              ),
+                            ),
                           ],
                         ),
                       );
@@ -355,12 +439,18 @@ class _BookStoreDashboardViewState extends State<BookStoreDashboardView> with Si
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
-                          color: order.paymentStatus == 'PAID' ? Colors.green : Colors.orange,
+                          color: order.paymentStatus == 'PAID'
+                              ? Colors.green
+                              : Colors.orange,
                         ),
                       ),
                       Text(
                         "Total: ₹${order.payableAmount}",
-                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w900, color: AppColors.brandPurple),
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w900,
+                          color: AppColors.brandPurple,
+                        ),
                       ),
                     ],
                   ),
@@ -374,31 +464,46 @@ class _BookStoreDashboardViewState extends State<BookStoreDashboardView> with Si
   }
 
   Widget _buildSearchBar() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          )
-        ],
-      ),
-      child: TextField(
-        onChanged: (val) {
-          controller.searchQuery.value = val;
-          controller.fetchBooks();
-        },
-        decoration: const InputDecoration(
-          hintText: "Search books, authors...",
-          hintStyle: TextStyle(fontSize: 13, color: AppColors.textSecondary),
-          prefixIcon: Icon(Icons.search, color: AppColors.textSecondary),
-          border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        ),
-      ),
+    return Builder(
+      builder: (context) {
+        final colorScheme = Theme.of(context).colorScheme;
+        return Container(
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.02),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: TextField(
+            onChanged: (val) {
+              controller.searchQuery.value = val;
+              controller.fetchBooks();
+            },
+            decoration: InputDecoration(
+              hintText: "Search books, authors...",
+              hintStyle: TextStyle(
+                fontSize: 13,
+                color: colorScheme.onSurfaceVariant,
+              ),
+              prefixIcon: Icon(
+                Icons.search,
+                color: colorScheme.onSurfaceVariant,
+              ),
+              border: InputBorder.none,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
+            ),
+            style: TextStyle(color: colorScheme.onSurface),
+          ),
+        );
+      },
     );
   }
 
@@ -406,39 +511,43 @@ class _BookStoreDashboardViewState extends State<BookStoreDashboardView> with Si
     return SizedBox(
       height: 38,
       child: Obx(() {
+        final categories = controller.categoriesList;
         return ListView.builder(
           scrollDirection: Axis.horizontal,
-          itemCount: controller.categoriesList.length + 1,
+          itemCount: categories.length + 1,
           itemBuilder: (context, index) {
             if (index == 0) {
-              final active = controller.selectedCategoryId.value.isEmpty;
+              return Obx(() {
+                final active = controller.selectedCategoryId.value.isEmpty;
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: CategoryChip(
+                    label: "All Books",
+                    isSelected: active,
+                    onSelected: (selected) {
+                      controller.selectedCategoryId.value = "";
+                      controller.fetchBooks();
+                    },
+                  ),
+                );
+              });
+            }
+
+            final cat = categories[index - 1];
+            return Obx(() {
+              final active = controller.selectedCategoryId.value == cat.id;
               return Padding(
                 padding: const EdgeInsets.only(right: 8.0),
                 child: CategoryChip(
-                  label: "All Books",
+                  label: cat.name,
                   isSelected: active,
                   onSelected: (selected) {
-                    controller.selectedCategoryId.value = "";
+                    controller.selectedCategoryId.value = cat.id;
                     controller.fetchBooks();
                   },
                 ),
               );
-            }
-
-            final cat = controller.categoriesList[index - 1];
-            final active = controller.selectedCategoryId.value == cat.id;
-
-            return Padding(
-              padding: const EdgeInsets.only(right: 8.0),
-              child: CategoryChip(
-                label: cat.name,
-                isSelected: active,
-                onSelected: (selected) {
-                  controller.selectedCategoryId.value = cat.id;
-                  controller.fetchBooks();
-                },
-              ),
-            );
+            });
           },
         );
       }),
@@ -446,81 +555,115 @@ class _BookStoreDashboardViewState extends State<BookStoreDashboardView> with Si
   }
 
   Widget _buildBookGridCard(BookModel book) {
-    return GestureDetector(
-      onTap: () => Get.to(() => BookDetailView(bookId: book.id)),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.grey.shade100),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Container(
-                width: double.infinity,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFF6F6FF),
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-                ),
-                child: Center(
-                  child: CustomNetworkImage(
-                    imageUrl: book.thumbnailUrl,
-                    fit: BoxFit.cover,
-                    errorWidget: const Icon(Icons.book, size: 40, color: Colors.grey),
-                  ),
-                ),
-              ),
+    return Builder(
+      builder: (context) {
+        final colorScheme = Theme.of(context).colorScheme;
+        return GestureDetector(
+          onTap: () => Get.to(() => BookDetailView(bookId: book.id)),
+          child: Container(
+            decoration: BoxDecoration(
+              color: colorScheme.surface,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: colorScheme.outline),
             ),
-            Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    book.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textPrimary),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: colorScheme.surfaceContainerHighest,
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(16),
+                      ),
+                    ),
+                    child: Center(
+                      child: CustomNetworkImage(
+                        imageUrl: book.thumbnailUrl,
+                        fit: BoxFit.cover,
+                        errorWidget: Icon(
+                          Icons.book,
+                          size: 40,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    book.author ?? 'Unknown Author',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(color: Colors.grey, fontSize: 10),
-                  ),
-                  const SizedBox(height: 6),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        book.priceHardCopy != null ? "₹${book.priceHardCopy}" : "₹${book.priceSoftCopy}",
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: AppColors.brandPurple),
+                        book.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                          color: colorScheme.onSurface,
+                        ),
                       ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: AppColors.brandPurple.withOpacity(0.08),
-                          borderRadius: BorderRadius.circular(4),
+                      const SizedBox(height: 2),
+                      Text(
+                        book.author ?? 'Unknown Author',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: colorScheme.onSurfaceVariant,
+                          fontSize: 10,
                         ),
-                        child: Text(
-                          book.priceHardCopy != null ? "Hard Copy" : "Soft Copy",
-                          style: const TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: AppColors.brandPurple),
-                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "₹${book.priceHardCopy ?? 0}",
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w900,
+                              color: AppColors.brandPurple,
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.brandPurple.withValues(
+                                alpha: 0.08,
+                              ),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              book.priceHardCopy != null
+                                  ? "Hard Copy"
+                                  : "Soft Copy",
+                              style: const TextStyle(
+                                fontSize: 8,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.brandPurple,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
+  /*
   Future<void> _handlePdfRead(String bookId) async {
     final result = await controller.downloadBookPdf(bookId);
     if (result != null) {
@@ -538,6 +681,7 @@ class _BookStoreDashboardViewState extends State<BookStoreDashboardView> with Si
       }
     }
   }
+  */
 
   BoxFit fitCover(String url) => url.isNotEmpty ? BoxFit.cover : BoxFit.contain;
 }

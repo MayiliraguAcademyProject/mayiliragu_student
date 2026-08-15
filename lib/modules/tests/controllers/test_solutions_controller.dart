@@ -35,8 +35,22 @@ class TestSolutionsController extends GetxController {
     
     if (attemptId.isNotEmpty) {
       fetchAttemptDetails();
+      fetchBookmarks();
     } else {
       errorMessage.value = 'Invalid attempt ID';
+    }
+  }
+
+  Future<void> fetchBookmarks() async {
+    try {
+      final response = await _repository.getBookmarkedQuestions();
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data['data'] ?? [];
+        final ids = data.map((q) => q['id'].toString()).toSet();
+        bookmarkedQuestions.assignAll(ids);
+      }
+    } catch (e) {
+      // ignore
     }
   }
 
@@ -76,19 +90,27 @@ class TestSolutionsController extends GetxController {
     expandedExplanations[questionId] = !current;
   }
 
-  void toggleBookmark(String questionId) {
-    if (bookmarkedQuestions.contains(questionId)) {
-      bookmarkedQuestions.remove(questionId);
-      AppToast.success(
-        'Question removed from your saved list.',
-        title: 'Bookmark Removed',
-      );
-    } else {
-      bookmarkedQuestions.add(questionId);
-      AppToast.success(
-        'Question saved for review in your profile.',
-        title: 'Question Bookmarked',
-      );
+  Future<void> toggleBookmark(String questionId) async {
+    try {
+      final response = await _repository.toggleQuestionBookmark(questionId);
+      if (response.statusCode == 200) {
+        final bool isBookmarked = response.data['data']['isBookmarked'] ?? false;
+        if (isBookmarked) {
+          bookmarkedQuestions.add(questionId);
+          AppToast.success(
+            'Question saved for review in your profile.',
+            title: 'Question Bookmarked',
+          );
+        } else {
+          bookmarkedQuestions.remove(questionId);
+          AppToast.success(
+            'Question removed from your saved list.',
+            title: 'Bookmark Removed',
+          );
+        }
+      }
+    } catch (e) {
+      AppToast.error('Failed to update bookmark');
     }
   }
 

@@ -53,10 +53,10 @@ class BookStoreRepository {
       '/books/orders',
       data: {
         'items': items,
-        if (couponCode != null) 'couponCode': couponCode,
-        if (shippingName != null) 'shippingName': shippingName,
-        if (shippingPhone != null) 'shippingPhone': shippingPhone,
-        if (shippingAddress != null) 'shippingAddress': shippingAddress,
+        'couponCode': ?couponCode,
+        'shippingName': ?shippingName,
+        'shippingPhone': ?shippingPhone,
+        'shippingAddress': ?shippingAddress,
       },
     );
   }
@@ -69,9 +69,11 @@ class BookStoreRepository {
     return await _apiClient.get('/books/my-books');
   }
 
+  /*
   Future<dio_instance.Response> downloadBookPdf(String id) async {
     return await _apiClient.get('/books/$id/read');
   }
+  */
 
   Future<dio_instance.Response> getPaymentQr() async {
     return await _apiClient.get('/books/payment-qr');

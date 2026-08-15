@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import '../../../../core/constants/app_colors.dart';
 import '../../models/question_model.dart';
 import '../../models/student_answer_model.dart';
 
@@ -31,6 +30,7 @@ class SingleChoiceLayout extends StatelessWidget {
       itemBuilder: (context, index) {
         final opt = options[index];
         final isSelected = selectedId == opt.id;
+        final colorScheme = Theme.of(context).colorScheme;
 
         return GestureDetector(
           onTap: () => onOptionSelected(opt.id),
@@ -38,12 +38,12 @@ class SingleChoiceLayout extends StatelessWidget {
             margin: const EdgeInsets.only(bottom: 12),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             decoration: BoxDecoration(
-              color: isSelected ? const Color(0xFFEFF6FF) : Colors.white,
+              color: isSelected
+                  ? colorScheme.primary.withValues(alpha: 0.1)
+                  : colorScheme.surface,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: isSelected
-                    ? const Color(0xFF1E60FF)
-                    : const Color(0xFFE5E7EB),
+                color: isSelected ? colorScheme.primary : colorScheme.outline,
                 width: isSelected ? 2 : 1,
               ),
             ),
@@ -56,7 +56,7 @@ class SingleChoiceLayout extends StatelessWidget {
                     shape: BoxShape.circle,
                     border: Border.all(
                       color: isSelected
-                          ? const Color(0xFF1E60FF)
+                          ? colorScheme.primary
                           : const Color(0xFF9CA3AF),
                       width: 2,
                     ),
@@ -66,9 +66,9 @@ class SingleChoiceLayout extends StatelessWidget {
                           child: Container(
                             width: 10,
                             height: 10,
-                            decoration: const BoxDecoration(
+                            decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: Color(0xFF1E60FF),
+                              color: colorScheme.primary,
                             ),
                           ),
                         )
@@ -88,8 +88,8 @@ class SingleChoiceLayout extends StatelessWidget {
                                 ? FontWeight.bold
                                 : FontWeight.normal,
                             color: isSelected
-                                ? const Color(0xFF1E3A8A)
-                                : AppColors.textPrimary,
+                                ? colorScheme.primary
+                                : colorScheme.onSurface,
                           ),
                         ),
                       if (opt.textEn.isNotEmpty && opt.textTa.isNotEmpty)
@@ -103,8 +103,8 @@ class SingleChoiceLayout extends StatelessWidget {
                                 ? FontWeight.bold
                                 : FontWeight.normal,
                             color: isSelected
-                                ? const Color(0xFF1E3A8A).withValues(alpha: 0.8)
-                                : AppColors.textPrimary.withValues(alpha: 0.8),
+                                ? colorScheme.primary.withValues(alpha: 0.8)
+                                : colorScheme.onSurface.withValues(alpha: 0.8),
                           ),
                         ),
                     ],
@@ -143,6 +143,7 @@ class MultiChoiceLayout extends StatelessWidget {
       itemBuilder: (context, index) {
         final opt = options[index];
         final isSelected = selectedIds.contains(opt.id);
+        final colorScheme = Theme.of(context).colorScheme;
 
         return GestureDetector(
           onTap: () => onOptionToggled(opt.id),
@@ -150,12 +151,12 @@ class MultiChoiceLayout extends StatelessWidget {
             margin: const EdgeInsets.only(bottom: 12),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             decoration: BoxDecoration(
-              color: isSelected ? const Color(0xFFEFF6FF) : Colors.white,
+              color: isSelected
+                  ? colorScheme.primary.withValues(alpha: 0.1)
+                  : colorScheme.surface,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: isSelected
-                    ? const Color(0xFF1E60FF)
-                    : const Color(0xFFE5E7EB),
+                color: isSelected ? colorScheme.primary : colorScheme.outline,
                 width: isSelected ? 2 : 1,
               ),
             ),
@@ -168,12 +169,12 @@ class MultiChoiceLayout extends StatelessWidget {
                     borderRadius: BorderRadius.circular(4),
                     border: Border.all(
                       color: isSelected
-                          ? const Color(0xFF1E60FF)
+                          ? colorScheme.primary
                           : const Color(0xFF9CA3AF),
                       width: 2,
                     ),
                     color: isSelected
-                        ? const Color(0xFF1E60FF)
+                        ? colorScheme.primary
                         : Colors.transparent,
                   ),
                   child: isSelected
@@ -194,8 +195,8 @@ class MultiChoiceLayout extends StatelessWidget {
                                 ? FontWeight.bold
                                 : FontWeight.normal,
                             color: isSelected
-                                ? const Color(0xFF1E3A8A)
-                                : AppColors.textPrimary,
+                                ? colorScheme.primary
+                                : colorScheme.onSurface,
                           ),
                         ),
                       if (opt.textEn.isNotEmpty && opt.textTa.isNotEmpty)
@@ -209,8 +210,8 @@ class MultiChoiceLayout extends StatelessWidget {
                                 ? FontWeight.bold
                                 : FontWeight.normal,
                             color: isSelected
-                                ? const Color(0xFF1E3A8A).withValues(alpha: 0.8)
-                                : AppColors.textPrimary.withValues(alpha: 0.8),
+                                ? colorScheme.primary.withValues(alpha: 0.8)
+                                : colorScheme.onSurface.withValues(alpha: 0.8),
                           ),
                         ),
                     ],
@@ -272,16 +273,19 @@ class TrueFalseLayout extends StatelessWidget {
     required IconData icon,
     required VoidCallback onTap,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 20),
         decoration: BoxDecoration(
-          color: isSelected ? activeColor.withValues(alpha: 0.1) : Colors.white,
+          color: isSelected
+              ? activeColor.withValues(alpha: 0.1)
+              : colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? activeColor : const Color(0xFFE5E7EB),
+            color: isSelected ? activeColor : colorScheme.outline,
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -299,7 +303,7 @@ class TrueFalseLayout extends StatelessWidget {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: isSelected ? activeColor : AppColors.textPrimary,
+                color: isSelected ? activeColor : colorScheme.onSurface,
                 letterSpacing: 1.0,
               ),
             ),
@@ -354,6 +358,7 @@ class _FillInBlankLayoutState extends State<FillInBlankLayout> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -369,9 +374,9 @@ class _FillInBlankLayoutState extends State<FillInBlankLayout> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: colorScheme.surface,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFE5E7EB)),
+            border: Border.all(color: colorScheme.outline),
           ),
           child: Row(
             children: [
@@ -384,10 +389,10 @@ class _FillInBlankLayoutState extends State<FillInBlankLayout> {
                     border: InputBorder.none,
                     hintStyle: TextStyle(color: Color(0xFF9CA3AF)),
                   ),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                    color: colorScheme.onSurface,
                   ),
                 ),
               ),
@@ -462,7 +467,7 @@ class _DescriptiveLayoutState extends State<DescriptiveLayout> {
 
   Future<void> _pickFile() async {
     try {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
+      FilePickerResult? result = await FilePicker.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
       );
@@ -481,6 +486,7 @@ class _DescriptiveLayoutState extends State<DescriptiveLayout> {
     final wordLimit = widget.question.wordLimit ?? 0;
     final currentWordCount = _countWords(_textController.text);
     final isOverLimit = wordLimit > 0 && currentWordCount > wordLimit;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -511,9 +517,9 @@ class _DescriptiveLayoutState extends State<DescriptiveLayout> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: colorScheme.surface,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFE5E7EB)),
+            border: Border.all(color: colorScheme.outline),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -531,10 +537,7 @@ class _DescriptiveLayoutState extends State<DescriptiveLayout> {
                   border: InputBorder.none,
                   hintStyle: TextStyle(color: Color(0xFF9CA3AF)),
                 ),
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: AppColors.textPrimary,
-                ),
+                style: TextStyle(fontSize: 14, color: colorScheme.onSurface),
               ),
               const Divider(height: 1),
               Padding(
@@ -573,12 +576,12 @@ class _DescriptiveLayoutState extends State<DescriptiveLayout> {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: colorScheme.surface,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: widget.answer?.attachmentUrl != null
                     ? const Color(0xFF10B981)
-                    : const Color(0xFFE5E7EB),
+                    : colorScheme.outline,
               ),
             ),
             child: Row(
@@ -604,7 +607,7 @@ class _DescriptiveLayoutState extends State<DescriptiveLayout> {
                       fontWeight: FontWeight.w600,
                       color: widget.answer?.attachmentUrl != null
                           ? const Color(0xFF10B981)
-                          : Colors.black87,
+                          : colorScheme.onSurface,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -651,13 +654,14 @@ class _SharedContextBlockState extends State<SharedContextBlock> {
   Widget build(BuildContext context) {
     final textEn = widget.question.sharedContextEn ?? '';
     final textTa = widget.question.sharedContextTa ?? '';
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFFF9FAFB),
+        color: colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFF3F4F6)),
+        border: Border.all(color: colorScheme.outline),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -684,10 +688,10 @@ class _SharedContextBlockState extends State<SharedContextBlock> {
                                 QuestionFormat.readingComprehension
                             ? 'Reading Passage'
                             : 'Common Instruction / Caselet',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF374151),
+                          color: colorScheme.onSurface,
                         ),
                       ),
                     ],
@@ -704,7 +708,7 @@ class _SharedContextBlockState extends State<SharedContextBlock> {
             ),
           ),
           if (!_isCollapsed) ...[
-            const Divider(height: 1, color: Color(0xFFE5E7EB)),
+            Divider(height: 1, color: colorScheme.outline),
             Container(
               constraints: const BoxConstraints(maxHeight: 220),
               child: SingleChildScrollView(
@@ -715,10 +719,10 @@ class _SharedContextBlockState extends State<SharedContextBlock> {
                     if (textEn.isNotEmpty)
                       Text(
                         textEn,
-                        style: const TextStyle(
-                          fontSize: 13,
+                        style: TextStyle(
+                          fontSize: 14,
                           height: 1.5,
-                          color: AppColors.textPrimary,
+                          color: colorScheme.onSurface,
                         ),
                       ),
                     if (textEn.isNotEmpty && textTa.isNotEmpty)
@@ -727,9 +731,9 @@ class _SharedContextBlockState extends State<SharedContextBlock> {
                       Text(
                         textTa,
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 14,
                           height: 1.5,
-                          color: AppColors.textPrimary.withValues(alpha: 0.8),
+                          color: colorScheme.onSurface.withValues(alpha: 0.8),
                         ),
                       ),
                   ],
@@ -750,21 +754,22 @@ class DiTableWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (rows.isEmpty) return const SizedBox.shrink();
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        border: Border.all(color: colorScheme.outline),
       ),
       clipBehavior: Clip.antiAlias,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Table(
           defaultColumnWidth: const IntrinsicColumnWidth(),
-          border: const TableBorder(
-            horizontalInside: BorderSide(color: Color(0xFFE5E7EB), width: 1),
-            verticalInside: BorderSide(color: Color(0xFFE5E7EB), width: 1),
+          border: TableBorder(
+            horizontalInside: BorderSide(color: colorScheme.outline, width: 1),
+            verticalInside: BorderSide(color: colorScheme.outline, width: 1),
           ),
           children: rows.asMap().entries.map((entry) {
             final idx = entry.key;
@@ -773,7 +778,9 @@ class DiTableWidget extends StatelessWidget {
 
             return TableRow(
               decoration: BoxDecoration(
-                color: isHeader ? const Color(0xFFF3F4F6) : Colors.white,
+                color: isHeader
+                    ? colorScheme.surfaceContainerHighest
+                    : colorScheme.surface,
               ),
               children: cells.map((cell) {
                 // Heuristic: right-align numbers
@@ -792,9 +799,7 @@ class DiTableWidget extends StatelessWidget {
                       fontWeight: isHeader
                           ? FontWeight.bold
                           : FontWeight.normal,
-                      color: isHeader
-                          ? const Color(0xFF374151)
-                          : AppColors.textPrimary,
+                      color: colorScheme.onSurface,
                     ),
                     textAlign: isNumeric ? TextAlign.right : TextAlign.left,
                   ),
@@ -822,9 +827,10 @@ class QuestionImagesRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (images.isEmpty) return const SizedBox.shrink();
+    final colorScheme = Theme.of(context).colorScheme;
 
     return SizedBox(
-      height:300,
+      height: 300,
 
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
@@ -838,17 +844,16 @@ class QuestionImagesRow extends StatelessWidget {
               width: 300,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: const Color(0xFFE5E7EB)),
+                border: Border.all(color: colorScheme.outline),
               ),
               clipBehavior: Clip.antiAlias,
               child: CachedNetworkImage(
                 imageUrl: img.url,
                 fit: BoxFit.fill,
-                placeholder: (context, url) => const Center(
-                  child: CircularProgressIndicator(),
-                ),
+                placeholder: (context, url) =>
+                    const Center(child: CircularProgressIndicator()),
                 errorWidget: (context, url, error) => Container(
-                  color: const Color(0xFFF3F4F6),
+                  color: colorScheme.surfaceContainerHighest,
                   child: const Center(
                     child: Icon(
                       Icons.broken_image_outlined,
@@ -955,6 +960,7 @@ class AssertionReasonCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -962,18 +968,18 @@ class AssertionReasonCard extends StatelessWidget {
           context,
           label: 'Assertion (A)',
           text: question.assertion ?? '[Not available]',
-          color: const Color(0xFFEFF6FF),
-          borderColor: const Color(0xFFBFDBFE),
-          labelColor: const Color(0xFF1D4ED8),
+          color: colorScheme.primaryContainer.withValues(alpha: 0.1),
+          borderColor: colorScheme.primary.withValues(alpha: 0.3),
+          labelColor: colorScheme.primary,
         ),
         const SizedBox(height: 12),
         _buildStatementBox(
           context,
           label: 'Reason (R)',
           text: question.reason ?? '[Not available]',
-          color: const Color(0xFFFAF5FF),
-          borderColor: const Color(0xFFE9D5FF),
-          labelColor: const Color(0xFF7E22CE),
+          color: colorScheme.secondaryContainer.withValues(alpha: 0.1),
+          borderColor: colorScheme.secondary.withValues(alpha: 0.3),
+          labelColor: colorScheme.secondary,
         ),
         const SizedBox(height: 16),
         const Text(
@@ -1019,10 +1025,10 @@ class AssertionReasonCard extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             text,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+              color: Theme.of(context).colorScheme.onSurface,
               height: 1.4,
             ),
           ),

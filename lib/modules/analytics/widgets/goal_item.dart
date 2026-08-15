@@ -79,7 +79,7 @@ class GoalItem extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: isCompleted ? Colors.green.shade50 : AppColors.brandPurple.withOpacity(0.06),
+                  color: isCompleted ? Colors.green.shade50 : AppColors.brandPurple.withValues(alpha: 0.06),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(

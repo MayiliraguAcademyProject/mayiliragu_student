@@ -12,7 +12,6 @@ class VideoDownloadService extends GetxService {
   late String _manifestPath;
   late String _baseOfflinePath;
   final Map<String, String> _manifest = {};
-  final dio_lib.Dio _dio = dio_lib.Dio();
 
   // Observable download progress map: lessonId -> progress (0.0 to 1.0)
   final downloadProgress = <String, double>{}.obs;

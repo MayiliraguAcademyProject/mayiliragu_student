@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../constants/app_colors.dart';
+import '../../shared/widgets/common_button.dart';
+import '../utils/toast_helper.dart';
 
 class UpdateRequiredDialog extends StatelessWidget {
   final String requiredVersion;
@@ -24,22 +25,20 @@ class UpdateRequiredDialog extends StatelessWidget {
         throw 'Could not launch $apkDownloadUrl';
       }
     } catch (e) {
-      Get.snackbar(
-        'Update Link Error',
+      AppToast.error(
         'Could not open download browser. Please copy link manually: $apkDownloadUrl',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.error,
-        colorText: Colors.white,
-        duration: const Duration(seconds: 8),
+        title: 'Update Link Error',
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return PopScope(
       canPop: false,
       child: AlertDialog(
+        backgroundColor: colorScheme.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Row(
           children: [
@@ -49,9 +48,9 @@ class UpdateRequiredDialog extends StatelessWidget {
               size: 28,
             ),
             const SizedBox(width: 12),
-            const Text(
+            Text(
               'Update Required',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: colorScheme.onSurface),
             ),
           ],
         ),
@@ -61,22 +60,22 @@ class UpdateRequiredDialog extends StatelessWidget {
           children: [
             Text(
               'A newer version of Mayiliragu Academy (v$requiredVersion) is required to continue. Please download the update.',
-              style: const TextStyle(fontSize: 14, height: 1.4),
+              style: TextStyle(fontSize: 14, height: 1.4, color: colorScheme.onSurface),
             ),
             if (releaseNotes != null && releaseNotes!.trim().isNotEmpty) ...[
               const SizedBox(height: 16),
-              const Text(
+              Text(
                 "What's New:",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: colorScheme.onSurface),
               ),
               const SizedBox(height: 6),
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: AppColors.backgroundEnd.withAlpha(51),
+                  color: colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: AppColors.border.withAlpha(128)),
+                  border: Border.all(color: colorScheme.outline),
                 ),
                 constraints: const BoxConstraints(maxHeight: 150),
                 child: SingleChildScrollView(
@@ -84,7 +83,7 @@ class UpdateRequiredDialog extends StatelessWidget {
                     releaseNotes!,
                     style: TextStyle(
                       fontSize: 12,
-                      color: AppColors.textSecondary,
+                      color: colorScheme.onSurfaceVariant,
                       height: 1.4,
                     ),
                   ),
@@ -92,42 +91,25 @@ class UpdateRequiredDialog extends StatelessWidget {
               ),
             ],
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Note: Please enable "Install from Unknown Sources" if prompted during installation.',
               style: TextStyle(
                 fontSize: 11,
                 fontStyle: FontStyle.italic,
-                color: Colors.grey,
+                color: colorScheme.onSurfaceVariant,
               ),
             ),
           ],
         ),
         actions: [
-          SizedBox(
-            width: double.infinity,
+          CommonButton(
+            text: 'Download Update',
+            onPressed: _handleDownload,
+            backgroundColor: AppColors.primary,
+            foregroundColor: Colors.white,
             height: 48,
-            child: ElevatedButton(
-              onPressed: _handleDownload,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                elevation: 0,
-              ),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.download_rounded, size: 20),
-                  SizedBox(width: 8),
-                  Text(
-                    'Download Update',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                  ),
-                ],
-              ),
-            ),
+            borderRadius: 12,
+            icon: const Icon(Icons.download_rounded, size: 20),
           ),
         ],
       ),

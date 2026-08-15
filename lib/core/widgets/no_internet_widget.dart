@@ -7,13 +7,13 @@ class NoInternetWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    final colorScheme = theme.colorScheme;
 
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.cardBgDark : AppColors.cardBg,
+        color: colorScheme.surface,
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(28),
           topRight: Radius.circular(28),
@@ -27,9 +27,7 @@ class NoInternetWidget extends StatelessWidget {
           ),
         ],
         border: Border.all(
-          color: (isDark ? AppColors.borderDark : AppColors.border).withAlpha(
-            128,
-          ),
+          color: colorScheme.outline.withAlpha(128),
           width: 1,
         ),
       ),
@@ -44,7 +42,7 @@ class NoInternetWidget extends StatelessWidget {
               height: 4,
               margin: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: isDark ? AppColors.borderDark : AppColors.border,
+                color: colorScheme.outline,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -66,9 +64,7 @@ class NoInternetWidget extends StatelessWidget {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w800,
-                color: isDark
-                    ? AppColors.textPrimaryDark
-                    : AppColors.textPrimary,
+                color: colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 8),
@@ -77,9 +73,7 @@ class NoInternetWidget extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
-                color: isDark
-                    ? AppColors.textSecondaryDark
-                    : AppColors.textSecondary,
+                color: colorScheme.onSurfaceVariant,
                 height: 1.4,
               ),
             ),

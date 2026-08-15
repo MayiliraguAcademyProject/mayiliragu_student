@@ -25,6 +25,7 @@ class StudentProfileModel {
   final int? yearOfPassing;
   final double? percentage;
   final String? mediumOfEducation;
+  final bool isPremium;
 
   StudentProfileModel({
     required this.id,
@@ -53,9 +54,26 @@ class StudentProfileModel {
     this.yearOfPassing,
     this.percentage,
     this.mediumOfEducation,
+    this.isPremium = false,
   });
 
   factory StudentProfileModel.fromJson(Map<String, dynamic> json) {
+    final paymentsList = json['payments'] as List?;
+    double totalPaid = 0.0;
+    if (paymentsList != null && paymentsList.isNotEmpty) {
+      for (var p in paymentsList) {
+        if (p is Map && p['amountPaid'] != null) {
+          totalPaid += (p['amountPaid'] as num).toDouble();
+        }
+      }
+    }
+
+    final rawIsPremium =
+        (json['isPremium'] ?? json['is_premium']) as bool? ?? false;
+    final bool calculatedIsPremium = paymentsList != null
+        ? (rawIsPremium && paymentsList.isNotEmpty && totalPaid > 0)
+        : rawIsPremium;
+
     return StudentProfileModel(
       id: json['id'] as String,
       userId: json['userId'] as String,
@@ -83,6 +101,7 @@ class StudentProfileModel {
       yearOfPassing: json['yearOfPassing'] as int?,
       percentage: (json['percentage'] as num?)?.toDouble(),
       mediumOfEducation: json['mediumOfEducation'] as String?,
+      isPremium: calculatedIsPremium,
     );
   }
 
@@ -114,6 +133,7 @@ class StudentProfileModel {
       'yearOfPassing': yearOfPassing,
       'percentage': percentage,
       'mediumOfEducation': mediumOfEducation,
+      'isPremium': isPremium,
     };
   }
 }

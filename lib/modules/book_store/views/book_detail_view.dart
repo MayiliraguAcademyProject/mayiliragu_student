@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/api_constants.dart';
+import '../../../../core/constants/app_strings.dart';
+import '../../../../shared/widgets/common_button.dart';
 import '../controllers/book_store_controller.dart';
 import 'book_checkout_view.dart';
 import '../../../../shared/widgets/custom_network_image.dart';
@@ -28,14 +29,18 @@ class _BookDetailViewState extends State<BookDetailView> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFFAF9FF),
       appBar: AppBar(
-        backgroundColor: Colors.white,
         elevation: 0.5,
-        title: const Text(
-          'Book Details',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+        title: Text(
+          AppStrings.bookDetails,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: colorScheme.onSurface,
+          ),
         ),
         actions: [
           Obx(() {
@@ -44,7 +49,9 @@ class _BookDetailViewState extends State<BookDetailView> {
             return IconButton(
               icon: Icon(
                 book.isBookmarked ? Icons.bookmark : Icons.bookmark_border,
-                color: book.isBookmarked ? AppColors.brandPurple : AppColors.textPrimary,
+                color: book.isBookmarked
+                    ? AppColors.brandPurple
+                    : colorScheme.onSurface,
               ),
               onPressed: () => controller.toggleBookmark(book.id),
             );
@@ -53,7 +60,9 @@ class _BookDetailViewState extends State<BookDetailView> {
       ),
       body: Obx(() {
         if (controller.isDetailLoading.value) {
-          return const Center(child: CircularProgressIndicator(color: AppColors.brandPurple));
+          return const Center(
+            child: CircularProgressIndicator(color: AppColors.brandPurple),
+          );
         }
 
         final book = controller.currentBook.value;
@@ -62,12 +71,16 @@ class _BookDetailViewState extends State<BookDetailView> {
         }
 
         // Set default format if one is not available
-        if (selectedFormat == 'HARD_COPY' && book.priceHardCopy == null && book.priceSoftCopy != null) {
+        /*
+        if (selectedFormat == 'HARD_COPY' &&
+            book.priceHardCopy == null &&
+            book.priceSoftCopy != null) {
           selectedFormat = 'SOFT_COPY';
         }
+        */
 
         final hasHard = book.priceHardCopy != null;
-        final hasSoft = book.priceSoftCopy != null;
+        // final hasSoft = false; // book.priceSoftCopy != null;
 
         return SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
@@ -79,9 +92,11 @@ class _BookDetailViewState extends State<BookDetailView> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: colorScheme.surface,
                   borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: Colors.grey.shade100),
+                  border: Border.all(
+                    color: colorScheme.outline.withAlpha(50),
+                  ),
                 ),
                 child: Column(
                   children: [
@@ -91,24 +106,39 @@ class _BookDetailViewState extends State<BookDetailView> {
                         imageUrl: book.thumbnailUrl,
                         height: 220,
                         fit: BoxFit.cover,
-                        errorWidget: const Icon(Icons.book, size: 80, color: Colors.grey),
+                        errorWidget: Icon(
+                          Icons.book,
+                          size: 80,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 16),
                     Text(
                       book.title,
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w900,
+                        color: colorScheme.onSurface,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 4),
                     Text(
                       "Author: ${book.author ?? 'Unknown Author'}",
-                      style: const TextStyle(fontSize: 13, color: AppColors.textSecondary, fontWeight: FontWeight.w600),
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     if (book.publisher != null)
                       Text(
                         "Publisher: ${book.publisher}",
-                        style: const TextStyle(fontSize: 11, color: Colors.grey),
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
                       ),
                   ],
                 ),
@@ -116,68 +146,135 @@ class _BookDetailViewState extends State<BookDetailView> {
               const SizedBox(height: 20),
 
               // Format Selector
-              const Text("Purchase Options", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+              Text(
+                AppStrings.purchaseOptions,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  color: colorScheme.onSurface,
+                ),
+              ),
               const SizedBox(height: 10),
               Row(
                 children: [
                   if (hasHard)
                     Expanded(
                       child: GestureDetector(
-                        onTap: () => setState(() => selectedFormat = 'HARD_COPY'),
+                        onTap: () =>
+                            setState(() => selectedFormat = 'HARD_COPY'),
                         child: Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: selectedFormat == 'HARD_COPY' ? AppColors.brandPurple.withOpacity(0.06) : Colors.white,
+                            color: selectedFormat == 'HARD_COPY'
+                                ? AppColors.brandPurple.withValues(alpha: 0.1)
+                                : colorScheme.surface,
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
-                              color: selectedFormat == 'HARD_COPY' ? AppColors.brandPurple : Colors.grey.shade200,
+                              color: selectedFormat == 'HARD_COPY'
+                                  ? AppColors.brandPurple
+                                  : colorScheme.outline.withAlpha(50),
                             ),
                           ),
                           child: Column(
                             children: [
-                              const Icon(Icons.menu_book, color: AppColors.brandPurple, size: 24),
+                              const Icon(
+                                Icons.menu_book,
+                                color: AppColors.brandPurple,
+                                size: 24,
+                              ),
                               const SizedBox(height: 6),
-                              const Text("Hard Copy", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                              Text(
+                                AppStrings.hardCopy,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                  color: colorScheme.onSurface,
+                                ),
+                              ),
                               const SizedBox(height: 2),
-                              Text("₹${book.priceHardCopy}", style: const TextStyle(fontWeight: FontWeight.w900, color: AppColors.brandPurple)),
+                              Text(
+                                "₹${book.priceHardCopy}",
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w900,
+                                  color: AppColors.brandPurple,
+                                ),
+                              ),
                               const SizedBox(height: 4),
                               Text(
-                                book.stockHardCopy > 0 ? "In Stock (${book.stockHardCopy})" : "Out of Stock",
-                                style: TextStyle(fontSize: 9, color: book.stockHardCopy > 0 ? Colors.green : Colors.red, fontWeight: FontWeight.bold),
+                                book.stockHardCopy > 0
+                                    ? "In Stock (${book.stockHardCopy})"
+                                    : "Out of Stock",
+                                style: TextStyle(
+                                  fontSize: 9,
+                                  color: book.stockHardCopy > 0
+                                      ? Colors.green
+                                      : Colors.red,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ],
                           ),
                         ),
                       ),
                     ),
+                  /*
                   if (hasHard && hasSoft) const SizedBox(width: 12),
                   if (hasSoft)
                     Expanded(
                       child: GestureDetector(
-                        onTap: () => setState(() => selectedFormat = 'SOFT_COPY'),
+                        onTap: () =>
+                            setState(() => selectedFormat = 'SOFT_COPY'),
                         child: Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: selectedFormat == 'SOFT_COPY' ? AppColors.brandPurple.withOpacity(0.06) : Colors.white,
+                            color: selectedFormat == 'SOFT_COPY'
+                                ? AppColors.brandPurple.withValues(alpha: 0.1)
+                                : colorScheme.surface,
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
-                              color: selectedFormat == 'SOFT_COPY' ? AppColors.brandPurple : Colors.grey.shade200,
+                              color: selectedFormat == 'SOFT_COPY'
+                                  ? AppColors.brandPurple
+                                  : colorScheme.outline.withAlpha(50),
                             ),
                           ),
                           child: Column(
                             children: [
-                              const Icon(Icons.picture_as_pdf, color: AppColors.brandPurple, size: 24),
+                              const Icon(
+                                Icons.picture_as_pdf,
+                                color: AppColors.brandPurple,
+                                size: 24,
+                              ),
                               const SizedBox(height: 6),
-                              const Text("Soft Copy", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                              Text(
+                                AppStrings.softCopy,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                  color: colorScheme.onSurface,
+                                ),
+                              ),
                               const SizedBox(height: 2),
-                              Text("₹${book.priceSoftCopy}", style: const TextStyle(fontWeight: FontWeight.w900, color: AppColors.brandPurple)),
+                              Text(
+                                "₹${book.priceSoftCopy}",
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w900,
+                                  color: AppColors.brandPurple,
+                                ),
+                              ),
                               const SizedBox(height: 4),
-                              const Text("Instant download", style: TextStyle(fontSize: 9, color: Colors.grey)),
+                              Text(
+                                AppStrings.instantDownload,
+                                style: TextStyle(
+                                  fontSize: 9,
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                              ),
                             ],
                           ),
                         ),
                       ),
                     ),
+                  */
                 ],
               ),
               const SizedBox(height: 20),
@@ -187,23 +284,52 @@ class _BookDetailViewState extends State<BookDetailView> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text("Quantity", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                    Text(
+                      AppStrings.quantity,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: colorScheme.onSurface,
+                      ),
+                    ),
                     Container(
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: colorScheme.surface,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.grey.shade200),
+                        border: Border.all(
+                          color: colorScheme.outline.withAlpha(50),
+                        ),
                       ),
                       child: Row(
                         children: [
                           IconButton(
-                            onPressed: () => setState(() => quantity > 1 ? quantity-- : null),
-                            icon: const Icon(Icons.remove, size: 16),
+                            onPressed: () => setState(
+                              () => quantity > 1 ? quantity-- : null,
+                            ),
+                            icon: Icon(
+                              Icons.remove,
+                              size: 16,
+                              color: colorScheme.onSurface,
+                            ),
                           ),
-                          Text("$quantity", style: const TextStyle(fontWeight: FontWeight.bold)),
+                          Text(
+                            "$quantity",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: colorScheme.onSurface,
+                            ),
+                          ),
                           IconButton(
-                            onPressed: () => setState(() => quantity < book.stockHardCopy ? quantity++ : null),
-                            icon: const Icon(Icons.add, size: 16),
+                            onPressed: () => setState(
+                              () => quantity < book.stockHardCopy
+                                  ? quantity++
+                                  : null,
+                            ),
+                            icon: Icon(
+                              Icons.add,
+                              size: 16,
+                              color: colorScheme.onSurface,
+                            ),
                           ),
                         ],
                       ),
@@ -214,37 +340,42 @@ class _BookDetailViewState extends State<BookDetailView> {
               ],
 
               // Description
-              if (book.description != null && book.description!.isNotEmpty) ...[
-                const Text("About this book", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+              if (book.description != null &&
+                  book.description!.isNotEmpty) ...[
+                Text(
+                  AppStrings.aboutThisBook,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: colorScheme.onSurface,
+                  ),
+                ),
                 const SizedBox(height: 6),
                 Text(
                   book.description!,
-                  style: const TextStyle(fontSize: 13, height: 1.5, color: AppColors.textSecondary),
+                  style: TextStyle(
+                    fontSize: 13,
+                    height: 1.5,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
                 ),
                 const SizedBox(height: 24),
               ],
 
               // Buy Now Button
-              SizedBox(
-                width: double.infinity,
+              CommonButton(
+                text: AppStrings.buyNow,
+                onPressed: (selectedFormat == 'HARD_COPY' && book.stockHardCopy <= 0)
+                    ? null
+                    : () => Get.to(() => BookCheckoutView(
+                          book: book,
+                          format: selectedFormat,
+                          quantity: quantity,
+                        )),
+                backgroundColor: AppColors.brandPurple,
+                foregroundColor: Colors.white,
                 height: 52,
-                child: ElevatedButton(
-                  onPressed: (selectedFormat == 'HARD_COPY' && book.stockHardCopy <= 0)
-                      ? null
-                      : () => Get.to(() => BookCheckoutView(
-                            book: book,
-                            format: selectedFormat,
-                            quantity: quantity,
-                          )),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.brandPurple,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  ),
-                  child: const Text(
-                    "Buy Now",
-                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
-                  ),
-                ),
+                borderRadius: 16,
               ),
             ],
           ),

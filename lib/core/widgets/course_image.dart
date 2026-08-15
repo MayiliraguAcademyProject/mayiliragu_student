@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import '../constants/app_colors.dart';
 import '../../shared/widgets/custom_network_image.dart';
 
 class CourseImage extends StatelessWidget {
@@ -63,24 +62,34 @@ class CourseImage extends StatelessWidget {
   }
 
   Widget _defaultPlaceholder() {
-    return Container(
-      color: AppColors.secondary,
-      child: const Icon(
-        Icons.image,
-        color: AppColors.textSecondary,
-        size: 48,
-      ),
+    return Builder(
+      builder: (context) {
+        final colorScheme = Theme.of(context).colorScheme;
+        return Container(
+          color: colorScheme.surfaceContainerHighest,
+          child: Icon(
+            Icons.image,
+            color: colorScheme.onSurfaceVariant,
+            size: 48,
+          ),
+        );
+      }
     );
   }
 
   Widget _defaultErrorWidget() {
-    return Container(
-      color: AppColors.secondary,
-      child: const Icon(
-        Icons.broken_image,
-        color: AppColors.textSecondary,
-        size: 48,
-      ),
+    return Builder(
+      builder: (context) {
+        final colorScheme = Theme.of(context).colorScheme;
+        return Container(
+          color: colorScheme.surfaceContainerHighest,
+          child: Icon(
+            Icons.broken_image,
+            color: colorScheme.onSurfaceVariant,
+            size: 48,
+          ),
+        );
+      }
     );
   }
 }

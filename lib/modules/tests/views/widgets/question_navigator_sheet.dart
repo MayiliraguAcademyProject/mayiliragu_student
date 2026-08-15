@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../../core/constants/app_colors.dart';
 import '../../controllers/test_runner_controller.dart';
+import '../../../../shared/widgets/common_button.dart';
 import '../../models/question_model.dart';
 import '../../models/student_answer_model.dart';
 
@@ -12,10 +12,12 @@ class QuestionNavigatorSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(24),
           topRight: Radius.circular(24),
         ),
@@ -28,12 +30,12 @@ class QuestionNavigatorSheet extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'Question Navigator',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+                  color: colorScheme.onSurface,
                 ),
               ),
               IconButton(
@@ -49,15 +51,15 @@ class QuestionNavigatorSheet extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                _buildLegendItem('Not Visited', const Color(0xFFF3F4F6), Colors.black54, null),
+                _buildLegendItem(context, 'Not Visited', colorScheme.surfaceContainerHighest, colorScheme.onSurfaceVariant, null),
                 const SizedBox(width: 10),
-                _buildLegendItem('Answered', const Color(0xFF1E60FF), Colors.white, null),
+                _buildLegendItem(context, 'Answered', const Color(0xFF1E60FF), Colors.white, null),
                 const SizedBox(width: 10),
-                _buildLegendItem('Flagged', const Color(0xFFF97316), Colors.white, null),
+                _buildLegendItem(context, 'Flagged', const Color(0xFFF97316), Colors.white, null),
                 const SizedBox(width: 10),
-                _buildLegendItem('Ans + Flag', const Color(0xFF7C3AED), Colors.white, null),
+                _buildLegendItem(context, 'Ans + Flag', const Color(0xFF7C3AED), Colors.white, null),
                 const SizedBox(width: 10),
-                _buildLegendItem('Skipped', Colors.white, const Color(0xFFEF4444), Border.all(color: const Color(0xFFEF4444), width: 1.5)),
+                _buildLegendItem(context, 'Skipped', colorScheme.surface, const Color(0xFFEF4444), Border.all(color: const Color(0xFFEF4444), width: 1.5)),
               ],
             ),
           ),
@@ -78,7 +80,7 @@ class QuestionNavigatorSheet extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final q = qList[index];
                   final ans = controller.userAnswers[q.id];
-                  return _buildCircle(index, q, ans);
+                  return _buildCircle(context, index, q, ans);
                 },
               );
             }),
@@ -93,21 +95,21 @@ class QuestionNavigatorSheet extends StatelessWidget {
             return Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: const Color(0xFFFFFBEB),
+                color: colorScheme.primaryContainer.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: const Color(0xFFFDE68A)),
+                border: Border.all(color: colorScheme.primary.withValues(alpha: 0.3)),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.warning_amber_rounded, color: Color(0xFFD97706), size: 18),
+                  Icon(Icons.warning_amber_rounded, color: colorScheme.primary, size: 18),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'Answered: $answered | Flagged: $flagged | Remaining: $remaining unanswered.',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFFB45309),
+                        color: colorScheme.onSurface,
                       ),
                     ),
                   ),
@@ -118,35 +120,25 @@ class QuestionNavigatorSheet extends StatelessWidget {
           const SizedBox(height: 20),
 
           // Submission Action
-          SizedBox(
-            width: double.infinity,
-            height: 48,
-            child: ElevatedButton(
+          Obx(() {
+            return CommonButton(
+              text: 'Submit Test — ${controller.countAnswered}/${controller.questions.length} Answered',
               onPressed: () {
                 Get.back(); // close bottom sheet
                 controller.submitTest();
               },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFDC2626), // red
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: Obx(() {
-                return Text(
-                  'Submit Test — ${controller.countAnswered}/${controller.questions.length} Answered',
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                );
-              }),
-            ),
-          ),
+              backgroundColor: const Color(0xFFDC2626),
+              foregroundColor: Colors.white,
+              height: 48,
+              borderRadius: 12,
+            );
+          }),
         ],
       ),
     );
   }
 
-  Widget _buildLegendItem(String label, Color bg, Color text, Border? border) {
+  Widget _buildLegendItem(BuildContext context, String label, Color bg, Color text, Border? border) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
@@ -161,9 +153,10 @@ class QuestionNavigatorSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildCircle(int index, QuestionModel q, StudentAnswer? ans) {
-    Color bgColor = const Color(0xFFF3F4F6); // Default Grey (Not Visited)
-    Color textColor = const Color(0xFF4B5563);
+  Widget _buildCircle(BuildContext context, int index, QuestionModel q, StudentAnswer? ans) {
+    final colorScheme = Theme.of(context).colorScheme;
+    Color bgColor = colorScheme.surfaceContainerHighest; // Default Grey (Not Visited)
+    Color textColor = colorScheme.onSurfaceVariant;
     Border? border;
 
     if (ans != null && ans.isVisited) {
@@ -181,7 +174,7 @@ class QuestionNavigatorSheet extends StatelessWidget {
           textColor = Colors.white;
         } else {
           // Visited but no answer and not flagged -> Skipped -> Red Outline
-          bgColor = Colors.white;
+          bgColor = colorScheme.surface;
           textColor = const Color(0xFFEF4444);
           border = Border.all(color: const Color(0xFFEF4444), width: 1.5);
         }

@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:upgrader/upgrader.dart';
 import '../../../../app/routes/app_routes.dart';
 import '../../../../core/services/secure_storage_service.dart';
 import '../../../../core/services/app_config_service.dart';
@@ -29,10 +30,22 @@ class SplashController extends GetxController {
       Get.log('Error getting PackageInfo: $e');
     }
 
+    // 2. Upgrader store check (Play Store / App Store)
+    try {
+      final upgrader = Upgrader();
+      await upgrader.initialize();
+      if (upgrader.isUpdateAvailable()) {
+        Get.log('Upgrader: Update is available. Halting navigation to force update.');
+        return;
+      }
+    } catch (e) {
+      Get.log('Error during Upgrader check: $e');
+    }
+
     // Delay slightly to give premium splash feel (minimum 1.5 seconds)
     final stopwatch = Stopwatch()..start();
 
-    // 2. Fetch app config from backend (version gating check)
+    // 3. Fetch app config from backend (version gating check)
     final appConfig = await _configService.fetchAppConfig();
 
     if (appConfig != null && appConfig.requiredVersion != null && appConfig.apkDownloadUrl != null) {

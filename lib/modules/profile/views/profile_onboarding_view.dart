@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/profile_controller.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../shared/widgets/common_button.dart';
 import '../widgets/demographics_section.dart';
 import '../widgets/contact_section.dart';
 import '../widgets/address_section.dart';
 import '../widgets/education_section.dart';
 
 class ProfileOnboardingView extends StatefulWidget {
-  const ProfileOnboardingView({Key? key}) : super(key: key);
+  const ProfileOnboardingView({super.key});
 
   @override
   State<ProfileOnboardingView> createState() => _ProfileOnboardingViewState();
@@ -57,11 +58,17 @@ class _ProfileOnboardingViewState extends State<ProfileOnboardingView> {
   @override
   Widget build(BuildContext context) {
     final primaryColor = AppColors.primary;
-    final borderColor = Theme.of(context).brightness == Brightness.dark ? AppColors.borderDark : AppColors.border;
+    final borderColor = Theme.of(context).colorScheme.outline;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Complete Your Profile', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(
+          'Complete Your Profile',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
+        ),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -175,32 +182,14 @@ class _ProfileOnboardingViewState extends State<ProfileOnboardingView> {
                       const SizedBox(width: 16),
                     ],
                     Expanded(
-                      child: ElevatedButton(
-                        onPressed: controller.isUpdatingStudentProfile.value ? null : _nextStep,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: primaryColor,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          elevation: 2,
-                        ),
-                        child: controller.isUpdatingStudentProfile.value
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : Text(
-                                _activeStep == _totalSteps - 1 ? 'Submit' : 'Continue',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
+                      child: CommonButton(
+                        text: _activeStep == _totalSteps - 1 ? 'Submit' : 'Continue',
+                        isLoading: controller.isUpdatingStudentProfile.value,
+                        onPressed: _nextStep,
+                        backgroundColor: primaryColor,
+                        foregroundColor: Colors.white,
+                        height: 54,
+                        borderRadius: 16,
                       ),
                     ),
                   ],

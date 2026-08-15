@@ -1,15 +1,21 @@
+import 'dart:convert';
+
 class DashboardModel {
   final List<BannerModel> banners;
+  final List<EnrolledCourse> allCourses;
   final List<EnrolledCourse> enrolledCourses;
   final ContinueLearning? continueLearning;
   final List<RecentlyWatched> recentlyWatched;
+  final List<QuickActionModel> quickActions;
   final UserProfile? profile;
 
   DashboardModel({
     required this.banners,
+    required this.allCourses,
     required this.enrolledCourses,
     this.continueLearning,
     required this.recentlyWatched,
+    required this.quickActions,
     this.profile,
   });
 
@@ -19,8 +25,13 @@ class DashboardModel {
         .map((b) => BannerModel.fromJson(b as Map<String, dynamic>))
         .toList();
 
-    final coursesList = json['enrolledCourses'] as List? ?? [];
-    final List<EnrolledCourse> courses = coursesList
+    final allCoursesList = json['allCourses'] as List? ?? json['enrolledCourses'] as List? ?? [];
+    final List<EnrolledCourse> all = allCoursesList
+        .map((c) => EnrolledCourse.fromJson(c as Map<String, dynamic>))
+        .toList();
+
+    final enrolledList = json['enrolledCourses'] as List? ?? [];
+    final List<EnrolledCourse> enrolled = enrolledList
         .map((c) => EnrolledCourse.fromJson(c as Map<String, dynamic>))
         .toList();
 
@@ -34,11 +45,18 @@ class DashboardModel {
         .map((r) => RecentlyWatched.fromJson(r as Map<String, dynamic>))
         .toList();
 
+    final actionsList = json['quickActions'] as List? ?? json['quick_actions'] as List? ?? [];
+    final List<QuickActionModel> actions = actionsList
+        .map((a) => QuickActionModel.fromJson(a as Map<String, dynamic>))
+        .toList();
+
     return DashboardModel(
       banners: banners,
-      enrolledCourses: courses,
+      allCourses: all,
+      enrolledCourses: enrolled,
       continueLearning: contLearn,
       recentlyWatched: recent,
+      quickActions: actions,
       profile: profile,
     );
   }
@@ -51,6 +69,14 @@ class BannerModel {
   final String? linkUrl;
   final bool isActive;
   final int order;
+  final String? linkType;
+  final String? linkId;
+  final double? price;
+  final double? offerPrice;
+  final DateTime? offerValidUntil;
+  final String? planDescription;
+  final int? validityDays;
+  final List<String>? curriculumJson;
 
   BannerModel({
     required this.id,
@@ -59,9 +85,34 @@ class BannerModel {
     this.linkUrl,
     required this.isActive,
     required this.order,
+    this.linkType,
+    this.linkId,
+    this.price,
+    this.offerPrice,
+    this.offerValidUntil,
+    this.planDescription,
+    this.validityDays,
+    this.curriculumJson,
   });
 
   factory BannerModel.fromJson(Map<String, dynamic> json) {
+    List<String>? curriculum;
+    if (json['curriculumJson'] != null) {
+      try {
+        final dynamic rawCurriculum = json['curriculumJson'];
+        final dynamic parsed = rawCurriculum is String 
+            ? jsonDecode(rawCurriculum) 
+            : rawCurriculum;
+        if (parsed is List) {
+          curriculum = parsed
+              .map((e) => e is Map ? (e['title'] ?? '').toString() : e.toString())
+              .toList();
+        }
+      } catch (e) {
+        print('Error parsing curriculumJson: $e');
+      }
+    }
+
     return BannerModel(
       id: json['id'] as String? ?? '',
       title: json['title'] as String? ?? '',
@@ -69,6 +120,20 @@ class BannerModel {
       linkUrl: json['linkUrl'] as String?,
       isActive: json['isActive'] as bool? ?? false,
       order: json['order'] as int? ?? 0,
+      linkType: json['linkType'] as String?,
+      linkId: json['linkId'] as String?,
+      price: json['price'] is num 
+          ? (json['price'] as num).toDouble() 
+          : (json['price'] is String ? double.tryParse(json['price'] as String) : null),
+      offerPrice: json['offerPrice'] is num 
+          ? (json['offerPrice'] as num).toDouble() 
+          : (json['offerPrice'] is String ? double.tryParse(json['offerPrice'] as String) : null),
+      offerValidUntil: json['offerValidUntil'] != null 
+          ? DateTime.tryParse(json['offerValidUntil'] as String) 
+          : null,
+      planDescription: json['planDescription'] as String?,
+      validityDays: json['validityDays'] as int?,
+      curriculumJson: curriculum,
     );
   }
 }
@@ -79,6 +144,9 @@ class EnrolledCourse {
   final String thumbnail;
   final int totalLessons;
   final double progressPercentage;
+  final bool isEnrolled;
+  final String? enrollmentRequestStatus;
+  final bool isDemo;
 
   EnrolledCourse({
     required this.id,
@@ -86,6 +154,9 @@ class EnrolledCourse {
     required this.thumbnail,
     required this.totalLessons,
     required this.progressPercentage,
+    this.isEnrolled = true,
+    this.enrollmentRequestStatus,
+    this.isDemo = false,
   });
 
   factory EnrolledCourse.fromJson(Map<String, dynamic> json) {
@@ -95,6 +166,9 @@ class EnrolledCourse {
       thumbnail: json['thumbnail'] as String? ?? '',
       totalLessons: json['totalLessons'] as int? ?? 0,
       progressPercentage: (json['progressPercentage'] as num?)?.toDouble() ?? 0.0,
+      isEnrolled: json['isEnrolled'] as bool? ?? true,
+      enrollmentRequestStatus: json['enrollmentRequestStatus'] as String?,
+      isDemo: json['isDemo'] as bool? ?? false,
     );
   }
 }
@@ -162,5 +236,45 @@ class UserProfile {
       name: json['name'] as String? ?? '',
       email: json['email'] as String? ?? '',
     );
+  }
+}
+
+class QuickActionModel {
+  final String id;
+  final String title;
+  final String icon;
+  final String route;
+  final bool isEnabled;
+  final int order;
+
+  QuickActionModel({
+    required this.id,
+    required this.title,
+    required this.icon,
+    required this.route,
+    required this.isEnabled,
+    required this.order,
+  });
+
+  factory QuickActionModel.fromJson(Map<String, dynamic> json) {
+    return QuickActionModel(
+      id: json['id'] as String? ?? '',
+      title: json['title'] as String? ?? '',
+      icon: json['icon'] as String? ?? '',
+      route: json['route'] as String? ?? '',
+      isEnabled: json['isEnabled'] as bool? ?? json['is_enabled'] as bool? ?? true,
+      order: json['order'] as int? ?? 0,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'icon': icon,
+      'route': route,
+      'isEnabled': isEnabled,
+      'order': order,
+    };
   }
 }

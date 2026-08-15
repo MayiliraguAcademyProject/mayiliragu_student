@@ -56,6 +56,10 @@ class TestModel {
   final bool hasAttempted;
   final Map<String, dynamic>? latestAttempt;
   final bool isSectioned;
+  final bool isPaid;
+  final bool isAllowed;
+  final bool isLocked;
+  final DateTime? scheduledAt;
   final List<TestSectionModel>? sections;
   final List<QuestionModel>? questions;
 
@@ -77,6 +81,10 @@ class TestModel {
     this.hasAttempted = false,
     this.latestAttempt,
     this.isSectioned = false,
+    this.isPaid = false,
+    this.isAllowed = true,
+    this.isLocked = false,
+    this.scheduledAt,
     this.sections,
     this.questions,
   });
@@ -88,9 +96,10 @@ class TestModel {
         : [];
 
     final List<dynamic>? secList = json['sections'];
-    final List<TestSectionModel>? parsedSections = secList != null
-        ? secList.map((s) => TestSectionModel.fromJson(s, parsedQuestions)).toList()
-        : null;
+    final List<TestSectionModel>? parsedSections = secList?.map((s) => TestSectionModel.fromJson(s, parsedQuestions)).toList();
+
+    final bool parsedAllowed = json['is_allowed'] ?? json['can_access'] ?? (json['is_locked'] != null ? !json['is_locked'] : true);
+    final bool parsedLocked = json['is_locked'] ?? !parsedAllowed;
 
     return TestModel(
       id: json['id'],
@@ -110,6 +119,10 @@ class TestModel {
       hasAttempted: json['has_attempted'] ?? false,
       latestAttempt: json['latest_attempt'],
       isSectioned: json['is_sectioned'] ?? false,
+      isPaid: json['is_paid'] ?? false,
+      isAllowed: parsedAllowed,
+      isLocked: parsedLocked,
+      scheduledAt: json['scheduled_at'] != null ? DateTime.tryParse(json['scheduled_at'].toString()) : null,
       sections: parsedSections,
       questions: parsedQuestions,
     );

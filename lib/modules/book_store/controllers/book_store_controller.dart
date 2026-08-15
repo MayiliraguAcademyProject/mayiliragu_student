@@ -267,7 +267,7 @@ class BookStoreController extends GetxController {
         shippingAddress: shippingAddress,
       );
 
-      if (response.statusCode == 201) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         final order = BookOrderModel.fromJson(response.data['data']);
         fetchMyOrders();
         return order;
@@ -280,6 +280,7 @@ class BookStoreController extends GetxController {
     return null;
   }
 
+  /*
   Future<Map<String, dynamic>?> downloadBookPdf(String id) async {
     try {
       isDownloading.value = true;
@@ -294,6 +295,7 @@ class BookStoreController extends GetxController {
     }
     return null;
   }
+  */
 
   Future<void> fetchPaymentQr() async {
     try {

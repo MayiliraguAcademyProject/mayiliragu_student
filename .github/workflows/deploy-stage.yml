@@ -61,22 +61,26 @@ jobs:
           git commit -m "chore: bump version to ${{ steps.get_version.outputs.new_version }} (stage) [skip ci] [ci skip]"
           git tag "v${{ steps.get_version.outputs.version }}-${{ steps.get_version.outputs.build_number }}-stage"
           git push origin HEAD:${{ github.head_ref || github.ref_name }}
-          git push origin "v${{ steps.get_version.outputs.version }}-${{ steps.get_version.outputs.build_number }}-stage"
+          git push origin "v${{ steps.get_version.outputs.version }}-${{ steps.get_version.outputs.build_number }}-stage" --force
 
-      - name: Create .env file
+      - name: Create Stage Environment
         run: |
-          echo "BASE_URL=${{ secrets.BASE_URL_STAGE }}" > .env
+          cat > .env.stage <<EOF
+          BASE_URL=${{ secrets.BASE_URL_STAGE || 'https://api-stage-mayiliragu.sathishdev.in/api' }}
+          APP_NAME=Mayiliragu Stage
+          ENABLE_LOGS=true
+          EOF
 
       - name: Flutter Pub Get
         run: flutter pub get
 
       - name: Build APK
-        run: flutter build apk --release --dart-define-from-file=.env
+        run: flutter build apk --release --dart-define-from-file=.env.stage
 
       - name: Upload artifact to Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1
         with:
-          appId: "1:388970099836:android:1263d86df30286226745f9"
+          appId: ${{ secrets.FIREBASE_ANDROID_APP_ID }}
           serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           groups: android
           file: build/app/outputs/flutter-apk/app-release.apk
@@ -86,7 +90,7 @@ jobs:
         with:
           token: "${{ secrets.GITHUB_TOKEN }}"
           tag_name: "v${{ steps.get_version.outputs.version }}-${{ steps.get_version.outputs.build_number }}-stage"
-          name: "Coconut Delivery Stage v${{ steps.get_version.outputs.version }}-${{ steps.get_version.outputs.build_number }}"
+          name: "Mayiliragu Student Stage v${{ steps.get_version.outputs.version }}-${{ steps.get_version.outputs.build_number }}"
           prerelease: true
           files: |
             build/app/outputs/flutter-apk/app-release.apk

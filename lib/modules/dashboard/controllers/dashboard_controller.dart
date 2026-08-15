@@ -6,6 +6,10 @@ import '../../../core/services/notification_service.dart';
 import '../repositories/dashboard_repository.dart';
 import '../models/dashboard_model.dart';
 
+import '../../tests/controllers/tests_controller.dart';
+import '../../courses/controllers/course_controller.dart';
+import '../../profile/controllers/profile_controller.dart';
+
 class DashboardController extends GetxController {
   final DashboardRepository _repository;
   final SecureStorageService _storage = Get.find<SecureStorageService>();
@@ -24,6 +28,31 @@ class DashboardController extends GetxController {
   void onInit() {
     super.onInit();
     fetchDashboardData();
+    tabController.addListener(_handleTabSelection);
+  }
+
+  void _handleTabSelection() {
+    final index = tabController.index;
+    switch (index) {
+      case 0:
+        fetchDashboardData();
+        break;
+      case 1:
+        if (Get.isRegistered<TestsController>()) {
+          Get.find<TestsController>().fetchTests();
+        }
+        break;
+      case 2:
+        if (Get.isRegistered<CourseController>()) {
+          Get.find<CourseController>().fetchCourses();
+        }
+        break;
+      case 3:
+        if (Get.isRegistered<ProfileController>()) {
+          Get.find<ProfileController>().fetchProfile();
+        }
+        break;
+    }
   }
 
   Future<void> fetchDashboardData() async {
@@ -55,8 +84,10 @@ class DashboardController extends GetxController {
       if (Get.isRegistered<NotificationService>()) {
         Get.find<NotificationService>().fetchUnreadCount();
       }
-    } catch (e) {
-      errorMessage.value = 'Failed to connect to server';
+    } catch (e, stackTrace) {
+      print('Error fetching dashboard: $e');
+      print(stackTrace);
+      errorMessage.value = 'Failed to connect to server: $e';
     } finally {
       isLoading.value = false;
     }
@@ -72,9 +103,4 @@ class DashboardController extends GetxController {
     Get.offAllNamed(Routes.LOGIN);
   }
 
-  @override
-  void onClose() {
-    tabController.dispose();
-    super.onClose();
-  }
 }
