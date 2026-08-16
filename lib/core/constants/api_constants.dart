@@ -18,5 +18,8 @@ class ApiConstants {
   static const paymentSettingsPublic = '/payment-settings/public';
   static const paymentRequests = '/payment-requests';
   static const myPaymentRequests = '/payment-requests/my';
+  static const liveStreams = '/live-streams';
+  static const testimonials = '/testimonials';
+  static const examUpdates = '/exam-updates';
 }
 

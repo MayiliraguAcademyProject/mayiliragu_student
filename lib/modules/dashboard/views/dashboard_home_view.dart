@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
-import '../../../core/widgets/course_image.dart';
+// import '../../../core/widgets/course_image.dart';
 import '../../../app/routes/app_routes.dart';
 import '../../../app/routes/app_pages.dart';
 import '../controllers/dashboard_controller.dart';
@@ -18,6 +18,18 @@ import '../../../core/utils/toast_helper.dart';
 
 class DashboardHomeView extends GetView<DashboardController> {
   const DashboardHomeView({super.key});
+
+  static const List<List<Color>> _quickActionGradients = [
+    [Color(0xFFF97316), Color(0xFFEA580C)], // Orange
+    [Color(0xFF22C55E), Color(0xFF16A34A)], // Green
+    [Color(0xFF3B82F6), Color(0xFF2563EB)], // Blue
+    [Color(0xFF8B5CF6), Color(0xFF7C3AED)], // Purple
+    [Color(0xFFEC4899), Color(0xFFDB2777)], // Pink
+    [Color(0xFF14B8A6), Color(0xFF0D9488)], // Teal
+    [Color(0xFFF59E0B), Color(0xFFD97706)], // Amber
+    [Color(0xFF06B6D4), Color(0xFF0891B2)], // Sky-Blue
+    [Color(0xFF6366F1), Color(0xFF4F46E5)], // Deep-Purple
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -45,11 +57,12 @@ class DashboardHomeView extends GetView<DashboardController> {
                   ),
                   const SizedBox(height: 16),
                   CommonButton(
-                  text: AppStrings.retry,
-                  onPressed: controller.fetchDashboardData,
-                  backgroundColor: AppColors.brandPurple,
-                  fullWidth: false,
-                )                ],
+                    text: AppStrings.retry,
+                    onPressed: controller.fetchDashboardData,
+                    backgroundColor: AppColors.brandPurple,
+                    fullWidth: false,
+                  ),
+                ],
               ),
             );
           }
@@ -85,6 +98,7 @@ class DashboardHomeView extends GetView<DashboardController> {
                   _buildQuickActions(),
                   const SizedBox(height: 24),
 
+                  /*
                   // 3. Courses Section
                   if (data?.allCourses != null &&
                       data!.allCourses.isNotEmpty) ...[
@@ -111,6 +125,7 @@ class DashboardHomeView extends GetView<DashboardController> {
                     _buildEnrolledCoursesList(data.allCourses),
                     const SizedBox(height: 24),
                   ],
+                  */
 
                   // 4. Continue Learning Section
                   Row(
@@ -231,16 +246,17 @@ class DashboardHomeView extends GetView<DashboardController> {
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
+          crossAxisCount: 3,
           crossAxisSpacing: 12,
           mainAxisSpacing: 12,
-          childAspectRatio: 2.3,
+          childAspectRatio: 0.9,
         ),
         itemCount: actions.length,
         itemBuilder: (context, index) {
           final action = actions[index];
-          return _buildActionCard(
-            _getIconData(action.icon),
+          return _buildGradientActionTile(
+            index,
+            action.icon,
             action.title,
             () {
               String targetRoute = action.route;
@@ -253,18 +269,25 @@ class DashboardHomeView extends GetView<DashboardController> {
                 if (Get.isRegistered<TestsController>()) {
                   Get.find<TestsController>().fetchTests();
                 }
-              } else if (targetRoute == '/demo-courses' || targetRoute == '/demo-class') {
-                final demoCourses = controller.dashboardData.value?.allCourses
-                    .where((c) => c.isDemo)
-                    .toList() ?? [];
+              } else if (targetRoute == '/demo-courses' ||
+                  targetRoute == '/demo-class') {
+                final demoCourses =
+                    controller.dashboardData.value?.allCourses
+                        .where((c) => c.isDemo)
+                        .toList() ??
+                    [];
 
                 if (demoCourses.length == 1) {
-                  Get.to(() => CourseDetailView(courseId: demoCourses.first.id));
+                  Get.to(
+                    () => CourseDetailView(courseId: demoCourses.first.id),
+                  );
                 } else {
                   Get.toNamed(Routes.COURSES, arguments: {'isDemoOnly': true});
                 }
               } else {
-                final isRegisteredRoute = AppPages.routes.any((page) => page.name == targetRoute);
+                final isRegisteredRoute = AppPages.routes.any(
+                  (page) => page.name == targetRoute,
+                );
                 if (isRegisteredRoute) {
                   Get.toNamed(targetRoute);
                 } else {
@@ -282,80 +305,169 @@ class DashboardHomeView extends GetView<DashboardController> {
   }
 
   IconData _getIconData(String iconName) {
-    switch (iconName) {
-      case 'assignment_outlined':
-      case 'quiz_outlined':
-        return Icons.quiz_outlined;
-      case 'newspaper':
-        return Icons.newspaper;
+    switch (iconName.toLowerCase()) {
+      case 'video':
+      case 'ondemand_video':
+      case 'online videos':
+      case 'online_videos':
+        return Icons.ondemand_video;
+      case 'bookopen':
       case 'menu_book':
+      case 'study materials':
+      case 'study_materials':
         return Icons.menu_book;
-      case 'analytics_outlined':
-        return Icons.analytics_outlined;
+      case 'award':
+      case 'quiz':
+      case 'tests':
+      case 'assignment_turned_in':
+        return Icons.assignment_turned_in;
+      case 'filetext':
+      case 'newspaper':
+      case 'current affairs':
+      case 'current_affairs':
+        return Icons.newspaper;
+      case 'co_present':
+      case 'live classes':
+      case 'live_classes':
+        return Icons.co_present;
+      case 'shopping_cart':
+      case 'book store':
+      case 'book_store':
       case 'shopping_bag_outlined':
-        return Icons.shopping_bag_outlined;
+        return Icons.shopping_cart;
       case 'bookmark':
+      case 'book mark':
+      case 'book_mark':
         return Icons.bookmark;
+      case 'notifications':
+      case 'exam updates':
+      case 'exam_updates':
+        return Icons.notifications;
+      case 'groups':
+      case 'demo classes':
+      case 'demo_classes':
       case 'play_circle_outline':
-      case 'video_library':
-      case 'demo_class':
-        return Icons.play_circle_outline;
+      case 'demo-class':
+      case 'demo-courses':
+        return Icons.groups;
       default:
         return Icons.link;
     }
   }
 
-  Widget _buildActionCard(IconData icon, String title, VoidCallback onTap) {
+  Widget _buildIconWidget(String iconString) {
+    final trimmed = iconString.trim();
+    final isNetworkImage = trimmed.startsWith('http://') ||
+        trimmed.startsWith('https://') ||
+        trimmed.contains('/');
+
+    if (isNetworkImage) {
+      return CustomNetworkImage(
+        imageUrl: trimmed,
+        width: 30,
+        height: 30,
+        fit: BoxFit.contain,
+        errorWidget: const Icon(
+          Icons.link,
+          color: Colors.white,
+          size: 30,
+        ),
+      );
+    } else {
+      return Icon(
+        _getIconData(trimmed),
+        color: Colors.white,
+        size: 30,
+      );
+    }
+  }
+
+  Widget _buildGradientActionTile(
+    int index,
+    String iconString,
+    String title,
+    VoidCallback onTap,
+  ) {
+    final gradientColors =
+        _quickActionGradients[index % _quickActionGradients.length];
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
-      child: Builder(
-        builder: (context) {
-          final colorScheme = Theme.of(context).colorScheme;
-          return Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      splashColor: Colors.transparent,
+      highlightColor: Colors.transparent,
+      child: Stack(
+        children: [
+          Container(
             decoration: BoxDecoration(
-              color: colorScheme.surface,
+              gradient: LinearGradient(
+                colors: gradientColors,
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
               borderRadius: BorderRadius.circular(16),
-              boxShadow: const [
+              boxShadow: [
                 BoxShadow(
-                  color: Color(0x05000000),
-                  blurRadius: 10,
-                  offset: Offset(0, 4),
+                  color: gradientColors[1].withValues(alpha: 0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
                 ),
               ],
-              border: Border.all(color: colorScheme.outline, width: 1),
             ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: AppColors.brandPurple.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(icon, color: AppColors.brandPurple, size: 20),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                      color: colorScheme.onSurface,
-                      height: 1.2,
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _buildIconWidget(iconString),
+                  const SizedBox(height: 8),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                    child: Text(
+                      title,
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        height: 1.2,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          );
-        }
+          ),
+
+          // Circle Number Badge
+          // Positioned(
+          //   top: 6,
+          //   left: 6,
+          //   child: Container(
+          //     width: 18,
+          //      height: 18,
+          //     decoration: BoxDecoration(
+          //       color: Colors.white.withValues(alpha: 0.25),
+          //       shape: BoxShape.circle,
+          //     ),
+          //     child: Center(
+          //       child: Text(
+          //         '${index + 1}',
+          //         style: const TextStyle(
+          //           color: Colors.white,
+          //           fontSize: 10,
+          //           fontWeight: FontWeight.bold,
+          //         ),
+          //       ),
+          //     ),
+          //   ),
+          // ),
+        ],
       ),
     );
   }
 
+  /*
   Widget _buildEnrolledCoursesList(List<EnrolledCourse> courses) {
     return Builder(
       builder: (context) {
@@ -522,6 +634,7 @@ class DashboardHomeView extends GetView<DashboardController> {
       }
     );
   }
+  */
 
   // Continue Learning Section
   Widget _buildContinueLearning(ContinueLearning? contLearn) {
@@ -540,7 +653,10 @@ class DashboardHomeView extends GetView<DashboardController> {
             child: Center(
               child: Text(
                 AppStrings.startLearningPrompt,
-                style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 14),
+                style: TextStyle(
+                  color: colorScheme.onSurfaceVariant,
+                  fontSize: 14,
+                ),
               ),
             ),
           );
@@ -645,7 +761,9 @@ class DashboardHomeView extends GetView<DashboardController> {
                       borderRadius: BorderRadius.circular(4),
                       child: LinearProgressIndicator(
                         value: progress,
-                        backgroundColor: colorScheme.outline.withValues(alpha: 0.2),
+                        backgroundColor: colorScheme.outline.withValues(
+                          alpha: 0.2,
+                        ),
                         valueColor: const AlwaysStoppedAnimation<Color>(
                           AppColors.brandPurple,
                         ),
@@ -654,25 +772,25 @@ class DashboardHomeView extends GetView<DashboardController> {
                     ),
                     const SizedBox(height: 16),
                     CommonButton(
-                  text: AppStrings.resumeLesson,
-                  onPressed: () {
-                          Get.toNamed(
-                            Routes.LESSON_DETAIL,
-                            arguments: contLearn.lessonId,
-                          );
-                        },
-                  height: 48,
-                  backgroundColor: AppColors.brandPurple,
-                  foregroundColor: Colors.white,
-                  borderRadius: 12,
-                )
+                      text: AppStrings.resumeLesson,
+                      onPressed: () {
+                        Get.toNamed(
+                          Routes.LESSON_DETAIL,
+                          arguments: contLearn.lessonId,
+                        );
+                      },
+                      height: 48,
+                      backgroundColor: AppColors.brandPurple,
+                      foregroundColor: Colors.white,
+                      borderRadius: 12,
+                    ),
                   ],
                 ),
               ),
             ],
           ),
         );
-      }
+      },
     );
   }
 }
@@ -727,7 +845,7 @@ class _BannerCarouselState extends State<BannerCarousel> {
     if (widget.banners.isEmpty) return const SizedBox.shrink();
 
     return AspectRatio(
-      aspectRatio: 1.1,
+      aspectRatio: 16 / 14,
       child: Stack(
         children: [
           PageView.builder(
@@ -742,9 +860,14 @@ class _BannerCarouselState extends State<BannerCarousel> {
               final banner = widget.banners[index];
               return GestureDetector(
                 onTap: () {
-                  if (banner.linkType == 'COURSE' || banner.linkType == 'TEST') {
-                    Get.toNamed(Routes.BANNER_PRODUCT_DETAIL, arguments: banner);
-                  } else if (banner.linkUrl != null && banner.linkUrl!.isNotEmpty) {
+                  if (banner.linkType == 'COURSE' ||
+                      banner.linkType == 'TEST') {
+                    Get.toNamed(
+                      Routes.BANNER_PRODUCT_DETAIL,
+                      arguments: banner,
+                    );
+                  } else if (banner.linkUrl != null &&
+                      banner.linkUrl!.isNotEmpty) {
                     Get.to(() => CourseDetailView(courseId: banner.linkUrl!));
                   }
                 },
