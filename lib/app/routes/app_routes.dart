@@ -21,4 +21,7 @@ abstract class Routes {
   static const BANNER_PRODUCT_DETAIL = '/banner-product-detail';
   static const PAYMENT_QR = '/payment-qr';
   static const PAYMENT_CONFIRMATION = '/payment-confirmation';
+  static const LIVE_VIDEOS = '/live-videos';
+  static const TESTIMONIALS = '/testimonials';
+  static const EXAM_UPDATES = '/exam-updates';
 }

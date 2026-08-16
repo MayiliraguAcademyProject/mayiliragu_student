@@ -37,6 +37,12 @@ import '../../modules/payment/bindings/payment_binding.dart';
 import '../../modules/payment/views/banner_product_detail_view.dart';
 import '../../modules/payment/views/payment_qr_view.dart';
 import '../../modules/payment/views/payment_confirmation_view.dart';
+import '../../modules/live_videos/bindings/live_videos_binding.dart';
+import '../../modules/live_videos/views/live_videos_list_view.dart';
+import '../../modules/testimonials/bindings/testimonials_binding.dart';
+import '../../modules/testimonials/views/testimonials_list_view.dart';
+import '../../modules/exam_updates/bindings/exam_updates_binding.dart';
+import '../../modules/exam_updates/views/exam_updates_list_view.dart';
 import 'app_routes.dart';
 
 class AppPages {
@@ -147,6 +153,21 @@ class AppPages {
     GetPage(
       name: Routes.PAYMENT_CONFIRMATION,
       page: () => const PaymentConfirmationView(),
+    ),
+    GetPage(
+      name: Routes.LIVE_VIDEOS,
+      page: () => const LiveVideosListView(),
+      binding: LiveVideosBinding(),
+    ),
+    GetPage(
+      name: Routes.TESTIMONIALS,
+      page: () => const TestimonialsListView(),
+      binding: TestimonialsBinding(),
+    ),
+    GetPage(
+      name: Routes.EXAM_UPDATES,
+      page: () => const ExamUpdatesListView(),
+      binding: ExamUpdatesBinding(),
     ),
   ];
 }

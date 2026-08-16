@@ -95,10 +95,10 @@ class ProfileController extends GetxController {
     storage.getThemeMode().then((mode) {
       if (mode == 'dark') {
         isDarkMode.value = true;
-      } else if (mode == 'light') {
-        isDarkMode.value = false;
-      } else {
+      } else if (mode == 'system') {
         isDarkMode.value = PlatformDispatcher.instance.platformBrightness == Brightness.dark;
+      } else {
+        isDarkMode.value = false;
       }
     });
   }

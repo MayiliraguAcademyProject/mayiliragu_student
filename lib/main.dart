@@ -6,7 +6,7 @@ import 'core/services/app_initializer.dart';
 import 'core/controllers/user_session_controller.dart';
 
 class ThemeController extends GetxController {
-  final rxThemeMode = ThemeMode.system.obs;
+  final rxThemeMode = ThemeMode.light.obs;
 
   ThemeController(ThemeMode initial) {
     rxThemeMode.value = initial;

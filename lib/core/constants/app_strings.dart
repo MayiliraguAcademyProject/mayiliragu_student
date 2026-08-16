@@ -9,7 +9,7 @@ class AppStrings {
   // Navigation Tabs
   static const String tabHome = 'Home';
   static const String tabTests = 'Tests';
-  static const String tabLearn = 'Learn';
+  static const String tabLearn = 'Online Videos';
   static const String tabProgress = 'Progress';
   static const String tabProfile = 'Profile';
   static const String tabMore = 'More';
@@ -163,4 +163,35 @@ class AppStrings {
   static const String savedAddresses = 'Saved Addresses';
   static const String selectSavedAddress = 'Select from saved addresses';
   static const String uploadPaymentProof = 'Upload Payment Proof';
+
+  // Live Streams & Testimonials
+  static const String liveClasses = 'Live Classes';
+  static const String liveNow = 'Live Now';
+  static const String upcoming = 'Upcoming';
+  static const String noClassesAvailable = 'No classes available.';
+  static const String noLiveClassesNow = 'No live classes happening right now.';
+  static const String noUpcomingClasses = 'No upcoming classes scheduled.';
+  static const String noRecordedClasses = 'No recorded classes found.';
+  static const String unsupportedLink = 'Unsupported Link';
+  static const String invalidVideoSourceUrl = 'The video source URL is invalid.';
+  static const String live = 'LIVE';
+  static const String failedToLoadLiveStreams = 'Failed to load live streams.';
+  static const String liveNowUppercase = 'LIVE NOW';
+  static const String completed = 'Completed';
+  static const String startsIn = 'Starts in';
+  static const String classScheduled = 'Class Scheduled';
+  static const String classScheduledStartIn = 'This class is scheduled to start in ';
+  static const String pleaseWaitScheduledTime = '.\n\nPlease wait for the scheduled time.';
+
+  // Testimonials
+  static const String studentSuccessStories = 'Student Success Stories';
+  static const String noTestimonialsPosted = 'No testimonials posted yet.';
+  static const String testimonialUrlParseError = 'The video URL could not be parsed.';
+  static const String failedToLoadTestimonials = 'Failed to load testimonials.';
+  static const String shorts = 'SHORTS';
+
+  // Exam Updates
+  static const String examUpdates = 'Exam Updates';
+  static const String noExamUpdates = 'No exam updates available.';
+  static const String failedToLoadExamUpdates = 'Failed to load exam updates.';
 }

@@ -53,6 +53,7 @@ dependencies:
   connectivity_plus: ^7.2.0
   upgrader: ^13.1.0
   flutter_image_compress: ^2.3.0
+  youtube_player_flutter: ^9.0.1
 
 dev_dependencies:
   flutter_test:
