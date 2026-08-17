@@ -8,6 +8,7 @@ import '../../../core/constants/api_constants.dart';
 import '../../../core/services/secure_storage_service.dart';
 import '../../../core/services/video_download_service.dart';
 import '../../../core/utils/toast_helper.dart';
+import '../../../core/utils/error_handler.dart';
 import '../repositories/lesson_repository.dart';
 import '../repositories/notes_repository.dart';
 
@@ -377,7 +378,7 @@ class LessonController extends GetxController {
         AppToast.success('Lesson marked as complete!');
       }
     } catch (e) {
-      AppToast.error('Failed to mark lesson as complete: $e');
+      AppToast.error(AppErrorHandler.getErrorMessage(e, defaultMessage: 'Failed to mark lesson as complete'));
     }
   }
 
@@ -456,7 +457,7 @@ class LessonController extends GetxController {
         update();
       },
       onError: (err) {
-        AppToast.error('Failed to download video: $err');
+        AppToast.error(AppErrorHandler.getErrorMessage(err, defaultMessage: 'Failed to download video'));
       },
     );
   }

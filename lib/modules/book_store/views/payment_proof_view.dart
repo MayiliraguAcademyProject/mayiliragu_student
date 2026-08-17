@@ -37,7 +37,7 @@ class _PaymentProofViewState extends State<PaymentProofView> {
         });
       }
     } catch (e) {
-      AppToast.error('Failed to pick screenshot image: $e');
+      AppToast.error('Failed to pick screenshot image');
     }
   }
 

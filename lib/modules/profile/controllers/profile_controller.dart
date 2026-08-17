@@ -159,7 +159,7 @@ class ProfileController extends GetxController {
         AppToast.error('Failed to update display name');
       }
     } catch (e) {
-      AppToast.error('Error updating name: $e');
+      AppToast.error(AppErrorHandler.getErrorMessage(e, defaultMessage: 'Failed to update name'));
     } finally {
       isUpdatingName.value = false;
     }
@@ -197,14 +197,7 @@ class ProfileController extends GetxController {
         AppToast.error(response.data['message'] ?? 'Failed to change password');
       }
     } catch (e) {
-      String msg = 'Error changing password: $e';
-      if (e is DioException && e.response?.data != null) {
-        final data = e.response?.data;
-        if (data is Map && data['message'] != null) {
-          msg = data['message'].toString();
-        }
-      }
-      AppToast.error(msg);
+      AppToast.error(AppErrorHandler.getErrorMessage(e, defaultMessage: 'Failed to change password'));
     } finally {
       isChangingPassword.value = false;
     }
@@ -220,7 +213,7 @@ class ProfileController extends GetxController {
       await storage.clearAll();
       Get.offAllNamed(Routes.LOGIN);
     } catch (e) {
-      AppToast.error('Logout failed: $e');
+      AppToast.error(AppErrorHandler.getErrorMessage(e, defaultMessage: 'Logout failed'));
     }
   }
 

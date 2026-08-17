@@ -1,6 +1,7 @@
 import 'package:Mayiliragu/shared/widgets/common_button.dart';
 import 'dart:async';
 import 'dart:convert';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:Mayiliragu/core/services/notification_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -859,7 +860,7 @@ class _BannerCarouselState extends State<BannerCarousel> {
             itemBuilder: (context, index) {
               final banner = widget.banners[index];
               return GestureDetector(
-                onTap: () {
+                onTap: () async {
                   if (banner.linkType == 'COURSE' ||
                       banner.linkType == 'TEST') {
                     Get.toNamed(
@@ -867,8 +868,33 @@ class _BannerCarouselState extends State<BannerCarousel> {
                       arguments: banner,
                     );
                   } else if (banner.linkUrl != null &&
-                      banner.linkUrl!.isNotEmpty) {
-                    Get.to(() => CourseDetailView(courseId: banner.linkUrl!));
+                      banner.linkUrl!.trim().isNotEmpty) {
+                    final link = banner.linkUrl!.trim();
+                    final lower = link.toLowerCase();
+                    if (lower == 'courses' || lower == '/courses') {
+                      if (Get.isRegistered<DashboardController>()) {
+                        Get.find<DashboardController>().tabController.jumpToTab(2);
+                      }
+                    } else if (lower == 'tests' || lower == '/tests') {
+                      if (Get.isRegistered<DashboardController>()) {
+                        Get.find<DashboardController>().tabController.jumpToTab(1);
+                      }
+                    } else if (lower == 'books' || lower == '/books' || lower == 'book-store') {
+                      Get.toNamed(Routes.BOOK_STORE);
+                    } else if (lower == 'current-affairs' || lower == '/current-affairs') {
+                      Get.toNamed(Routes.CURRENT_AFFAIRS);
+                    } else if (lower == 'study-materials' || lower == '/study-materials') {
+                      Get.toNamed(Routes.STUDY_MATERIALS);
+                    } else if (lower.startsWith('http://') || lower.startsWith('https://')) {
+                      final uri = Uri.tryParse(link);
+                      if (uri != null) {
+                        try {
+                          await launchUrl(uri, mode: LaunchMode.externalApplication);
+                        } catch (_) {}
+                      }
+                    } else {
+                      Get.to(() => CourseDetailView(courseId: link));
+                    }
                   }
                 },
                 child: Container(

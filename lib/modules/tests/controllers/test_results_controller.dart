@@ -5,6 +5,7 @@ import '../../../core/utils/toast_helper.dart';
 import '../../../core/services/secure_storage_service.dart';
 import '../models/test_attempt_result_model.dart';
 import '../views/widgets/test_feedback_dialog.dart';
+import '../../../app/routes/app_routes.dart';
 
 class TestResultsController extends GetxController {
   final TestsRepository _testsRepository = Get.find<TestsRepository>();
@@ -141,6 +142,10 @@ class TestResultsController extends GetxController {
         title: 'Solutions Unavailable',
       );
     }
+  }
+
+  void backToHome() {
+    Get.offAllNamed(Routes.DASHBOARD);
   }
 
   void detailedAnalysis() {

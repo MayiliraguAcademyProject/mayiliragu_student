@@ -1,10 +1,10 @@
 import 'dart:io';
-import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:get/get.dart';
 import '../models/payment_models.dart';
 import '../repositories/payment_repository.dart';
 import '../../../core/utils/toast_helper.dart';
+import '../../../core/utils/error_handler.dart';
 
 class PaymentController extends GetxController {
   final PaymentRepository _repository;
@@ -67,7 +67,7 @@ class PaymentController extends GetxController {
         selectedImagePath.value = result.files.single.path;
       }
     } catch (e) {
-      AppToast.error('Failed to select screenshot: $e');
+      AppToast.error('Failed to select screenshot');
     }
   }
 
@@ -98,11 +98,7 @@ class PaymentController extends GetxController {
         return true;
       }
     } catch (e) {
-      String msg = e.toString();
-      if (e is DioException && e.response?.data != null) {
-        msg = e.response?.data['message'] ?? msg;
-      }
-      AppToast.error(msg.replaceAll('Exception:', ''), title: 'Submission Error');
+      AppToast.error(AppErrorHandler.getErrorMessage(e, defaultMessage: 'Failed to submit payment screenshot'), title: 'Submission Error');
     } finally {
       isSubmitting.value = false;
     }
