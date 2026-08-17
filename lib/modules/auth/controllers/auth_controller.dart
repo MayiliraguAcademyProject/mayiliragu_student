@@ -7,6 +7,7 @@ import '../../../../core/controllers/user_session_controller.dart';
 import '../../../../app/routes/app_routes.dart';
 import '../repositories/auth_repository.dart';
 import '../../../shared/models/student_profile_model.dart';
+import '../../../../core/enums/user_role.dart';
 
 class AuthController extends GetxController {
   final AuthRepository _authRepository;
@@ -52,7 +53,7 @@ class AuthController extends GetxController {
         final refreshToken = responseData['refreshToken'] as String;
         final role = responseData['user']['role'] as String;
 
-        if (role != 'STUDENT') {
+        if (!UserRole.fromString(role).isStudent) {
           errorMessage.value = 'Access denied. Student account required.';
           return;
         }
@@ -105,7 +106,18 @@ class AuthController extends GetxController {
     } catch (e) {
       if (e is DioException) {
         final resData = e.response?.data;
-        if (resData is Map && (resData['code'] == 'DEVICE_BOUND_MISMATCH' || e.response?.statusCode == 403)) {
+        if (resData is Map && resData['code'] == 'ACCOUNT_NOT_VERIFIED') {
+          // Navigate to OTP verification screen with pre-filled email
+          Get.toNamed(
+            Routes.OTP_VERIFICATION,
+            arguments: {
+              'email': email,
+            },
+          );
+          errorMessage.value = resData['message'] ?? 'Please verify your email to activate your account.';
+          return;
+        }
+        if (resData is Map && resData['code'] == 'DEVICE_BOUND_MISMATCH') {
           errorMessage.value = resData['message'] ??
               'This account is registered on another device. Contact support to transfer device.';
           return;
@@ -116,6 +128,37 @@ class AuthController extends GetxController {
       } else {
         errorMessage.value = 'Invalid email or password';
       }
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> enterGuestMode() async {
+    isLoading.value = true;
+    errorMessage.value = '';
+    try {
+      final response = await _authRepository.guestLogin();
+      if (response.statusCode == 200) {
+        final responseData = response.data['data'] as Map<String, dynamic>;
+        final accessToken = responseData['accessToken'] as String;
+        final role = responseData['role'] as String? ?? UserRole.guest.value;
+
+        await _storage.saveTokens(
+          accessToken: accessToken,
+          refreshToken: '',
+          role: role,
+        );
+
+        if (Get.isRegistered<UserSessionController>()) {
+          await Get.find<UserSessionController>().loadSession();
+        }
+
+        Get.offAllNamed(Routes.DASHBOARD);
+      } else {
+        errorMessage.value = 'Failed to enter guest mode. Please try again.';
+      }
+    } catch (e) {
+      errorMessage.value = 'Unable to enter guest mode. Please check connection.';
     } finally {
       isLoading.value = false;
     }

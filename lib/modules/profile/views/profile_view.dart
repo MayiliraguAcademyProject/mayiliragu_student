@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/enums/user_role.dart';
 import '../../../shared/widgets/common_button.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../controllers/profile_controller.dart';
@@ -136,7 +137,7 @@ class ProfileView extends GetView<ProfileController> {
               const SizedBox(height: 28),
 
               // 2. Personal & Academic Section
-              if (controller.userRole.value == 'STUDENT') ...[
+              if (UserRole.fromString(controller.userRole.value).isStudent) ...[
                 _buildSectionHeader('Academic Profile'),
                 const SizedBox(height: 12),
                 Card(

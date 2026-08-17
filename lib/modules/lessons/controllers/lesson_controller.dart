@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:better_player_enhanced/better_player.dart';
 import 'package:flutter/material.dart';
@@ -105,7 +106,18 @@ class LessonController extends GetxController {
         errorMessage.value = 'Failed to load lesson details';
       }
     } catch (e) {
-      errorMessage.value = 'Error: $e';
+      if (e is DioException) {
+        final resData = e.response?.data;
+        if (resData is Map && resData['message'] != null) {
+          errorMessage.value = resData['message'].toString();
+        } else if (e.response?.statusCode == 403) {
+          errorMessage.value = 'Access denied. Enrollment required to access this lesson.';
+        } else {
+          errorMessage.value = 'Failed to load lesson details. Please try again.';
+        }
+      } else {
+        errorMessage.value = e.toString().replaceFirst('Exception: ', '');
+      }
     } finally {
       isLoading.value = false;
     }

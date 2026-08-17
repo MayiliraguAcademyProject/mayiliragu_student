@@ -1,5 +1,6 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
+import '../enums/user_role.dart';
 
 class SecureStorageService extends GetxService {
   final _storage = const FlutterSecureStorage();
@@ -49,6 +50,11 @@ class SecureStorageService extends GetxService {
   }
   Future<void> setIsOnboardingCompleted(bool completed) async {
     await _storage.write(key: _isOnboardingCompletedKey, value: completed.toString());
+  }
+
+  Future<bool> getIsGuest() async {
+    final role = await getUserRole();
+    return UserRole.fromString(role).isGuest;
   }
 
   Future<String?> getAccessToken() async => await _storage.read(key: _accessTokenKey);

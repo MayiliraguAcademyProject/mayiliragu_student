@@ -3,6 +3,7 @@ import '../../../core/models/testimonial_model.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/constants/api_constants.dart';
+import '../../../core/utils/error_handler.dart';
 import '../../../core/utils/toast_helper.dart';
 
 class TestimonialsController extends GetxController {
@@ -29,7 +30,7 @@ class TestimonialsController extends GetxController {
       }
     } catch (e) {
       Get.log('Error fetching testimonials: $e');
-      AppToast.error(AppStrings.failedToLoadTestimonials);
+      AppToast.error(AppErrorHandler.getErrorMessage(e, defaultMessage: AppStrings.failedToLoadTestimonials));
     } finally {
       isLoading.value = false;
     }

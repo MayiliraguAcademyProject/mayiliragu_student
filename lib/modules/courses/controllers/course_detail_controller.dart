@@ -1,6 +1,5 @@
-import 'dart:convert';
 import 'package:get/get.dart';
-import 'package:dio/dio.dart';
+import '../../../core/utils/error_handler.dart';
 import '../../../core/utils/toast_helper.dart';
 import '../repositories/course_repository.dart';
 import '../models/course_detail_model.dart';
@@ -35,7 +34,7 @@ class CourseDetailController extends GetxController {
         errorMessage.value = 'Failed to load course details';
       }
     } catch (e) {
-      errorMessage.value = 'Error: $e';
+      errorMessage.value = AppErrorHandler.getErrorMessage(e);
     } finally {
       isLoading.value = false;
     }
@@ -59,31 +58,9 @@ class CourseDetailController extends GetxController {
         return false;
       }
     } catch (e) {
-      String msg = 'Failed to submit enrollment request. Please try again.';
-      if (e is DioException && e.response?.data != null) {
-        final data = e.response?.data;
-        if (data is Map) {
-          msg = data['message'] ?? msg;
-        } else if (data is String) {
-          try {
-            final decoded = json.decode(data);
-            if (decoded is Map) {
-              msg = decoded['message'] ?? msg;
-            }
-          } catch (_) {}
-        }
-      } else {
-        final errStr = e.toString();
-        if (errStr.contains('already pending')) {
-          msg = 'Enrollment request already pending for this course.';
-        } else if (errStr.contains('Already enrolled')) {
-          msg = 'You are already enrolled in this course.';
-        } else {
-          msg = errStr;
-        }
-      }
+      final msg = AppErrorHandler.getErrorMessage(e, defaultMessage: 'Failed to submit enrollment request. Please try again.');
       AppToast.error(
-        msg.replaceAll('Exception:', ''),
+        msg,
         title: 'Request Failed',
       );
       return false;

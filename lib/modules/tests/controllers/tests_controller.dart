@@ -1,6 +1,7 @@
 import 'package:flutter/painting.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:get/get.dart';
+import '../../../core/utils/error_handler.dart';
 import '../models/test_model.dart';
 import '../models/category_model.dart';
 import '../repositories/tests_repository.dart';
@@ -51,7 +52,7 @@ class TestsController extends GetxController {
             
         final Map<String, String> loadedSubjects = {};
         final Map<String, String> loadedTopics = {};
-        
+
         for (var cat in loadedCategories) {
           for (var sub in cat.subjects) {
             if (sub.id.isNotEmpty) {
@@ -64,7 +65,7 @@ class TestsController extends GetxController {
             }
           }
         }
-        
+
         categories.assignAll(loadedCategories);
         subjectNames.assignAll(loadedSubjects);
         topicNames.assignAll(loadedTopics);
@@ -74,7 +75,7 @@ class TestsController extends GetxController {
         }
       }
     } catch (e) {
-      errorMessage.value = 'Failed to load categories: $e';
+      errorMessage.value = AppErrorHandler.getErrorMessage(e);
     }
   }
 
@@ -100,7 +101,7 @@ class TestsController extends GetxController {
         errorMessage.value = 'Failed to load tests';
       }
     } catch (e) {
-      errorMessage.value = 'Error: $e';
+      errorMessage.value = AppErrorHandler.getErrorMessage(e);
     } finally {
       isLoading.value = false;
     }

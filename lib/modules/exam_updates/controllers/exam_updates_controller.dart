@@ -3,6 +3,7 @@ import '../../../core/constants/app_strings.dart';
 import '../../../core/constants/api_constants.dart';
 import '../../../core/models/exam_update_model.dart';
 import '../../../core/network/api_client.dart';
+import '../../../core/utils/error_handler.dart';
 import '../../../core/utils/toast_helper.dart';
 
 class ExamUpdatesController extends GetxController {
@@ -29,7 +30,7 @@ class ExamUpdatesController extends GetxController {
       }
     } catch (e) {
       Get.log('Error fetching exam updates: $e');
-      AppToast.error(AppStrings.failedToLoadExamUpdates);
+      AppToast.error(AppErrorHandler.getErrorMessage(e, defaultMessage: AppStrings.failedToLoadExamUpdates));
     } finally {
       isLoading.value = false;
     }

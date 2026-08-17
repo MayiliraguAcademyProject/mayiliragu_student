@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 import 'package:dio/dio.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import '../repositories/profile_repository.dart';
+import '../../../core/enums/user_role.dart';
+import '../../../core/utils/error_handler.dart';
 import '../../../core/utils/toast_helper.dart';
 import '../../../core/constants/api_constants.dart';
 import '../../../core/network/api_client.dart';
@@ -127,14 +129,14 @@ class ProfileController extends GetxController {
         userRole.value = data['role'] ?? '';
         userCreatedAt.value = data['createdAt'] ?? '';
         nameController.text = userName.value;
-        if (userId.value.isNotEmpty && userRole.value == 'STUDENT') {
+        if (userId.value.isNotEmpty && UserRole.fromString(userRole.value).isStudent) {
           await fetchStudentProfile(userId.value);
         }
       } else {
         AppToast.error('Failed to load profile details');
       }
     } catch (e) {
-      AppToast.error('Error loading profile: $e');
+      AppToast.error(AppErrorHandler.getErrorMessage(e, defaultMessage: 'Failed to load profile details.'));
     } finally {
       isLoading.value = false;
     }

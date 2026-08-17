@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import '../../../core/utils/error_handler.dart';
 import '../models/study_material_models.dart';
 import '../repositories/study_materials_repository.dart';
 import '../../../core/utils/toast_helper.dart';
@@ -73,7 +74,7 @@ class StudyMaterialsController extends GetxController {
         errorMessage.value = 'Failed to load study materials';
       }
     } catch (e) {
-      errorMessage.value = 'Error: $e';
+      errorMessage.value = AppErrorHandler.getErrorMessage(e);
     } finally {
       isMaterialsLoading.value = false;
     }
@@ -95,7 +96,7 @@ class StudyMaterialsController extends GetxController {
         errorMessage.value = 'Failed to load details';
       }
     } catch (e) {
-      errorMessage.value = 'Error: $e';
+      errorMessage.value = AppErrorHandler.getErrorMessage(e);
     } finally {
       isDetailLoading.value = false;
     }

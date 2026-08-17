@@ -4,6 +4,7 @@ import '../../../core/models/live_stream_model.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/constants/api_constants.dart';
+import '../../../core/utils/error_handler.dart';
 import '../../../core/utils/toast_helper.dart';
 
 class LiveVideosController extends GetxController {
@@ -45,7 +46,7 @@ class LiveVideosController extends GetxController {
       }
     } catch (e) {
       Get.log('Error fetching live streams: $e');
-      AppToast.error(AppStrings.failedToLoadLiveStreams);
+      AppToast.error(AppErrorHandler.getErrorMessage(e, defaultMessage: AppStrings.failedToLoadLiveStreams));
     } finally {
       isLoading.value = false;
     }

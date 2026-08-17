@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:get/get.dart';
 import '../../../core/services/secure_storage_service.dart';
+import '../../../core/utils/error_handler.dart';
 import '../models/test_model.dart';
 import '../repositories/tests_repository.dart';
 
@@ -41,7 +42,10 @@ class SectionSelectionController extends GetxController {
         errorMessage.value = 'Failed to load test details';
       }
     } catch (e) {
-      errorMessage.value = 'Error loading test: $e';
+      errorMessage.value = AppErrorHandler.getErrorMessage(
+        e,
+        defaultMessage: 'Failed to load test details. Please try again.',
+      );
     } finally {
       isLoading.value = false;
     }
