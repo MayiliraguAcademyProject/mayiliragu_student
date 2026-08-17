@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../enums/user_role.dart';
 import '../network/api_client.dart';
 import '../../shared/models/student_profile_model.dart';
 
@@ -20,7 +21,7 @@ class UserSessionController extends GetxController {
         final userId = userData['id'] as String?;
         final role = userData['role'] as String?;
 
-        if (userId != null && userId.isNotEmpty && role == 'STUDENT') {
+        if (userId != null && userId.isNotEmpty && UserRole.fromString(role).isStudent) {
           final studentRes = await apiClient.get('/enrollments/students/$userId/profile');
           if (studentRes.statusCode == 200) {
             final profileData = studentRes.data['data'];

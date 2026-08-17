@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:upgrader/upgrader.dart';
 import '../../../../app/routes/app_routes.dart';
+import '../../../../core/enums/user_role.dart';
 import '../../../../core/services/secure_storage_service.dart';
 import '../../../../core/services/app_config_service.dart';
 import '../../../../core/utils/version_comparator.dart';
@@ -74,22 +75,29 @@ class SplashController extends GetxController {
       }
     }
 
-    // 3. Normal navigation flow
-    final elapsedMs = stopwatch.elapsedMilliseconds;
+    // 4. Normal navigation flow
+    await _navigateNext(stopwatch);
+  }
+
+  Future<void> _navigateNext(Stopwatch stopwatch) async {
     const minDelayMs = 1500;
+    final elapsedMs = stopwatch.elapsedMilliseconds;
     if (elapsedMs < minDelayMs) {
       await Future.delayed(Duration(milliseconds: minDelayMs - elapsedMs));
     }
 
     final token = await _storage.getAccessToken();
     final role = await _storage.getUserRole();
+    final userRole = UserRole.fromString(role);
     final hasSeenOnboarding = await _storage.hasSeenOnboarding();
 
     String targetRoute = Routes.ONBOARDING;
     if (hasSeenOnboarding) {
-      if (token != null && role == 'STUDENT') {
+      if (token != null && userRole.isStudent) {
         final onboardingCompleted = await _storage.isOnboardingCompleted();
         targetRoute = onboardingCompleted ? Routes.DASHBOARD : Routes.PROFILE_ONBOARDING;
+      } else if (token != null && userRole.isGuest) {
+        targetRoute = Routes.DASHBOARD;
       } else {
         targetRoute = Routes.LOGIN;
       }

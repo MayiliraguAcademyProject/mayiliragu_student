@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:better_player_enhanced/better_player.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/guards/guest_auth_guard.dart';
 import '../controllers/lesson_controller.dart';
 
 import '../../../core/services/video_download_service.dart';
@@ -437,32 +438,85 @@ class LessonDetailView extends GetView<LessonController> {
           }
 
           if (controller.errorMessage.value.isNotEmpty) {
+            final isRestricted = controller.errorMessage.value.toLowerCase().contains('access denied') ||
+                controller.errorMessage.value.toLowerCase().contains('enrollment required') ||
+                controller.errorMessage.value.toLowerCase().contains('restricted');
+
             return Center(
-              child: Padding(
+              child: SingleChildScrollView(
                 padding: const EdgeInsets.all(24.0),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    Container(
+                      width: 64,
+                      height: 64,
+                      decoration: BoxDecoration(
+                        color: isRestricted
+                            ? AppColors.brandPurple.withValues(alpha: 0.1)
+                            : AppColors.error.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        isRestricted ? Icons.lock_outline_rounded : Icons.error_outline_rounded,
+                        color: isRestricted ? AppColors.brandPurple : AppColors.error,
+                        size: 32,
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+                    Text(
+                      isRestricted ? 'Access Restricted' : 'Unable to Load Lesson',
+                      style: AppTextStyles.heading.copyWith(
+                        fontSize: 18,
+                        color: colorScheme.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
                     Text(
                       controller.errorMessage.value,
                       style: AppTextStyles.body.copyWith(
-                        color: AppColors.error,
+                        color: colorScheme.onSurfaceVariant,
+                        fontSize: 14,
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 16),
-                    CommonButton(
-                  text: 'Retry',
-                  onPressed: () {
-                        final String? lessonId =
-                            Get.parameters['id'] ?? Get.arguments?.toString();
-                        if (lessonId != null) {
-                          controller.fetchLessonDetail(lessonId);
-                        }
-                      },
-                  backgroundColor: colorScheme.primary,
-                  fullWidth: false,
-                ),
+                    const SizedBox(height: 24),
+                    if (isRestricted) ...[
+                      CommonButton(
+                        text: 'Sign In / Unlock Full Course',
+                        onPressed: () {
+                          GuestAuthGuard.showForceLoginSheet(featureName: 'this lesson');
+                        },
+                        backgroundColor: AppColors.brandPurple,
+                        foregroundColor: Colors.white,
+                        borderRadius: 24,
+                      ),
+                      const SizedBox(height: 12),
+                      OutlinedButton(
+                        onPressed: () => Get.back(),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: colorScheme.onSurface,
+                          side: BorderSide(color: colorScheme.outline),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                          minimumSize: const Size(double.infinity, 48),
+                        ),
+                        child: const Text('Go Back'),
+                      ),
+                    ] else ...[
+                      CommonButton(
+                        text: 'Retry',
+                        onPressed: () {
+                          final String? lessonId =
+                              Get.parameters['id'] ?? Get.arguments?.toString();
+                          if (lessonId != null) {
+                            controller.fetchLessonDetail(lessonId);
+                          }
+                        },
+                        backgroundColor: colorScheme.primary,
+                        fullWidth: false,
+                        borderRadius: 24,
+                      ),
+                    ],
                   ],
                 ),
               ),

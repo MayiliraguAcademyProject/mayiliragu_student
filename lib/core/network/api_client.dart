@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:get/get.dart' hide Response;
 import '../../app/routes/app_routes.dart';
 import '../constants/api_constants.dart';
+import '../guards/guest_auth_guard.dart';
 import '../services/secure_storage_service.dart';
 
 class ApiClient {
@@ -39,7 +40,23 @@ class ApiClient {
             Get.offAllNamed(Routes.LOGIN);
             return handler.next(e);
           }
+
+          if (e.response?.statusCode == 403) {
+            final resData = e.response?.data;
+            if (resData is Map && resData['code'] == 'GUEST_RESTRICTED') {
+              GuestAuthGuard.showForceLoginSheet();
+              return handler.next(e);
+            }
+          }
+
           if (e.response?.statusCode == 401) {
+            final role = await _storage.getUserRole();
+            if (role == 'GUEST') {
+              await _storage.clearAll();
+              Get.offAllNamed(Routes.LOGIN);
+              return handler.next(e);
+            }
+
             final requestPath = e.requestOptions.path;
             if (requestPath != ApiConstants.login && requestPath != '/auth/refresh') {
               if (_isRefreshing) {
@@ -116,23 +133,64 @@ class ApiClient {
     );
   }
 
+  Future<bool> _shouldBlockGuestMutation(String path) async {
+    if (path.startsWith('/auth') || path.startsWith(ApiConstants.login)) {
+      return false;
+    }
+    final role = await _storage.getUserRole();
+    return role == 'GUEST';
+  }
+
   Future<Response> get(String path, {Map<String, dynamic>? queryParameters}) async {
     return await dio.get(path, queryParameters: queryParameters);
   }
 
   Future<Response> post(String path, {dynamic data}) async {
+    if (await _shouldBlockGuestMutation(path)) {
+      GuestAuthGuard.showForceLoginSheet();
+      throw DioException(
+        requestOptions: RequestOptions(path: path),
+        type: DioExceptionType.cancel,
+        error: 'GUEST_RESTRICTED',
+      );
+    }
     return await dio.post(path, data: data);
   }
 
   Future<Response> put(String path, {dynamic data}) async {
+    if (await _shouldBlockGuestMutation(path)) {
+      GuestAuthGuard.showForceLoginSheet();
+      throw DioException(
+        requestOptions: RequestOptions(path: path),
+        type: DioExceptionType.cancel,
+        error: 'GUEST_RESTRICTED',
+      );
+    }
     return await dio.put(path, data: data);
   }
 
   Future<Response> patch(String path, {dynamic data}) async {
+    if (await _shouldBlockGuestMutation(path)) {
+      GuestAuthGuard.showForceLoginSheet();
+      throw DioException(
+        requestOptions: RequestOptions(path: path),
+        type: DioExceptionType.cancel,
+        error: 'GUEST_RESTRICTED',
+      );
+    }
     return await dio.patch(path, data: data);
   }
 
   Future<Response> delete(String path, {dynamic data}) async {
+    if (await _shouldBlockGuestMutation(path)) {
+      GuestAuthGuard.showForceLoginSheet();
+      throw DioException(
+        requestOptions: RequestOptions(path: path),
+        type: DioExceptionType.cancel,
+        error: 'GUEST_RESTRICTED',
+      );
+    }
     return await dio.delete(path, data: data);
   }
 }
+

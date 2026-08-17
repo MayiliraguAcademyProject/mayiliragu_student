@@ -7,6 +7,10 @@ class ApiConstants {
 
   static const login = '/auth/login';
   static const logout = '/auth/logout';
+  static const register = '/auth/register';
+  static const verifyOtp = '/auth/verify-otp';
+  static const resendOtp = '/auth/resend-otp';
+  static const guest = '/auth/guest';
   static const dashboard = '/dashboard/student';
   static const courses = '/courses';
   static const profile = '/profile';

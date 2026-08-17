@@ -1,6 +1,10 @@
 import 'package:get/get.dart';
 import '../../modules/auth/bindings/auth_binding.dart';
 import '../../modules/auth/views/auth_view.dart';
+import '../../modules/auth/bindings/register_binding.dart';
+import '../../modules/auth/views/register_view.dart';
+import '../../modules/auth/bindings/otp_verification_binding.dart';
+import '../../modules/auth/views/otp_verification_view.dart';
 import '../../modules/onboarding/bindings/onboarding_binding.dart';
 import '../../modules/onboarding/views/onboarding_view.dart';
 import '../../modules/splash/bindings/splash_binding.dart';
@@ -65,6 +69,16 @@ class AppPages {
       name: Routes.LOGIN,
       page: () => const AuthView(),
       binding: AuthBinding(),
+    ),
+    GetPage(
+      name: Routes.REGISTER,
+      page: () => const RegisterView(),
+      binding: RegisterBinding(),
+    ),
+    GetPage(
+      name: Routes.OTP_VERIFICATION,
+      page: () => const OtpVerificationView(),
+      binding: OtpVerificationBinding(),
     ),
     GetPage(
       name: Routes.DASHBOARD,
