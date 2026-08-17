@@ -5,6 +5,10 @@ import '../../modules/auth/bindings/register_binding.dart';
 import '../../modules/auth/views/register_view.dart';
 import '../../modules/auth/bindings/otp_verification_binding.dart';
 import '../../modules/auth/views/otp_verification_view.dart';
+import '../../modules/auth/bindings/forgot_password_binding.dart';
+import '../../modules/auth/views/forgot_password_view.dart';
+import '../../modules/auth/views/forgot_password_otp_view.dart';
+import '../../modules/auth/views/reset_password_view.dart';
 import '../../modules/onboarding/bindings/onboarding_binding.dart';
 import '../../modules/onboarding/views/onboarding_view.dart';
 import '../../modules/splash/bindings/splash_binding.dart';
@@ -79,6 +83,21 @@ class AppPages {
       name: Routes.OTP_VERIFICATION,
       page: () => const OtpVerificationView(),
       binding: OtpVerificationBinding(),
+    ),
+    GetPage(
+      name: Routes.FORGOT_PASSWORD,
+      page: () => const ForgotPasswordView(),
+      binding: ForgotPasswordBinding(),
+    ),
+    GetPage(
+      name: Routes.FORGOT_PASSWORD_OTP,
+      page: () => const ForgotPasswordOtpView(),
+      binding: ForgotPasswordBinding(),
+    ),
+    GetPage(
+      name: Routes.RESET_PASSWORD,
+      page: () => const ResetPasswordView(),
+      binding: ForgotPasswordBinding(),
     ),
     GetPage(
       name: Routes.DASHBOARD,

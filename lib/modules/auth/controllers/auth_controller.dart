@@ -23,6 +23,15 @@ class AuthController extends GetxController {
 
   AuthController(this._authRepository);
 
+  @override
+  void onInit() {
+    super.onInit();
+    final args = Get.arguments;
+    if (args is Map && args['email'] != null) {
+      emailController.text = args['email'].toString();
+    }
+  }
+
   void togglePasswordVisibility() {
     obscurePassword.value = !obscurePassword.value;
   }
@@ -203,11 +212,5 @@ class AuthController extends GetxController {
     await _storage.clearAll();
     Get.offAllNamed(Routes.LOGIN);
   }
-
-  @override
-  void onClose() {
-    emailController.dispose();
-    passwordController.dispose();
-    super.onClose();
-  }
 }
+
