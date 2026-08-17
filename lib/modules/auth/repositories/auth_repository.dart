@@ -91,4 +91,45 @@ class AuthRepository {
   Future<Response> getStudentProfile(String userId) async {
     return await _apiClient.get('/enrollments/students/$userId/profile');
   }
+
+  Future<Response> forgotPassword({required String email}) async {
+    return await _apiClient.post(
+      ApiConstants.forgotPassword,
+      data: {'email': email.trim()},
+    );
+  }
+
+  Future<Response> forgotPasswordResendOtp({required String email}) async {
+    return await _apiClient.post(
+      ApiConstants.forgotPasswordResendOtp,
+      data: {'email': email.trim()},
+    );
+  }
+
+  Future<Response> forgotPasswordVerifyOtp({
+    required String email,
+    required String otp,
+  }) async {
+    return await _apiClient.post(
+      ApiConstants.forgotPasswordVerifyOtp,
+      data: {
+        'email': email.trim(),
+        'otp': otp.trim(),
+      },
+    );
+  }
+
+  Future<Response> resetPassword({
+    required String resetToken,
+    required String newPassword,
+  }) async {
+    return await _apiClient.post(
+      ApiConstants.resetPassword,
+      data: {
+        'resetToken': resetToken,
+        'newPassword': newPassword,
+      },
+    );
+  }
 }
+

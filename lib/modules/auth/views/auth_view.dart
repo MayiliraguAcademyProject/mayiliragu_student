@@ -15,12 +15,15 @@ class AuthView extends GetView<AuthController> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 24.0,
-              vertical: 16.0,
-            ),
+        child: GestureDetector(
+          onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+          behavior: HitTestBehavior.translucent,
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24.0,
+                vertical: 16.0,
+              ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -87,6 +90,7 @@ class AuthView extends GetView<AuthController> {
 
                         // Email field
                         TextField(
+                          key: const ValueKey('login_email_field'),
                           controller: controller.emailController,
                           style: TextStyle(
                             color: theme.colorScheme.onSurface,
@@ -141,6 +145,7 @@ class AuthView extends GetView<AuthController> {
                         // Password field
                         Obx(
                           () => TextField(
+                            key: const ValueKey('login_password_field'),
                             controller: controller.passwordController,
                             obscureText: controller.obscurePassword.value,
                             style: TextStyle(
@@ -192,25 +197,23 @@ class AuthView extends GetView<AuthController> {
                         ),
 
                         // Forgot Password button
-                        // Align(
-                        //   alignment: Alignment.centerRight,
-                        //   child: TextButton(
-                        //     onPressed: () {
-                        //       AppToast.info(
-                        //         'Please contact the administrator to reset your password.',
-                        //         title: 'Forgot Password',
-                        //       );
-                        //     },
-                        //     child: const Text(
-                        //       'Forgot Password?',
-                        //       style: TextStyle(
-                        //         color: AppColors.brandPurple,
-                        //         fontSize: 13,
-                        //         fontWeight: FontWeight.w600,
-                        //       ),
-                        //     ),
-                        //   ),
-                        // ),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: () {
+                              FocusManager.instance.primaryFocus?.unfocus();
+                              Get.toNamed(Routes.FORGOT_PASSWORD);
+                            },
+                            child: const Text(
+                              'Forgot Password?',
+                              style: TextStyle(
+                                color: AppColors.brandPurple,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ),
                         const SizedBox(height: 8),
 
                         // Error message
@@ -322,6 +325,8 @@ class AuthView extends GetView<AuthController> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
 }
+}
+

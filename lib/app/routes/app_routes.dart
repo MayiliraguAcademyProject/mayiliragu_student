@@ -4,6 +4,9 @@ abstract class Routes {
   static const LOGIN = '/login';
   static const REGISTER = '/register';
   static const OTP_VERIFICATION = '/otp-verification';
+  static const FORGOT_PASSWORD = '/forgot-password';
+  static const FORGOT_PASSWORD_OTP = '/forgot-password-otp';
+  static const RESET_PASSWORD = '/reset-password';
   static const DASHBOARD = '/dashboard';
   static const COURSES = '/courses';
   static const LESSON_DETAIL = '/lesson-detail';
