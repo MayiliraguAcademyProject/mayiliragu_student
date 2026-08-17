@@ -8,6 +8,7 @@ import '../../../../app/routes/app_routes.dart';
 import '../repositories/auth_repository.dart';
 import '../../../shared/models/student_profile_model.dart';
 import '../../../../core/enums/user_role.dart';
+import '../widgets/guest_intake_bottom_sheet.dart';
 
 class AuthController extends GetxController {
   final AuthRepository _authRepository;
@@ -133,11 +134,31 @@ class AuthController extends GetxController {
     }
   }
 
-  Future<void> enterGuestMode() async {
-    isLoading.value = true;
-    errorMessage.value = '';
+  void enterGuestMode() {
+    final context = Get.context;
+    if (context != null) {
+      GuestIntakeBottomSheet.show(
+        context,
+        onSubmit: submitGuestIntake,
+      );
+    }
+  }
+
+  Future<void> submitGuestIntake({
+    required String name,
+    required String phoneNumber,
+    required String place,
+    required String targetCourse,
+    required String studyMode,
+  }) async {
     try {
-      final response = await _authRepository.guestLogin();
+      final response = await _authRepository.guestLogin(
+        name: name,
+        phoneNumber: phoneNumber,
+        place: place,
+        targetCourse: targetCourse,
+        studyMode: studyMode,
+      );
       if (response.statusCode == 200) {
         final responseData = response.data['data'] as Map<String, dynamic>;
         final accessToken = responseData['accessToken'] as String;
@@ -153,14 +174,22 @@ class AuthController extends GetxController {
           await Get.find<UserSessionController>().loadSession();
         }
 
+        if (Get.isBottomSheetOpen == true) {
+          Get.back();
+        }
+
         Get.offAllNamed(Routes.DASHBOARD);
       } else {
-        errorMessage.value = 'Failed to enter guest mode. Please try again.';
+        throw Exception(response.data['message'] ?? 'Failed to enter guest mode');
       }
     } catch (e) {
-      errorMessage.value = 'Unable to enter guest mode. Please check connection.';
-    } finally {
-      isLoading.value = false;
+      if (e is DioException) {
+        final resData = e.response?.data;
+        if (resData is Map && resData['message'] != null) {
+          throw Exception(resData['message'].toString());
+        }
+      }
+      throw Exception('Unable to enter guest mode. Please check connection.');
     }
   }
 

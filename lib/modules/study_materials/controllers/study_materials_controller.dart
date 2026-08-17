@@ -189,7 +189,7 @@ class StudyMaterialsController extends GetxController {
         AppToast.error(response.data['message'] ?? 'Unable to download file', title: 'Download Failed');
       }
     } catch (e) {
-      AppToast.error('Unable to initiate download: $e', title: 'Error');
+      AppToast.error(AppErrorHandler.getErrorMessage(e, defaultMessage: 'Unable to initiate download'), title: 'Error');
     } finally {
       isDownloading.value = false;
     }

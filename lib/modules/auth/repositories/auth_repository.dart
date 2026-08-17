@@ -65,8 +65,23 @@ class AuthRepository {
     );
   }
 
-  Future<Response> guestLogin() async {
-    return await _apiClient.post(ApiConstants.guest);
+  Future<Response> guestLogin({
+    required String name,
+    required String phoneNumber,
+    required String place,
+    required String targetCourse,
+    String studyMode = 'ONLINE',
+  }) async {
+    return await _apiClient.post(
+      ApiConstants.guest,
+      data: {
+        'name': name.trim(),
+        'phoneNumber': phoneNumber.trim(),
+        'place': place.trim(),
+        'targetCourse': targetCourse.trim(),
+        'studyMode': studyMode,
+      },
+    );
   }
 
   Future<Response> logout() async {
