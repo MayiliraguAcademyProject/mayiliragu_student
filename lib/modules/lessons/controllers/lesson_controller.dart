@@ -181,8 +181,9 @@ class LessonController extends GetxController {
 
         if (isGoogleDriveUrl || !driveFileId.startsWith('http')) {
           // Use backend proxy streaming endpoint
-          videoUrl = '${ApiConstants.baseUrl}/lessons/stream/$extractedId';
           final token = await Get.find<SecureStorageService>().getAccessToken();
+          final tokenQuery = (token != null && token.isNotEmpty) ? '?token=$token' : '';
+          videoUrl = '${ApiConstants.baseUrl}/lessons/stream/$extractedId$tokenQuery';
           if (token != null) {
             headers = {'Authorization': 'Bearer $token'};
           }
@@ -426,8 +427,9 @@ class LessonController extends GetxController {
     }
 
     if (isGoogleDriveUrl || !driveFileId.startsWith('http')) {
-      videoUrl = '${ApiConstants.baseUrl}/lessons/stream/$extractedId';
       final token = await Get.find<SecureStorageService>().getAccessToken();
+      final tokenQuery = (token != null && token.isNotEmpty) ? '?token=$token' : '';
+      videoUrl = '${ApiConstants.baseUrl}/lessons/stream/$extractedId$tokenQuery';
       if (token != null) {
         headers = {'Authorization': 'Bearer $token'};
       }
