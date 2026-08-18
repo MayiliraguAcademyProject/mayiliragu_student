@@ -160,16 +160,27 @@ class DashboardHomeView extends GetView<DashboardController> {
     );
   }
 
+  String _getGreeting() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) {
+      return AppStrings.goodMorning;
+    } else if (hour < 17) {
+      return AppStrings.goodAfternoon;
+    } else {
+      return AppStrings.goodEvening;
+    }
+  }
+
   // Header UI Component
   Widget _buildHeader(BuildContext context, String name) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          '${AppStrings.goodMorning}$name 👋',
+          '${_getGreeting()}$name 👋',
           style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
+            fontSize: 12,
+            fontWeight: FontWeight.normal,
             color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
