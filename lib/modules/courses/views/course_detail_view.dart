@@ -43,18 +43,21 @@ class CourseDetailView extends StatelessWidget {
         child: Obx(() {
           if (controller.isLoading.value) {
             return Center(
-              child: CircularProgressIndicator(color: theme.colorScheme.secondary),
+              child: CircularProgressIndicator(
+                color: theme.colorScheme.secondary,
+              ),
             );
           }
 
-          if (controller.errorMessage.isNotEmpty || controller.courseData.value == null) {
+          if (controller.errorMessage.isNotEmpty ||
+              controller.courseData.value == null) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    controller.errorMessage.isNotEmpty 
-                        ? controller.errorMessage.value 
+                    controller.errorMessage.isNotEmpty
+                        ? controller.errorMessage.value
                         : 'Course details not found.',
                     style: AppTextStyles.body.copyWith(
                       color: theme.colorScheme.error,
@@ -62,11 +65,12 @@ class CourseDetailView extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   CommonButton(
-                  text: 'Retry',
-                  onPressed: controller.fetchCourseDetails,
-                  backgroundColor: theme.colorScheme.secondary,
-                  fullWidth: false,
-                )                ],
+                    text: 'Retry',
+                    onPressed: controller.fetchCourseDetails,
+                    backgroundColor: theme.colorScheme.secondary,
+                    fullWidth: false,
+                  ),
+                ],
               ),
             );
           }
@@ -95,7 +99,9 @@ class CourseDetailView extends StatelessWidget {
                             ),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: const Color(0xFF4CAF50).withValues(alpha: 0.4),
+                              color: const Color(
+                                0xFF4CAF50,
+                              ).withValues(alpha: 0.4),
                             ),
                           ),
                           child: Row(
@@ -130,7 +136,9 @@ class CourseDetailView extends StatelessWidget {
                                       'All lessons in this demo course are unlocked for free preview playback.',
                                       style: AppTextStyles.body.copyWith(
                                         fontSize: 12,
-                                        color: textColorPrimary.withValues(alpha: 0.85),
+                                        color: textColorPrimary.withValues(
+                                          alpha: 0.85,
+                                        ),
                                       ),
                                     ),
                                   ],
@@ -144,10 +152,14 @@ class CourseDetailView extends StatelessWidget {
                           padding: const EdgeInsets.all(16),
                           margin: const EdgeInsets.only(bottom: 20),
                           decoration: BoxDecoration(
-                            color: theme.colorScheme.secondary.withValues(alpha: 0.1),
+                            color: theme.colorScheme.secondary.withValues(
+                              alpha: 0.1,
+                            ),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: theme.colorScheme.secondary.withValues(alpha: 0.3),
+                              color: theme.colorScheme.secondary.withValues(
+                                alpha: 0.3,
+                              ),
                             ),
                           ),
                           child: Row(
@@ -163,22 +175,47 @@ class CourseDetailView extends StatelessWidget {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      'Course Access Restricted',
-                                      style: AppTextStyles.heading.copyWith(
-                                        fontSize: 14,
+                                      'Enrollment Required',
+                                      style: TextStyle(
+                                        fontSize: 15,
                                         fontWeight: FontWeight.bold,
                                         color: theme.colorScheme.secondary,
                                       ),
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
-                                      'You are browsing in preview mode. Tap any lesson or button below to request full access.',
+                                      'Unlock full course access, video lessons, and materials.',
                                       style: AppTextStyles.body.copyWith(
                                         fontSize: 12,
-                                        color: textColorPrimary.withValues(alpha: 0.8),
+                                        color: textColorPrimary.withValues(
+                                          alpha: 0.85,
+                                        ),
                                       ),
                                     ),
                                   ],
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              ElevatedButton(
+                                onPressed: () =>
+                                    _showPurchaseDialog(context, course),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: theme.colorScheme.secondary,
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 14,
+                                    vertical: 8,
+                                  ),
+                                ),
+                                child: const Text(
+                                  'Enroll',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
                             ],
@@ -186,64 +223,43 @@ class CourseDetailView extends StatelessWidget {
                         ),
                       ],
                       Text(
-                        'About this Course',
-                        style: AppTextStyles.subheading.copyWith(
-                          fontWeight: FontWeight.bold,
+                        'Course Overview',
+                        style: AppTextStyles.heading.copyWith(
                           fontSize: 18,
+                          fontWeight: FontWeight.bold,
                           color: textColorPrimary,
                         ),
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        course.description.isNotEmpty ? course.description : 'No description provided.',
+                        course.description.isNotEmpty
+                            ? course.description
+                            : 'No course description available.',
                         style: AppTextStyles.body.copyWith(
-                          color: textColorPrimary.withValues(alpha: 0.85),
-                          height: 1.5,
+                          fontSize: 14,
+                          color: theme.colorScheme.onSurfaceVariant,
+                          height: 1.4,
                         ),
                       ),
                       const SizedBox(height: 24),
                       Text(
-                        'Course Content',
-                        style: AppTextStyles.subheading.copyWith(
-                          fontWeight: FontWeight.bold,
+                        'Curriculum Structure',
+                        style: AppTextStyles.heading.copyWith(
                           fontSize: 18,
+                          fontWeight: FontWeight.bold,
                           color: textColorPrimary,
                         ),
                       ),
-                      const SizedBox(height: 12),
                     ],
                   ),
                 ),
               ),
               _buildModulesList(context, course),
+              const SliverToBoxAdapter(child: SizedBox(height: 40)),
             ],
           );
         }),
       ),
-      bottomNavigationBar: Obx(() {
-        final course = controller.courseData.value;
-        if (course == null || course.isEnrolled || course.isDemo) {
-          return const SizedBox.shrink();
-        }
-        final isPending = course.enrollmentRequestStatus == 'PENDING';
-        return Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surface,
-            border: Border(
-              top: BorderSide(color: theme.colorScheme.outline.withValues(alpha: 0.2)),
-            ),
-          ),
-          child: SafeArea(
-            child: CommonButton(
-              text: isPending ? 'Request Pending Review' : 'Request Access to Course',
-              onPressed: isPending ? null : () => _showPurchaseDialog(context, course),
-              backgroundColor: isPending ? Colors.grey : theme.colorScheme.secondary,
-              foregroundColor: isPending ? Colors.white70 : theme.colorScheme.onSecondary,
-            ),
-          ),
-        );
-      }),
     );
   }
 
@@ -254,9 +270,7 @@ class CourseDetailView extends StatelessWidget {
       expandedHeight: 220,
       pinned: true,
       backgroundColor: theme.colorScheme.surface,
-      iconTheme: IconThemeData(
-        color: theme.colorScheme.onSurface,
-      ),
+      iconTheme: IconThemeData(color: theme.colorScheme.onSurface),
       flexibleSpace: FlexibleSpaceBar(
         title: Text(
           course.title,
@@ -308,7 +322,7 @@ class CourseDetailView extends StatelessWidget {
   Widget _buildModulesList(BuildContext context, CourseDetailModel course) {
     final modules = course.modules;
     final theme = Theme.of(context);
-    
+
     final textColorPrimary = theme.colorScheme.onSurface;
     final textColorSecondary = theme.colorScheme.onSurfaceVariant;
     final cardBackgroundColor = theme.colorScheme.surface;
@@ -318,7 +332,7 @@ class CourseDetailView extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
           child: Text(
-            'No modules available.', 
+            'No modules available.',
             style: AppTextStyles.body.copyWith(color: textColorSecondary),
           ),
         ),
@@ -326,42 +340,132 @@ class CourseDetailView extends StatelessWidget {
     }
 
     return SliverList(
-      delegate: SliverChildBuilderDelegate((context, index) {
-        final module = modules[index];
-        final lessons = module.lessons;
+      delegate: SliverChildBuilderDelegate((context, mIndex) {
+        final module = modules[mIndex];
+        final topics = module.topics;
+
+        int moduleLessonsCount = 0;
+        int moduleVideosCount = 0;
+        for (var t in topics) {
+          moduleLessonsCount += t.lessons.length;
+          for (var l in t.lessons) {
+            moduleVideosCount += l.videos.length;
+          }
+        }
 
         return Container(
           margin: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 6.0),
           decoration: BoxDecoration(
             color: cardBackgroundColor,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
+            ),
           ),
-          child: ExpansionTile(
-            shape: const Border(),
-            collapsedShape: const Border(),
-            title: Text(
-              module.title.isNotEmpty ? module.title : 'Module ${index + 1}',
-              style: AppTextStyles.heading.copyWith(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                color: textColorPrimary,
+          child: Theme(
+            data: theme.copyWith(dividerColor: Colors.transparent),
+            child: ExpansionTile(
+              initiallyExpanded: mIndex == 0,
+              shape: const Border(),
+              collapsedShape: const Border(),
+              leading: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  // color: theme.colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  'M${mIndex + 1}',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.onPrimaryContainer,
+                  ),
+                ),
               ),
-            ),
-            subtitle: Text(
-              '${lessons.length} lessons',
-              style: AppTextStyles.body.copyWith(
-                fontSize: 12,
-                color: textColorSecondary,
+              title: Text(
+                module.title.isNotEmpty ? module.title : 'Module ${mIndex + 1}',
+                style: AppTextStyles.heading.copyWith(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: textColorPrimary,
+                ),
               ),
+              subtitle: Text(
+                '${topics.length} topics • $moduleLessonsCount lessons • $moduleVideosCount videos',
+                style: AppTextStyles.body.copyWith(
+                  fontSize: 11,
+                  color: textColorSecondary,
+                ),
+              ),
+              iconColor: theme.colorScheme.secondary,
+              collapsedIconColor: textColorSecondary,
+              children: topics.map<Widget>((topic) {
+                return _buildTopicItem(context, topic, course);
+              }).toList(),
             ),
-            iconColor: theme.colorScheme.secondary,
-            collapsedIconColor: textColorSecondary,
-            children: lessons
-                .map<Widget>((lesson) => _buildLessonItem(context, lesson, course))
-                .toList(),
           ),
         );
       }, childCount: modules.length),
+    );
+  }
+
+  Widget _buildTopicItem(
+    BuildContext context,
+    TopicModel topic,
+    CourseDetailModel course,
+  ) {
+    final theme = Theme.of(context);
+    final textColorPrimary = theme.colorScheme.onSurface;
+    final textColorSecondary = theme.colorScheme.onSurfaceVariant;
+    final lessons = topic.lessons;
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(12),
+        // border: Border.all(
+        //   color: theme.colorScheme.outlineVariant.withValues(alpha: 0.25),
+        // ),
+      ),
+      child: Theme(
+        data: theme.copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          initiallyExpanded: true,
+          shape: const Border(),
+          collapsedShape: const Border(),
+          leading: Icon(
+            Icons.folder_open_rounded,
+            size: 20,
+            color: theme.colorScheme.primary,
+          ),
+          title: Text(
+            topic.title,
+            style: AppTextStyles.body.copyWith(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: textColorPrimary,
+            ),
+          ),
+          subtitle: topic.description != null && topic.description!.isNotEmpty
+              ? Text(
+                  topic.description!,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 11, color: textColorSecondary),
+                )
+              : Text(
+                  '${lessons.length} lessons',
+                  style: TextStyle(fontSize: 11, color: textColorSecondary),
+                ),
+          children: lessons
+              .map<Widget>(
+                (lesson) => _buildLessonItem(context, lesson, course),
+              )
+              .toList(),
+        ),
+      ),
     );
   }
 
@@ -372,22 +476,26 @@ class CourseDetailView extends StatelessWidget {
     return '$minutes:${seconds.toString().padLeft(2, '0')}';
   }
 
-  Widget _buildLessonItem(BuildContext context, LessonModel lesson, CourseDetailModel course) {
+  Widget _buildLessonItem(
+    BuildContext context,
+    LessonModel lesson,
+    CourseDetailModel course,
+  ) {
     final title = lesson.title.isNotEmpty ? lesson.title : 'Untitled Lesson';
     final description = lesson.description;
-    final durationSeconds = lesson.duration;
+    final durationSeconds = lesson.totalDuration;
     final durationMinutes = (durationSeconds / 60).toStringAsFixed(1);
     final watchedSeconds = lesson.progress?.watchedSeconds ?? 0;
-    final isCompleted = lesson.progress?.completed == true;
+    final isCompleted = lesson.isCompleted;
     final canPlayLesson = course.isEnrolled || course.isDemo;
     final isLocked = !canPlayLesson || (course.isEnrolled && lesson.isLocked);
     final theme = Theme.of(context);
-    
+
     final progressFraction = isCompleted
         ? 1.0
         : (durationSeconds > 0
-            ? (watchedSeconds / durationSeconds).clamp(0.0, 1.0)
-            : 0.0);
+              ? (watchedSeconds / durationSeconds).clamp(0.0, 1.0)
+              : 0.0);
     final percentage = (progressFraction * 100).round();
 
     final textColorPrimary = theme.colorScheme.onSurface;
@@ -397,47 +505,53 @@ class CourseDetailView extends StatelessWidget {
     final durationFormatted = _formatDuration(durationSeconds);
 
     String subtitleText;
+    final videosCount = lesson.videos.length;
+    final countLabel = '$videosCount ${videosCount == 1 ? 'video' : 'videos'}';
+
     if (!canPlayLesson) {
-      subtitleText = '$durationMinutes min';
+      subtitleText = '$countLabel • $durationMinutes min';
     } else if (isLocked) {
-      subtitleText = '$durationMinutes min';
+      subtitleText = '$countLabel • $durationMinutes min';
     } else if (isCompleted) {
-      subtitleText = '$durationFormatted • Completed';
+      subtitleText = '$countLabel • $durationFormatted • Completed';
     } else if (watchedSeconds > 0) {
-      subtitleText = '$watchedFormatted / $durationFormatted ($percentage%)';
+      subtitleText =
+          '$countLabel • $watchedFormatted / $durationFormatted ($percentage%)';
     } else {
-      subtitleText = '$durationFormatted min';
+      subtitleText = '$countLabel • $durationFormatted';
     }
 
     final VoidCallback onItemTap = !canPlayLesson
         ? () => _showPurchaseDialog(context, course)
         : (isLocked
-            ? () {
-                AppToast.validation(
-                  'Please watch and complete the previous lesson to unlock this video.',
-                  title: 'Lesson Locked',
-                );
-              }
-            : () async {
-                await Get.toNamed(Routes.LESSON_DETAIL, arguments: lesson.id);
-                final controller = Get.find<CourseDetailController>(tag: courseId);
-                controller.fetchCourseDetails();
-              });
+              ? () {
+                  AppToast.validation(
+                    'Please watch and complete the previous lesson video to unlock.',
+                    title: 'Lesson Locked',
+                  );
+                }
+              : () async {
+                  await Get.toNamed(Routes.LESSON_DETAIL, arguments: lesson.id);
+                  final controller = Get.find<CourseDetailController>(
+                    tag: courseId,
+                  );
+                  controller.fetchCourseDetails();
+                });
 
     return InkWell(
       onTap: onItemTap,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(12),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+        padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 8.0),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Video Thumbnail Container matching reference UI
+            // Video Thumbnail Container
             Container(
-              width: 135,
-              height: 80,
+              width: 120,
+              height: 72,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(12),
                 color: theme.colorScheme.surfaceContainerHighest,
                 boxShadow: [
                   BoxShadow(
@@ -450,7 +564,6 @@ class CourseDetailView extends StatelessWidget {
               clipBehavior: Clip.antiAlias,
               child: Stack(
                 children: [
-                  // Image or fallback design
                   Positioned.fill(
                     child: (lesson.image != null && lesson.image!.isNotEmpty)
                         ? CourseImage(
@@ -471,8 +584,9 @@ class CourseDetailView extends StatelessWidget {
                             child: Center(
                               child: Icon(
                                 Icons.play_circle_outline_rounded,
-                                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
-                                size: 36,
+                                color: theme.colorScheme.onSurfaceVariant
+                                    .withValues(alpha: 0.4),
+                                size: 32,
                               ),
                             ),
                           ),
@@ -480,15 +594,28 @@ class CourseDetailView extends StatelessWidget {
                   if (isLocked)
                     Positioned.fill(
                       child: Container(
-                        color: Colors.black.withValues(alpha: 0.35),
+                        color: Colors.black.withValues(alpha: 0.4),
+                        child: const Center(
+                          child: Icon(
+                            Icons.lock_rounded,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                        ),
                       ),
                     ),
-                  // Duration / Watched Badge on Thumbnail (bottom-left)
+                  // Duration / Watched Badge
                   Positioned(
                     left: 6,
-                    bottom: (course.isEnrolled && !isLocked && progressFraction > 0) ? 8 : 6,
+                    bottom:
+                        (course.isEnrolled && !isLocked && progressFraction > 0)
+                        ? 8
+                        : 6,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 5,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.black.withValues(alpha: 0.75),
                         borderRadius: BorderRadius.circular(4),
@@ -505,39 +632,6 @@ class CourseDetailView extends StatelessWidget {
                       ),
                     ),
                   ),
-                  // Bottom-Right Red Play Badge / Status Badge
-                  // Positioned(
-                  //   bottom: (course.isEnrolled && !isLocked && progressFraction > 0) ? 8 : 6,
-                  //   right: 6,
-                  //   child: Container(
-                  //     width: 24,
-                  //     height: 24,
-                  //     decoration: BoxDecoration(
-                  //       color: isCompleted
-                  //           ? Colors.green
-                  //           : (isLocked
-                  //               ? Colors.black.withValues(alpha: 0.6)
-                  //               : const Color(0xFFE50914)),
-                  //       shape: BoxShape.circle,
-                  //       boxShadow: [
-                  //         BoxShadow(
-                  //           color: Colors.black.withValues(alpha: 0.3),
-                  //           blurRadius: 4,
-                  //           offset: const Offset(0, 1),
-                  //         ),
-                  //       ],
-                  //     ),
-                  //     child: Icon(
-                  //       isCompleted
-                  //           ? Icons.check_rounded
-                  //           : (isLocked ? Icons.lock_rounded : Icons.play_arrow_rounded),
-                  //       color: Colors.white,
-                  //       size: 14,
-                  //     ),
-                  //   ),
-                  // ),
-                
-                
                   // Bottom Progress Bar inside Thumbnail
                   if (course.isEnrolled && !isLocked && progressFraction > 0)
                     Positioned(
@@ -548,7 +642,9 @@ class CourseDetailView extends StatelessWidget {
                         value: progressFraction,
                         minHeight: 3.5,
                         backgroundColor: Colors.black38,
-                        color: isCompleted ? Colors.green : const Color(0xFFE50914),
+                        color: isCompleted
+                            ? Colors.green
+                            : const Color(0xFFE50914),
                       ),
                     ),
                 ],
@@ -560,46 +656,31 @@ class CourseDetailView extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          title,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTextStyles.body.copyWith(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: !course.isEnrolled
-                                ? textColorPrimary
-                                : (isLocked
-                                    ? textColorSecondary.withValues(alpha: 0.7)
-                                    : (isCompleted ? textColorSecondary : textColorPrimary)),
-                            decoration: isCompleted ? TextDecoration.lineThrough : null,
-                            height: 1.25,
-                          ),
-                        ),
-                      ),
-                      // IconButton(
-                      //   padding: const EdgeInsets.all(4),
-                      //   constraints: const BoxConstraints(),
-                      //   icon: Icon(
-                      //     Icons.more_vert_rounded,
-                      //     size: 18,
-                      //     color: textColorSecondary,
-                      //   ),
-                      //   onPressed: () {
-                      //     _showLessonOptionsBottomSheet(context, lesson, course);
-                      //   },
-                      // ),
-                    ],
+                  Text(
+                    title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.body.copyWith(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: !course.isEnrolled
+                          ? textColorPrimary
+                          : (isLocked
+                                ? textColorSecondary.withValues(alpha: 0.7)
+                                : (isCompleted
+                                      ? textColorSecondary
+                                      : textColorPrimary)),
+                      decoration: isCompleted
+                          ? TextDecoration.lineThrough
+                          : null,
+                      height: 1.25,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     subtitleText,
                     style: AppTextStyles.body.copyWith(
-                      fontSize: 12,
+                      fontSize: 11,
                       color: textColorSecondary,
                     ),
                   ),
@@ -647,7 +728,7 @@ class CourseDetailView extends StatelessWidget {
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
-                            'Watch previous lesson to unlock',
+                            'Watch previous lesson video to unlock',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
@@ -655,44 +736,6 @@ class CourseDetailView extends StatelessWidget {
                               fontWeight: FontWeight.w600,
                               color: Colors.amber.shade700,
                             ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ] else if (progressFraction > 0) ...[
-                    const SizedBox(height: 6),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              isCompleted ? 'Completed' : 'Watched',
-                              style: AppTextStyles.body.copyWith(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w500,
-                                color: textColorSecondary,
-                              ),
-                            ),
-                            Text(
-                              '$watchedFormatted / $durationFormatted ($percentage%)',
-                              style: AppTextStyles.body.copyWith(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w600,
-                                color: isCompleted ? Colors.green : theme.colorScheme.secondary,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 3),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(2),
-                          child: LinearProgressIndicator(
-                            value: progressFraction,
-                            minHeight: 4,
-                            backgroundColor: theme.colorScheme.surfaceContainerHighest,
-                            color: isCompleted ? Colors.green : const Color(0xFFE50914),
                           ),
                         ),
                       ],
@@ -706,8 +749,6 @@ class CourseDetailView extends StatelessWidget {
       ),
     );
   }
-
-
 
   void _showPurchaseDialog(BuildContext context, CourseDetailModel course) {
     final theme = Theme.of(context);
@@ -732,7 +773,9 @@ class CourseDetailView extends StatelessWidget {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
+                  color: theme.colorScheme.onSurfaceVariant.withValues(
+                    alpha: 0.3,
+                  ),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -798,7 +841,8 @@ class CourseDetailView extends StatelessWidget {
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
             ),
-            const SizedBox(height: 24),             Row(
+            const SizedBox(height: 24),
+            Row(
               children: [
                 Expanded(
                   child: OutlinedButton(
