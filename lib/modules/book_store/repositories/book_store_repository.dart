@@ -69,9 +69,11 @@ class BookStoreRepository {
     return await _apiClient.get('/books/my-books');
   }
 
+  /*
   Future<dio_instance.Response> downloadBookPdf(String id) async {
     return await _apiClient.get('/books/$id/read');
   }
+  */
 
   Future<dio_instance.Response> getPaymentQr() async {
     return await _apiClient.get('/books/payment-qr');

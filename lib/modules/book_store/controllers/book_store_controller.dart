@@ -280,6 +280,7 @@ class BookStoreController extends GetxController {
     return null;
   }
 
+  /*
   Future<Map<String, dynamic>?> downloadBookPdf(String id) async {
     try {
       isDownloading.value = true;
@@ -294,6 +295,7 @@ class BookStoreController extends GetxController {
     }
     return null;
   }
+  */
 
   Future<void> fetchPaymentQr() async {
     try {

@@ -3,6 +3,7 @@ import 'package:persistent_bottom_nav_bar_v2/persistent_bottom_nav_bar_v2.dart';
 import '../../../app/routes/app_routes.dart';
 import '../../../core/services/secure_storage_service.dart';
 import '../../../core/services/notification_service.dart';
+import '../../../core/utils/error_handler.dart';
 import '../repositories/dashboard_repository.dart';
 import '../models/dashboard_model.dart';
 
@@ -55,6 +56,14 @@ class DashboardController extends GetxController {
     }
   }
 
+  void jumpToTab(int index) {
+    tabController.jumpToTab(index);
+  }
+
+  void changeTab(int index) {
+    tabController.jumpToTab(index);
+  }
+
   Future<void> fetchDashboardData() async {
     isLoading.value = true;
     errorMessage.value = '';
@@ -84,8 +93,13 @@ class DashboardController extends GetxController {
       if (Get.isRegistered<NotificationService>()) {
         Get.find<NotificationService>().fetchUnreadCount();
       }
-    } catch (e) {
-      errorMessage.value = 'Failed to connect to server';
+    } catch (e, stackTrace) {
+      print('Error fetching dashboard: $e');
+      print(stackTrace);
+      errorMessage.value = AppErrorHandler.getErrorMessage(
+        e,
+        defaultMessage: 'Failed to load dashboard. Please check your network connection.',
+      );
     } finally {
       isLoading.value = false;
     }
@@ -101,9 +115,4 @@ class DashboardController extends GetxController {
     Get.offAllNamed(Routes.LOGIN);
   }
 
-  @override
-  void onClose() {
-    tabController.dispose();
-    super.onClose();
-  }
 }

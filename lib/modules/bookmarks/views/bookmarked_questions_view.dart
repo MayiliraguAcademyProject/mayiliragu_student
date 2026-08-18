@@ -1,3 +1,4 @@
+import 'package:Mayiliragu/shared/widgets/common_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/bookmarked_questions_controller.dart';
@@ -46,10 +47,11 @@ class BookmarkedQuestionsView extends GetView<BookmarkedQuestionsController> {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 16),
-                  ElevatedButton(
+                  CommonButton(
+                    text: 'Retry',
                     onPressed: () => controller.fetchBookmarkedQuestions(),
-                    style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0F3CC9)),
-                    child: const Text('Retry', style: TextStyle(color: Colors.white)),
+                    backgroundColor: const Color(0xFF0F3CC9),
+                    fullWidth: false,
                   ),
                 ],
               ),

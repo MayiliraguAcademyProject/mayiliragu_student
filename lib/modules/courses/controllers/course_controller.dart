@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../core/utils/error_handler.dart';
 import '../repositories/course_repository.dart';
 
 class CourseController extends GetxController {
@@ -70,7 +71,7 @@ class CourseController extends GetxController {
         errorMessage.value = 'Failed to load courses';
       }
     } catch (e) {
-      errorMessage.value = 'Error: $e';
+      errorMessage.value = AppErrorHandler.getErrorMessage(e);
     } finally {
       isLoading.value = false;
     }

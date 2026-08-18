@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/enums/user_role.dart';
+import '../../../shared/widgets/common_button.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../controllers/profile_controller.dart';
 import '../widgets/demographics_section.dart';
@@ -135,7 +137,7 @@ class ProfileView extends GetView<ProfileController> {
               const SizedBox(height: 28),
 
               // 2. Personal & Academic Section
-              if (controller.userRole.value == 'STUDENT') ...[
+              if (UserRole.fromString(controller.userRole.value).isStudent) ...[
                 _buildSectionHeader('Academic Profile'),
                 const SizedBox(height: 12),
                 Card(
@@ -186,40 +188,16 @@ class ProfileView extends GetView<ProfileController> {
                             horizontal: 8.0,
                             vertical: 4.0,
                           ),
-                          child: SizedBox(
-                            width: double.infinity,
-                            height: 48,
-                            child: ElevatedButton(
-                              onPressed:
-                                  controller.isUpdatingStudentProfile.value
-                                  ? null
-                                  : () => controller.updateStudentProfile(
-                                      isOnboarding: false,
-                                    ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.primary,
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                                elevation: 0,
-                              ),
-                              child: controller.isUpdatingStudentProfile.value
-                                  ? const SizedBox(
-                                      height: 20,
-                                      width: 20,
-                                      child: CircularProgressIndicator(
-                                        color: Colors.white,
-                                        strokeWidth: 2,
-                                      ),
-                                    )
-                                  : const Text(
-                                      'Save Profile Details',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
+                          child: CommonButton(
+                            text: 'Save Profile Details',
+                            isLoading: controller.isUpdatingStudentProfile.value,
+                            onPressed: () => controller.updateStudentProfile(
+                              isOnboarding: false,
                             ),
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                            height: 48,
+                            borderRadius: 14,
                           ),
                         ),
                       ],
@@ -292,35 +270,14 @@ class ProfileView extends GetView<ProfileController> {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      SizedBox(
-                        width: double.infinity,
+                      CommonButton(
+                        text: 'Save Name Changes',
+                        isLoading: controller.isUpdatingName.value,
+                        onPressed: controller.updateName,
+                        backgroundColor: AppColors.accentDark,
+                        foregroundColor: Colors.white,
                         height: 48,
-                        child: ElevatedButton(
-                          onPressed: controller.isUpdatingName.value
-                              ? null
-                              : controller.updateName,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.accentDark,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            elevation: 0,
-                          ),
-                          child: controller.isUpdatingName.value
-                              ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                    color: Colors.white,
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : const Text(
-                                  'Save Name Changes',
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                        ),
+                        borderRadius: 14,
                       ),
                     ],
                   ),
@@ -506,35 +463,14 @@ class ProfileView extends GetView<ProfileController> {
                         ),
                       ),
                       const SizedBox(height: 20),
-                      SizedBox(
-                        width: double.infinity,
+                      CommonButton(
+                        text: 'Update Account Password',
+                        isLoading: controller.isChangingPassword.value,
+                        onPressed: controller.changePassword,
+                        backgroundColor: AppColors.accentDark,
+                        foregroundColor: Colors.white,
                         height: 48,
-                        child: ElevatedButton(
-                          onPressed: controller.isChangingPassword.value
-                              ? null
-                              : controller.changePassword,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.accentDark,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            elevation: 0,
-                          ),
-                          child: controller.isChangingPassword.value
-                              ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                    color: Colors.white,
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : const Text(
-                                  'Update Account Password',
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                        ),
+                        borderRadius: 14,
                       ),
                     ],
                   ),

@@ -7,6 +7,8 @@ import '../../../../core/controllers/user_session_controller.dart';
 import '../../../../app/routes/app_routes.dart';
 import '../repositories/auth_repository.dart';
 import '../../../shared/models/student_profile_model.dart';
+import '../../../../core/enums/user_role.dart';
+import '../widgets/guest_intake_bottom_sheet.dart';
 
 class AuthController extends GetxController {
   final AuthRepository _authRepository;
@@ -20,6 +22,15 @@ class AuthController extends GetxController {
   final obscurePassword = true.obs;
 
   AuthController(this._authRepository);
+
+  @override
+  void onInit() {
+    super.onInit();
+    final args = Get.arguments;
+    if (args is Map && args['email'] != null) {
+      emailController.text = args['email'].toString();
+    }
+  }
 
   void togglePasswordVisibility() {
     obscurePassword.value = !obscurePassword.value;
@@ -52,7 +63,7 @@ class AuthController extends GetxController {
         final refreshToken = responseData['refreshToken'] as String;
         final role = responseData['user']['role'] as String;
 
-        if (role != 'STUDENT') {
+        if (!UserRole.fromString(role).isStudent) {
           errorMessage.value = 'Access denied. Student account required.';
           return;
         }
@@ -105,7 +116,18 @@ class AuthController extends GetxController {
     } catch (e) {
       if (e is DioException) {
         final resData = e.response?.data;
-        if (resData is Map && (resData['code'] == 'DEVICE_BOUND_MISMATCH' || e.response?.statusCode == 403)) {
+        if (resData is Map && resData['code'] == 'ACCOUNT_NOT_VERIFIED') {
+          // Navigate to OTP verification screen with pre-filled email
+          Get.toNamed(
+            Routes.OTP_VERIFICATION,
+            arguments: {
+              'email': email,
+            },
+          );
+          errorMessage.value = resData['message'] ?? 'Please verify your email to activate your account.';
+          return;
+        }
+        if (resData is Map && resData['code'] == 'DEVICE_BOUND_MISMATCH') {
           errorMessage.value = resData['message'] ??
               'This account is registered on another device. Contact support to transfer device.';
           return;
@@ -121,6 +143,65 @@ class AuthController extends GetxController {
     }
   }
 
+  void enterGuestMode() {
+    final context = Get.context;
+    if (context != null) {
+      GuestIntakeBottomSheet.show(
+        context,
+        onSubmit: submitGuestIntake,
+      );
+    }
+  }
+
+  Future<void> submitGuestIntake({
+    required String name,
+    required String phoneNumber,
+    required String place,
+    required String targetCourse,
+    required String studyMode,
+  }) async {
+    try {
+      final response = await _authRepository.guestLogin(
+        name: name,
+        phoneNumber: phoneNumber,
+        place: place,
+        targetCourse: targetCourse,
+        studyMode: studyMode,
+      );
+      if (response.statusCode == 200) {
+        final responseData = response.data['data'] as Map<String, dynamic>;
+        final accessToken = responseData['accessToken'] as String;
+        final role = responseData['role'] as String? ?? UserRole.guest.value;
+
+        await _storage.saveTokens(
+          accessToken: accessToken,
+          refreshToken: '',
+          role: role,
+        );
+
+        if (Get.isRegistered<UserSessionController>()) {
+          await Get.find<UserSessionController>().loadSession();
+        }
+
+        if (Get.isBottomSheetOpen == true) {
+          Get.back();
+        }
+
+        Get.offAllNamed(Routes.DASHBOARD);
+      } else {
+        throw Exception(response.data['message'] ?? 'Failed to enter guest mode');
+      }
+    } catch (e) {
+      if (e is DioException) {
+        final resData = e.response?.data;
+        if (resData is Map && resData['message'] != null) {
+          throw Exception(resData['message'].toString());
+        }
+      }
+      throw Exception('Unable to enter guest mode. Please check connection.');
+    }
+  }
+
   Future<void> logout() async {
     try {
       if (Get.isRegistered<NotificationService>()) {
@@ -131,11 +212,5 @@ class AuthController extends GetxController {
     await _storage.clearAll();
     Get.offAllNamed(Routes.LOGIN);
   }
-
-  @override
-  void onClose() {
-    emailController.dispose();
-    passwordController.dispose();
-    super.onClose();
-  }
 }
+

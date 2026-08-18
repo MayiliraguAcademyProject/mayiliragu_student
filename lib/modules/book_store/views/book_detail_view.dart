@@ -1,9 +1,12 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
+import '../../../../shared/widgets/common_button.dart';
 import '../controllers/book_store_controller.dart';
 import 'book_checkout_view.dart';
+import 'book_sample_preview_view.dart';
 import '../../../../shared/widgets/custom_network_image.dart';
 
 class BookDetailView extends StatefulWidget {
@@ -19,11 +22,38 @@ class _BookDetailViewState extends State<BookDetailView> {
   final controller = Get.find<BookStoreController>();
   String selectedFormat = 'HARD_COPY';
   int quantity = 1;
+  late final PageController _carouselPageController;
+  int _currentCarouselIndex = 0;
+  Timer? _autoScrollTimer;
+  int _lastAutoScrollCount = 0;
 
   @override
   void initState() {
     super.initState();
+    _carouselPageController = PageController(viewportFraction: 0.88);
     controller.fetchBookDetail(widget.bookId);
+  }
+
+  void _startAutoScroll(int totalCount) {
+    if (totalCount <= 1 || _lastAutoScrollCount == totalCount) return;
+    _lastAutoScrollCount = totalCount;
+    _autoScrollTimer?.cancel();
+    _autoScrollTimer = Timer.periodic(const Duration(seconds: 4), (timer) {
+      if (!_carouselPageController.hasClients || !mounted) return;
+      final nextIndex = (_currentCarouselIndex + 1) % totalCount;
+      _carouselPageController.animateToPage(
+        nextIndex,
+        duration: const Duration(milliseconds: 550),
+        curve: Curves.easeInOutCubic,
+      );
+    });
+  }
+
+  @override
+  void dispose() {
+    _autoScrollTimer?.cancel();
+    _carouselPageController.dispose();
+    super.dispose();
   }
 
   @override
@@ -69,78 +99,402 @@ class _BookDetailViewState extends State<BookDetailView> {
           return const Center(child: Text("Book not found."));
         }
 
-        // Set default format if one is not available
-        if (selectedFormat == 'HARD_COPY' &&
-            book.priceHardCopy == null &&
-            book.priceSoftCopy != null) {
-          selectedFormat = 'SOFT_COPY';
-        }
-
         final hasHard = book.priceHardCopy != null;
-        final hasSoft = book.priceSoftCopy != null;
 
         return SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Cover image and header info
+              // Cover image or Sample Pages Carousel
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.symmetric(vertical: 16),
                 decoration: BoxDecoration(
                   color: colorScheme.surface,
                   borderRadius: BorderRadius.circular(24),
-                  border: Border.all(
-                    color: colorScheme.outline.withAlpha(50),
-                  ),
+                  border: Border.all(color: colorScheme.outline.withAlpha(50)),
                 ),
                 child: Column(
                   children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: CustomNetworkImage(
-                        imageUrl: book.thumbnailUrl,
-                        height: 220,
-                        fit: BoxFit.cover,
-                        errorWidget: Icon(
-                          Icons.book,
-                          size: 80,
-                          color: colorScheme.onSurfaceVariant,
+                    if (book.samplePages.isNotEmpty) ...[
+                      // Carousel Slider with Cover + Sample Pages
+                      Builder(
+                        builder: (context) {
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            _startAutoScroll(1 + book.samplePages.length);
+                          });
+                          return Column(
+                            children: [
+                              SizedBox(
+                                height: 240,
+                                child: PageView.builder(
+                                  controller: _carouselPageController,
+                                  itemCount: 1 + book.samplePages.length,
+                                  onPageChanged: (index) {
+                                    setState(() {
+                                      _currentCarouselIndex = index;
+                                    });
+                                  },
+                                  itemBuilder: (context, index) {
+                                    final isCover = index == 0;
+                                    final imageUrl = isCover
+                                        ? book.thumbnailUrl
+                                        : book.samplePages[index - 1];
+
+                                    return GestureDetector(
+                                      onTap: () {
+                                        Get.to(
+                                          () => BookSamplePreviewView(
+                                            book: book,
+                                            initialPage: isCover
+                                                ? 0
+                                                : index - 1,
+                                          ),
+                                        );
+                                      },
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 6.0,
+                                        ),
+                                        child: Stack(
+                                          children: [
+                                            ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(16),
+                                              child: SizedBox(
+                                                width: double.infinity,
+                                                height: 240,
+                                                child: CustomNetworkImage(
+                                                  imageUrl: imageUrl,
+                                                  fit: BoxFit.cover,
+                                                  errorWidget: Icon(
+                                                    Icons.book,
+                                                    size: 80,
+                                                    color: colorScheme
+                                                        .onSurfaceVariant,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            // Badge on top right
+                                            Positioned(
+                                              top: 10,
+                                              right: 10,
+                                              child: Container(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 8,
+                                                      vertical: 4,
+                                                    ),
+                                                decoration: BoxDecoration(
+                                                  color: isCover
+                                                      ? AppColors.brandPurple
+                                                      : Colors.black.withValues(
+                                                          alpha: 0.75,
+                                                        ),
+                                                  borderRadius:
+                                                      BorderRadius.circular(12),
+                                                  boxShadow: [
+                                                    BoxShadow(
+                                                      color: Colors.black
+                                                          .withValues(
+                                                            alpha: 0.3,
+                                                          ),
+                                                      blurRadius: 4,
+                                                    ),
+                                                  ],
+                                                ),
+                                                child: Row(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [
+                                                    Icon(
+                                                      isCover
+                                                          ? Icons.auto_stories
+                                                          : Icons.menu_book,
+                                                      size: 11,
+                                                      color: Colors.white,
+                                                    ),
+                                                    const SizedBox(width: 4),
+                                                    Text(
+                                                      isCover
+                                                          ? "Cover"
+                                                          : "Sample P.$index",
+                                                      style: const TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 10,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                            // Fullscreen tap hint on bottom
+                                            Positioned(
+                                              bottom: 10,
+                                              right: 10,
+                                              child: Container(
+                                                padding: const EdgeInsets.all(
+                                                  6,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.black
+                                                      .withValues(alpha: 0.6),
+                                                  shape: BoxShape.circle,
+                                                ),
+                                                child: const Icon(
+                                                  Icons.fullscreen,
+                                                  color: Colors.white,
+                                                  size: 16,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              // Carousel Indicator Dots
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: List.generate(
+                                  1 + book.samplePages.length,
+                                  (dotIndex) {
+                                    final isActive =
+                                        _currentCarouselIndex == dotIndex;
+                                    return AnimatedContainer(
+                                      duration: const Duration(
+                                        milliseconds: 250,
+                                      ),
+                                      margin: const EdgeInsets.symmetric(
+                                        horizontal: 3,
+                                      ),
+                                      width: isActive ? 18 : 6,
+                                      height: 6,
+                                      decoration: BoxDecoration(
+                                        color: isActive
+                                            ? AppColors.brandPurple
+                                            : colorScheme.outline.withAlpha(80),
+                                        borderRadius: BorderRadius.circular(3),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                    ] else ...[
+                      // Single Cover (when no sample images found)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: CustomNetworkImage(
+                            imageUrl: book.thumbnailUrl,
+                            height: 220,
+                            fit: BoxFit.cover,
+                            errorWidget: Icon(
+                              Icons.book,
+                              size: 80,
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
+                    ],
                     const SizedBox(height: 16),
-                    Text(
-                      book.title,
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w900,
-                        color: colorScheme.onSurface,
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Column(
+                        children: [
+                          Text(
+                            book.title,
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w900,
+                              color: colorScheme.onSurface,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            "Author: ${book.author ?? 'Unknown Author'}",
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: colorScheme.onSurfaceVariant,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          if (book.publisher != null)
+                            Text(
+                              "Publisher: ${book.publisher}",
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                        ],
                       ),
-                      textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      "Author: ${book.author ?? 'Unknown Author'}",
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    if (book.publisher != null)
-                      Text(
-                        "Publisher: ${book.publisher}",
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      ),
                   ],
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
+
+              // Look Inside / Sample Pages Banner
+              if (book.samplePages.isNotEmpty ||
+                  (book.samplePdfUrl != null &&
+                      book.samplePdfUrl!.isNotEmpty)) ...[
+                GestureDetector(
+                  onTap: () => Get.to(() => BookSamplePreviewView(book: book)),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          AppColors.brandPurple.withValues(alpha: 0.12),
+                          AppColors.brandPurple.withValues(alpha: 0.04),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(
+                        color: AppColors.brandPurple.withValues(alpha: 0.28),
+                        width: 1.2,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.brandPurple.withValues(alpha: 0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: AppColors.brandPurple.withValues(
+                              alpha: 0.15,
+                            ),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.auto_stories_rounded,
+                            color: AppColors.brandPurple,
+                            size: 22,
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Text(
+                                    "Look Inside",
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w900,
+                                      color: colorScheme.onSurface,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.brandPurple,
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: const Text(
+                                      "FREE",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.w900,
+                                        letterSpacing: 0.5,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 3),
+                              Text(
+                                book.samplePages.isNotEmpty
+                                    ? "Read ${book.samplePages.length} sample pages & contents"
+                                    : "Preview sample chapter excerpt (PDF)",
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w500,
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.brandPurple,
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.brandPurple.withValues(
+                                  alpha: 0.3,
+                                ),
+                                blurRadius: 6,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                "Read Sample",
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              SizedBox(width: 4),
+                              Icon(
+                                Icons.arrow_forward_rounded,
+                                size: 13,
+                                color: Colors.white,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+              ],
 
               // Format Selector
               Text(
@@ -214,6 +568,7 @@ class _BookDetailViewState extends State<BookDetailView> {
                         ),
                       ),
                     ),
+                  /*
                   if (hasHard && hasSoft) const SizedBox(width: 12),
                   if (hasSoft)
                     Expanded(
@@ -270,6 +625,7 @@ class _BookDetailViewState extends State<BookDetailView> {
                         ),
                       ),
                     ),
+                  */
                 ],
               ),
               const SizedBox(height: 20),
@@ -335,8 +691,7 @@ class _BookDetailViewState extends State<BookDetailView> {
               ],
 
               // Description
-              if (book.description != null &&
-                  book.description!.isNotEmpty) ...[
+              if (book.description != null && book.description!.isNotEmpty) ...[
                 Text(
                   AppStrings.aboutThisBook,
                   style: TextStyle(
@@ -358,33 +713,22 @@ class _BookDetailViewState extends State<BookDetailView> {
               ],
 
               // Buy Now Button
-              SizedBox(
-                width: double.infinity,
+              CommonButton(
+                text: AppStrings.buyNow,
+                onPressed:
+                    (selectedFormat == 'HARD_COPY' && book.stockHardCopy <= 0)
+                    ? null
+                    : () => Get.to(
+                        () => BookCheckoutView(
+                          book: book,
+                          format: selectedFormat,
+                          quantity: quantity,
+                        ),
+                      ),
+                backgroundColor: AppColors.brandPurple,
+                foregroundColor: Colors.white,
                 height: 52,
-                child: ElevatedButton(
-                  onPressed:
-                      (selectedFormat == 'HARD_COPY' && book.stockHardCopy <= 0)
-                          ? null
-                          : () => Get.to(() => BookCheckoutView(
-                                book: book,
-                                format: selectedFormat,
-                                quantity: quantity,
-                              )),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.brandPurple,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  child: const Text(
-                    AppStrings.buyNow,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
-                    ),
-                  ),
-                ),
+                borderRadius: 16,
               ),
             ],
           ),

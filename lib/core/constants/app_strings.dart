@@ -2,14 +2,14 @@ class AppStrings {
   AppStrings._();
 
   // App Metadata & Branding
-  static const String appName = 'Mayiliragu Student App';
+  static const String appName = 'Mayiliragu Academy';
   static const String appTagline = 'Learn, Practice, Excel';
   static const String appVersion = 'v1.0.0';
 
   // Navigation Tabs
   static const String tabHome = 'Home';
   static const String tabTests = 'Tests';
-  static const String tabLearn = 'Learn';
+  static const String tabLearn = 'Online Videos';
   static const String tabProgress = 'Progress';
   static const String tabProfile = 'Profile';
   static const String tabMore = 'More';
@@ -42,7 +42,8 @@ class AppStrings {
   // Authentication & Session
   static const String welcomeBack = 'Welcome Back!';
   static const String loginTitle = 'Login to your account';
-  static const String loginSubtitle = 'Enter your credentials to access your courses and tests';
+  static const String loginSubtitle =
+      'Enter your credentials to access your courses and tests';
   static const String emailOrPhone = 'Email or Mobile Number';
   static const String password = 'Password';
   static const String forgotPassword = 'Forgot Password?';
@@ -60,7 +61,8 @@ class AppStrings {
   static const String quickActions = 'Quick Actions';
   static const String enrolledCourses = 'My Enrolled Courses';
   static const String continueLearning = 'Continue Learning';
-  static const String startLearningPrompt = 'Explore courses to start learning!';
+  static const String startLearningPrompt =
+      'Explore courses to start learning!';
   static const String overallProgress = 'Overall Progress';
   static const String resumeLesson = 'Resume Lesson';
   static const String noNotifications = 'No new notifications right now.';
@@ -74,18 +76,23 @@ class AppStrings {
   // Practice Tests & Mock Exams
   static const String practiceTests = 'Practice Tests';
   static const String evaluatePrep = 'Evaluate Your Prep';
-  static const String evaluatePrepDesc = 'Access hundreds of mock tests, subject-wise quizzes, and detailed analysis.';
+  static const String evaluatePrepDesc =
+      'Access hundreds of mock tests, subject-wise quizzes, and detailed analysis.';
   static const String testCategories = 'Test Categories';
   static const String mockExams = 'Full-Length Mock Exams';
-  static const String mockExamsDesc = 'Simulate the real exam experience with timers and score reports.';
+  static const String mockExamsDesc =
+      'Simulate the real exam experience with timers and score reports.';
   static const String mockExamsStatus = '15 Available';
   static const String subjectTests = 'Subject-wise Tests';
-  static const String subjectTestsDesc = 'Target specific topics to build concepts and improve accuracy.';
+  static const String subjectTestsDesc =
+      'Target specific topics to build concepts and improve accuracy.';
   static const String subjectTestsStatus = '45 Available';
   static const String previousExams = 'Previous Year Papers';
-  static const String previousExamsDesc = 'Attempt original papers from past exams to understand the pattern.';
+  static const String previousExamsDesc =
+      'Attempt original papers from past exams to understand the pattern.';
   static const String previousExamsStatus = '10 Available';
-  static const String testsFooter = 'More test series are being curated by our educators and will be updated weekly.';
+  static const String testsFooter =
+      'More test series are being curated by our educators and will be updated weekly.';
   static const String startTest = 'Start Test';
   static const String resumeTest = 'Resume';
   static const String viewResults = 'Results';
@@ -93,10 +100,13 @@ class AppStrings {
   // Scheduled & Premium Tests
   static const String testScheduled = 'Test Scheduled';
   static const String scheduledOpensOn = 'Opens On';
-  static const String scheduledDesc = 'This test is scheduled for a future date and time. It will automatically unlock once the scheduled time arrives.';
+  static const String scheduledDesc =
+      'This test is scheduled for a future date and time. It will automatically unlock once the scheduled time arrives.';
   static const String premiumTest = 'Premium Test';
-  static const String premiumTestDesc = 'This test is exclusively available to enrolled premium students. Upgrade your plan to access all mock tests, detailed solutions, and performance analytics.';
-  static const String premiumUnlockPrompt = 'To unlock premium access, please contact your institution admin or support.';
+  static const String premiumTestDesc =
+      'This test is exclusively available to enrolled premium students. Upgrade your plan to access all mock tests, detailed solutions, and performance analytics.';
+  static const String premiumUnlockPrompt =
+      'To unlock premium access, please contact your institution admin or support.';
 
   // Courses & Learning
   static const String myCourses = 'My Courses';
@@ -136,11 +146,14 @@ class AppStrings {
   static const String privacyPolicy = 'Privacy Policy';
 
   // Error & Informational Messages
-  static const String somethingWentWrong = 'Something went wrong. Please try again.';
-  static const String networkError = 'Network error. Please check your internet connection.';
+  static const String somethingWentWrong =
+      'Something went wrong. Please try again.';
+  static const String networkError =
+      'Network error. Please check your internet connection.';
   static const String tryAgainLater = 'Please try again later.';
   static const String noDataAvailable = 'No data available at this time.';
-  static const String sessionExpired = 'Your session has expired. Please log in again.';
+  static const String sessionExpired =
+      'Your session has expired. Please log in again.';
 
   // Book Store & Orders
   static const String bookStore = 'Book Store';
@@ -163,4 +176,39 @@ class AppStrings {
   static const String savedAddresses = 'Saved Addresses';
   static const String selectSavedAddress = 'Select from saved addresses';
   static const String uploadPaymentProof = 'Upload Payment Proof';
+
+  // Live Streams & Testimonials
+  static const String liveClasses = 'Live Classes';
+  static const String liveNow = 'Live Now';
+  static const String upcoming = 'Upcoming';
+  static const String noClassesAvailable = 'No classes available.';
+  static const String noLiveClassesNow = 'No live classes happening right now.';
+  static const String noUpcomingClasses = 'No upcoming classes scheduled.';
+  static const String noRecordedClasses = 'No recorded classes found.';
+  static const String unsupportedLink = 'Unsupported Link';
+  static const String invalidVideoSourceUrl =
+      'The video source URL is invalid.';
+  static const String live = 'LIVE';
+  static const String failedToLoadLiveStreams = 'Failed to load live streams.';
+  static const String liveNowUppercase = 'LIVE NOW';
+  static const String completed = 'Completed';
+  static const String startsIn = 'Starts in';
+  static const String classScheduled = 'Class Scheduled';
+  static const String classScheduledStartIn =
+      'This class is scheduled to start in ';
+  static const String pleaseWaitScheduledTime =
+      '.\n\nPlease wait for the scheduled time.';
+
+  // Testimonials
+  static const String studentSuccessStories = 'Student Success Stories';
+  static const String noTestimonialsPosted = 'No testimonials posted yet.';
+  static const String testimonialUrlParseError =
+      'The video URL could not be parsed.';
+  static const String failedToLoadTestimonials = 'Failed to load testimonials.';
+  static const String shorts = 'SHORTS';
+
+  // Exam Updates
+  static const String examUpdates = 'Exam Updates';
+  static const String noExamUpdates = 'No exam updates available.';
+  static const String failedToLoadExamUpdates = 'Failed to load exam updates.';
 }

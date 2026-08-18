@@ -1,6 +1,14 @@
 import 'package:get/get.dart';
 import '../../modules/auth/bindings/auth_binding.dart';
 import '../../modules/auth/views/auth_view.dart';
+import '../../modules/auth/bindings/register_binding.dart';
+import '../../modules/auth/views/register_view.dart';
+import '../../modules/auth/bindings/otp_verification_binding.dart';
+import '../../modules/auth/views/otp_verification_view.dart';
+import '../../modules/auth/bindings/forgot_password_binding.dart';
+import '../../modules/auth/views/forgot_password_view.dart';
+import '../../modules/auth/views/forgot_password_otp_view.dart';
+import '../../modules/auth/views/reset_password_view.dart';
 import '../../modules/onboarding/bindings/onboarding_binding.dart';
 import '../../modules/onboarding/views/onboarding_view.dart';
 import '../../modules/splash/bindings/splash_binding.dart';
@@ -33,6 +41,16 @@ import '../../modules/book_store/views/book_store_dashboard_view.dart';
 import '../../modules/notifications/views/notification_inbox_view.dart';
 import '../../modules/bookmarks/bindings/bookmarked_questions_binding.dart';
 import '../../modules/bookmarks/views/bookmarked_questions_view.dart';
+import '../../modules/payment/bindings/payment_binding.dart';
+import '../../modules/payment/views/banner_product_detail_view.dart';
+import '../../modules/payment/views/payment_qr_view.dart';
+import '../../modules/payment/views/payment_confirmation_view.dart';
+import '../../modules/live_videos/bindings/live_videos_binding.dart';
+import '../../modules/live_videos/views/live_videos_list_view.dart';
+import '../../modules/testimonials/bindings/testimonials_binding.dart';
+import '../../modules/testimonials/views/testimonials_list_view.dart';
+import '../../modules/exam_updates/bindings/exam_updates_binding.dart';
+import '../../modules/exam_updates/views/exam_updates_list_view.dart';
 import 'app_routes.dart';
 
 class AppPages {
@@ -55,6 +73,31 @@ class AppPages {
       name: Routes.LOGIN,
       page: () => const AuthView(),
       binding: AuthBinding(),
+    ),
+    GetPage(
+      name: Routes.REGISTER,
+      page: () => const RegisterView(),
+      binding: RegisterBinding(),
+    ),
+    GetPage(
+      name: Routes.OTP_VERIFICATION,
+      page: () => const OtpVerificationView(),
+      binding: OtpVerificationBinding(),
+    ),
+    GetPage(
+      name: Routes.FORGOT_PASSWORD,
+      page: () => const ForgotPasswordView(),
+      binding: ForgotPasswordBinding(),
+    ),
+    GetPage(
+      name: Routes.FORGOT_PASSWORD_OTP,
+      page: () => const ForgotPasswordOtpView(),
+      binding: ForgotPasswordBinding(),
+    ),
+    GetPage(
+      name: Routes.RESET_PASSWORD,
+      page: () => const ResetPasswordView(),
+      binding: ForgotPasswordBinding(),
     ),
     GetPage(
       name: Routes.DASHBOARD,
@@ -129,6 +172,35 @@ class AppPages {
       name: Routes.BOOKMARKS,
       page: () => const BookmarkedQuestionsView(),
       binding: BookmarkedQuestionsBinding(),
+    ),
+    GetPage(
+      name: Routes.BANNER_PRODUCT_DETAIL,
+      page: () => BannerProductDetailView(banner: Get.arguments),
+      binding: PaymentBinding(),
+    ),
+    GetPage(
+      name: Routes.PAYMENT_QR,
+      page: () => const PaymentQrView(),
+      binding: PaymentBinding(),
+    ),
+    GetPage(
+      name: Routes.PAYMENT_CONFIRMATION,
+      page: () => const PaymentConfirmationView(),
+    ),
+    GetPage(
+      name: Routes.LIVE_VIDEOS,
+      page: () => const LiveVideosListView(),
+      binding: LiveVideosBinding(),
+    ),
+    GetPage(
+      name: Routes.TESTIMONIALS,
+      page: () => const TestimonialsListView(),
+      binding: TestimonialsBinding(),
+    ),
+    GetPage(
+      name: Routes.EXAM_UPDATES,
+      page: () => const ExamUpdatesListView(),
+      binding: ExamUpdatesBinding(),
     ),
   ];
 }

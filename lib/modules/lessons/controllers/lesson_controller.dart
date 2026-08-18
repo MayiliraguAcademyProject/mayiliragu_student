@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:better_player_enhanced/better_player.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +8,7 @@ import '../../../core/constants/api_constants.dart';
 import '../../../core/services/secure_storage_service.dart';
 import '../../../core/services/video_download_service.dart';
 import '../../../core/utils/toast_helper.dart';
+import '../../../core/utils/error_handler.dart';
 import '../repositories/lesson_repository.dart';
 import '../repositories/notes_repository.dart';
 
@@ -18,10 +20,15 @@ class LessonController extends GetxController {
   final errorMessage = ''.obs;
   final lessonData = Rxn<Map<String, dynamic>>();
 
-  // Tab index: 0 = Notes, 1 = Resources
+  // Video playlist state
+  final videos = <Map<String, dynamic>>[].obs;
+  final currentVideoIndex = 0.obs;
+  final activeVideoId = RxnString();
+
+  // Tab index: 0 = Playlist, 1 = Notes
   final activeTabIndex = 0.obs;
 
-  // Completion status
+  // Completion status for active video
   final isCompleted = false.obs;
 
   // Study notes list state
@@ -36,6 +43,13 @@ class LessonController extends GetxController {
   int maxWatchedSeconds = 0;
 
   LessonController(this._repository, this._notesRepository);
+
+  Map<String, dynamic>? get currentVideo {
+    if (videos.isEmpty || currentVideoIndex.value >= videos.length) {
+      return null;
+    }
+    return videos[currentVideoIndex.value];
+  }
 
   @override
   void onInit() {
@@ -85,30 +99,106 @@ class LessonController extends GetxController {
         final data = Map<String, dynamic>.from(response.data['data']);
         lessonData.value = data;
 
-        int startSeconds = 0;
-        if (data['progress'] != null &&
-            data['progress']['watchedSeconds'] != null) {
-          startSeconds = data['progress']['watchedSeconds'] as int;
-          _lastSyncedPosition = startSeconds;
-        }
-        _latestPosition = startSeconds;
-        maxWatchedSeconds = startSeconds;
+        // Parse videos playlist
+        final videosList = (data['videos'] as List? ?? [])
+            .map((v) => Map<String, dynamic>.from(v as Map))
+            .toList();
 
-        if (data['progress'] != null && data['progress']['completed'] != null) {
-          isCompleted.value = data['progress']['completed'] as bool;
+        if (videosList.isNotEmpty) {
+          videos.value = videosList;
+        } else if (data['driveFileId'] != null) {
+          // Backward compatibility fallback: single video represented by lesson
+          videos.value = [
+            {
+              'id': data['id'],
+              'lessonId': data['id'],
+              'title': data['title'] ?? 'Lecture Video',
+              'driveFileId': data['driveFileId'],
+              'duration': data['duration'] ?? 0,
+              'downloadEnabled': data['downloadEnabled'] ?? false,
+              'isLocked': data['isLocked'] ?? false,
+              'progress': data['progress'],
+            }
+          ];
+        } else {
+          videos.value = [];
         }
 
-        final driveFileId = data['driveFileId']?.toString() ?? '';
-        await _initializeVideoPlayer(driveFileId, startSeconds: startSeconds);
+        // Select first unlocked video (or index 0)
+        int targetIdx = 0;
+        final selectedVideoId = Get.parameters['videoId'];
+        if (selectedVideoId != null) {
+          final foundIdx = videos.indexWhere((v) => v['id'] == selectedVideoId);
+          if (foundIdx != -1) targetIdx = foundIdx;
+        }
+
+        currentVideoIndex.value = targetIdx;
+        if (videos.isNotEmpty) {
+          await _loadVideo(targetIdx, autoPlay: false);
+        }
+
         fetchNotes(id);
       } else {
         errorMessage.value = 'Failed to load lesson details';
       }
     } catch (e) {
-      errorMessage.value = 'Error: $e';
+      if (e is DioException) {
+        final resData = e.response?.data;
+        if (resData is Map && resData['message'] != null) {
+          errorMessage.value = resData['message'].toString();
+        } else if (e.response?.statusCode == 403) {
+          errorMessage.value = 'Access denied. Enrollment required to access this lesson.';
+        } else {
+          errorMessage.value = 'Failed to load lesson details. Please try again.';
+        }
+      } else {
+        errorMessage.value = e.toString().replaceFirst('Exception: ', '');
+      }
     } finally {
       isLoading.value = false;
     }
+  }
+
+  Future<void> selectVideo(int index) async {
+    if (index < 0 || index >= videos.length) return;
+    if (index == currentVideoIndex.value && betterPlayerController != null) return;
+
+    // Check lock status
+    final video = videos[index];
+    if (video['isLocked'] == true) {
+      AppToast.validation(
+        'Please complete the previous video to unlock this lecture.',
+        title: 'Video Locked',
+      );
+      return;
+    }
+
+    _syncProgressOnClose();
+    currentVideoIndex.value = index;
+    await _loadVideo(index, autoPlay: true);
+  }
+
+  Future<void> _loadVideo(int index, {bool autoPlay = false}) async {
+    if (index >= videos.length) return;
+    final video = videos[index];
+    activeVideoId.value = video['id']?.toString();
+
+    int startSeconds = 0;
+    if (video['progress'] != null && video['progress']['watchedSeconds'] != null) {
+      startSeconds = video['progress']['watchedSeconds'] as int;
+      _lastSyncedPosition = startSeconds;
+    }
+    _latestPosition = startSeconds;
+    maxWatchedSeconds = startSeconds;
+
+    if (video['progress'] != null && video['progress']['completed'] != null) {
+      isCompleted.value = video['progress']['completed'] as bool;
+    } else {
+      isCompleted.value = false;
+    }
+
+    final driveFileId = video['driveFileId']?.toString() ?? '';
+    await _initializeVideoPlayer(driveFileId, startSeconds: startSeconds, autoPlay: autoPlay);
   }
 
   bool get isVideoPlayerSupported =>
@@ -117,32 +207,30 @@ class LessonController extends GetxController {
   Future<void> _initializeVideoPlayer(
     String driveFileId, {
     int startSeconds = 0,
+    bool autoPlay = false,
   }) async {
-    if (!isVideoPlayerSupported) {
-      return;
-    }
+    if (!isVideoPlayerSupported) return;
+
+    // Clean previous controller if any
+    betterPlayerController?.dispose();
+    betterPlayerController = null;
 
     final downloadService = Get.find<VideoDownloadService>();
-    final isDownloadedOffline = downloadService.isDownloaded(
-      _currentLessonId ?? '',
-    );
+    final videoId = activeVideoId.value ?? _currentLessonId ?? '';
+    final isDownloadedOffline = downloadService.isDownloaded(videoId);
     final BetterPlayerDataSource dataSource;
 
     if (isDownloadedOffline) {
-      final localPath = downloadService.getLocalVideoPath(
-        _currentLessonId ?? '',
-      );
+      final localPath = downloadService.getLocalVideoPath(videoId);
       dataSource = BetterPlayerDataSource(
         BetterPlayerDataSourceType.file,
         localPath!,
       );
     } else {
-      // If the driveFileId is already a full URL (or for fallback test stream)
       String videoUrl = driveFileId;
       Map<String, String>? headers;
 
       if (driveFileId.isEmpty) {
-        // Fallback test video stream if none provided
         videoUrl =
             'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
       } else {
@@ -150,14 +238,11 @@ class LessonController extends GetxController {
         final bool isGoogleDriveUrl = driveFileId.contains('drive.google.com');
 
         if (isGoogleDriveUrl) {
-          // Extract the file ID from Google Drive URL patterns:
-          // 1. /file/d/FILE_ID/view...
           final regExp1 = RegExp(r'/file/d/([a-zA-Z0-9-_]+)');
           final match1 = regExp1.firstMatch(driveFileId);
           if (match1 != null && match1.groupCount >= 1) {
             extractedId = match1.group(1)!;
           } else {
-            // 2. ?id=FILE_ID or &id=FILE_ID
             final regExp2 = RegExp(r'[?&]id=([a-zA-Z0-9-_]+)');
             final match2 = regExp2.firstMatch(driveFileId);
             if (match2 != null && match2.groupCount >= 1) {
@@ -167,9 +252,9 @@ class LessonController extends GetxController {
         }
 
         if (isGoogleDriveUrl || !driveFileId.startsWith('http')) {
-          // Use backend proxy streaming endpoint
-          videoUrl = '${ApiConstants.baseUrl}/lessons/stream/$extractedId';
           final token = await Get.find<SecureStorageService>().getAccessToken();
+          final tokenQuery = (token != null && token.isNotEmpty) ? '?token=$token' : '';
+          videoUrl = '${ApiConstants.baseUrl}/lessons/stream/$extractedId$tokenQuery';
           if (token != null) {
             headers = {'Authorization': 'Bearer $token'};
           }
@@ -186,7 +271,7 @@ class LessonController extends GetxController {
     betterPlayerController = BetterPlayerController(
       BetterPlayerConfiguration(
         aspectRatio: 16 / 9,
-        autoPlay: false,
+        autoPlay: autoPlay,
         looping: false,
         startAt: Duration(seconds: startSeconds),
         placeholder: const Center(
@@ -219,38 +304,66 @@ class LessonController extends GetxController {
         }
       }
       if (event.betterPlayerEventType == BetterPlayerEventType.progress) {
-        final videoPlayerController =
-            betterPlayerController!.videoPlayerController;
+        final videoPlayerController = betterPlayerController!.videoPlayerController;
         if (videoPlayerController != null) {
           final currentPos = videoPlayerController.value.position.inSeconds;
+          final totalDuration = videoPlayerController.value.duration?.inSeconds ?? 0;
+
           if (currentPos > 0) {
             if (currentPos > maxWatchedSeconds) {
               maxWatchedSeconds = currentPos;
             }
             _latestPosition = currentPos;
-            if ((currentPos - _lastSyncedPosition).abs() >= 30) {
+
+            // Auto completion at 90%
+            if (!isCompleted.value && totalDuration > 0 && currentPos >= (totalDuration * 0.9)) {
+              isCompleted.value = true;
+              _syncProgress(currentPos);
+              _handleAutoAdvance();
+            } else if ((currentPos - _lastSyncedPosition).abs() >= 30) {
               _syncProgress(currentPos);
             }
           }
         }
       }
+      if (event.betterPlayerEventType == BetterPlayerEventType.finished) {
+        if (!isCompleted.value) {
+          isCompleted.value = true;
+          _syncProgress(_latestPosition);
+        }
+        _handleAutoAdvance();
+      }
     });
+
+    update();
+  }
+
+  void _handleAutoAdvance() {
+    if (currentVideoIndex.value < videos.length - 1) {
+      final nextIdx = currentVideoIndex.value + 1;
+      AppToast.info('Advancing to next video: ${videos[nextIdx]['title']}');
+      Future.delayed(const Duration(seconds: 1), () {
+        selectVideo(nextIdx);
+      });
+    }
   }
 
   Future<void> _syncProgress(int currentPos) async {
     if (_currentLessonId == null) return;
     _lastSyncedPosition = currentPos;
     try {
-      await _repository.updateProgress(_currentLessonId!, currentPos);
+      await _repository.updateProgress(
+        lessonId: _currentLessonId,
+        videoId: activeVideoId.value,
+        watchedSeconds: currentPos,
+      );
     } catch (e) {
       debugPrint('Failed to sync progress: $e');
     }
   }
 
   void _syncProgressOnClose() {
-    if (_currentLessonId != null &&
-        _latestPosition > 0 &&
-        _latestPosition != _lastSyncedPosition) {
+    if (_latestPosition > 0 && _latestPosition != _lastSyncedPosition) {
       _syncProgress(_latestPosition);
     }
   }
@@ -273,12 +386,7 @@ class LessonController extends GetxController {
     if (_currentLessonId == null || content.trim().isEmpty) return;
     try {
       final currentPos =
-          betterPlayerController
-              ?.videoPlayerController
-              ?.value
-              .position
-              .inSeconds ??
-          0;
+          betterPlayerController?.videoPlayerController?.value.position.inSeconds ?? 0;
       final response = await _notesRepository.createNote(
         lessonId: _currentLessonId!,
         timestamp: currentPos,
@@ -331,8 +439,7 @@ class LessonController extends GetxController {
 
   void seekBackward([int seconds = 10]) {
     if (isVideoPlayerSupported && betterPlayerController != null) {
-      final videoPlayerController =
-          betterPlayerController!.videoPlayerController;
+      final videoPlayerController = betterPlayerController!.videoPlayerController;
       if (videoPlayerController != null) {
         final currentPos = videoPlayerController.value.position.inSeconds;
         final targetPos = (currentPos - seconds).clamp(
@@ -346,8 +453,7 @@ class LessonController extends GetxController {
 
   void seekForward([int seconds = 10]) {
     if (isVideoPlayerSupported && betterPlayerController != null) {
-      final videoPlayerController =
-          betterPlayerController!.videoPlayerController;
+      final videoPlayerController = betterPlayerController!.videoPlayerController;
       if (videoPlayerController != null) {
         final currentPos = videoPlayerController.value.position.inSeconds;
         final targetPos = currentPos + seconds;
@@ -359,34 +465,37 @@ class LessonController extends GetxController {
   Future<void> markLessonAsComplete() async {
     if (_currentLessonId == null) return;
     try {
-      final response = await _repository.markAsComplete(_currentLessonId!);
+      final response = await _repository.markAsComplete(
+        lessonId: _currentLessonId,
+        videoId: activeVideoId.value,
+      );
       if (response.statusCode == 200) {
         isCompleted.value = true;
-        AppToast.success('Lesson marked as complete!');
+        AppToast.success('Video marked as complete!');
+        _handleAutoAdvance();
       }
     } catch (e) {
-      AppToast.error('Failed to mark lesson as complete: $e');
+      AppToast.error(AppErrorHandler.getErrorMessage(e, defaultMessage: 'Failed to mark video as complete'));
     }
   }
 
   Future<void> startVideoDownload() async {
-    if (_currentLessonId == null || lessonData.value == null) return;
+    final video = currentVideo;
+    if (video == null) return;
 
     final downloadService = Get.find<VideoDownloadService>();
     final secureStorage = Get.find<SecureStorageService>();
     final customPath = await secureStorage.getDownloadDirPath();
 
     if (customPath == null || customPath.isEmpty) {
-      final bool picked = await _promptAndSelectDownloadDirectory(
-        downloadService,
-      );
+      final bool picked = await _promptAndSelectDownloadDirectory(downloadService);
       if (!picked) {
         AppToast.error('Download cancelled. Please select a download folder.');
         return;
       }
     }
 
-    final driveFileId = lessonData.value!['driveFileId']?.toString() ?? '';
+    final driveFileId = video['driveFileId']?.toString() ?? '';
     if (driveFileId.isEmpty) {
       AppToast.error('No video source file found.');
       return;
@@ -413,57 +522,48 @@ class LessonController extends GetxController {
     }
 
     if (isGoogleDriveUrl || !driveFileId.startsWith('http')) {
-      videoUrl = '${ApiConstants.baseUrl}/lessons/stream/$extractedId';
       final token = await Get.find<SecureStorageService>().getAccessToken();
+      final tokenQuery = (token != null && token.isNotEmpty) ? '?token=$token' : '';
+      videoUrl = '${ApiConstants.baseUrl}/lessons/stream/$extractedId$tokenQuery';
       if (token != null) {
         headers = {'Authorization': 'Bearer $token'};
       }
     }
 
+    final vidId = video['id']?.toString() ?? _currentLessonId!;
+
     await downloadService.downloadVideo(
-      _currentLessonId!,
+      vidId,
       videoUrl,
       headers: headers,
       onComplete: () async {
         try {
-          await _repository.logVideoDownload(_currentLessonId!);
+          await _repository.logVideoDownload(lessonId: _currentLessonId, videoId: vidId);
         } catch (e) {
           debugPrint('Failed to log video download on backend: $e');
         }
         AppToast.success('Video downloaded successfully for offline viewing!');
-        // Reload player with offline file source
         final startSecs =
-            betterPlayerController
-                ?.videoPlayerController
-                ?.value
-                .position
-                .inSeconds ??
-            0;
-        betterPlayerController?.dispose();
+            betterPlayerController?.videoPlayerController?.value.position.inSeconds ?? 0;
         await _initializeVideoPlayer(driveFileId, startSeconds: startSecs);
         update();
       },
       onError: (err) {
-        AppToast.error('Failed to download video: $err');
+        AppToast.error(AppErrorHandler.getErrorMessage(err, defaultMessage: 'Failed to download video'));
       },
     );
   }
 
   Future<void> deleteDownloadedVideo() async {
-    if (_currentLessonId == null || lessonData.value == null) return;
+    final video = currentVideo;
+    if (video == null) return;
+    final vidId = video['id']?.toString() ?? _currentLessonId!;
     final downloadService = Get.find<VideoDownloadService>();
-    await downloadService.deleteVideo(_currentLessonId!);
+    await downloadService.deleteVideo(vidId);
     AppToast.info('Local offline video deleted successfully.');
-    // Reload player with network source
-    final driveFileId = lessonData.value!['driveFileId']?.toString() ?? '';
+    final driveFileId = video['driveFileId']?.toString() ?? '';
     final startSecs =
-        betterPlayerController
-            ?.videoPlayerController
-            ?.value
-            .position
-            .inSeconds ??
-        0;
-    betterPlayerController?.dispose();
+        betterPlayerController?.videoPlayerController?.value.position.inSeconds ?? 0;
     await _initializeVideoPlayer(driveFileId, startSeconds: startSecs);
     update();
   }

@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import '../../../core/models/notification_model.dart';
 import '../../../core/services/notification_service.dart';
+import '../../../core/utils/error_handler.dart';
 
 class NotificationInboxController extends GetxController {
   final NotificationService _notificationService = Get.find<NotificationService>();
@@ -52,7 +53,10 @@ class NotificationInboxController extends GetxController {
         _currentOffset += _pageSize;
       }
     } catch (e) {
-      errorMessage.value = 'Failed to load notifications';
+      errorMessage.value = AppErrorHandler.getErrorMessage(
+        e,
+        defaultMessage: 'Failed to load notifications. Please try again.',
+      );
     } finally {
       isLoading.value = false;
       isMoreLoading.value = false;

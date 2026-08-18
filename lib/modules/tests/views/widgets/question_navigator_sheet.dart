@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/test_runner_controller.dart';
+import '../../../../shared/widgets/common_button.dart';
 import '../../models/question_model.dart';
 import '../../models/student_answer_model.dart';
 
@@ -119,29 +120,19 @@ class QuestionNavigatorSheet extends StatelessWidget {
           const SizedBox(height: 20),
 
           // Submission Action
-          SizedBox(
-            width: double.infinity,
-            height: 48,
-            child: ElevatedButton(
+          Obx(() {
+            return CommonButton(
+              text: 'Submit Test — ${controller.countAnswered}/${controller.questions.length} Answered',
               onPressed: () {
                 Get.back(); // close bottom sheet
                 controller.submitTest();
               },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFDC2626), // red
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: Obx(() {
-                return Text(
-                  'Submit Test — ${controller.countAnswered}/${controller.questions.length} Answered',
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                );
-              }),
-            ),
-          ),
+              backgroundColor: const Color(0xFFDC2626),
+              foregroundColor: Colors.white,
+              height: 48,
+              borderRadius: 12,
+            );
+          }),
         ],
       ),
     );

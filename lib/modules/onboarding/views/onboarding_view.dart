@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../shared/widgets/common_button.dart';
 import '../controllers/onboarding_controller.dart';
 
 class OnboardingView extends GetView<OnboardingController> {
@@ -151,40 +152,20 @@ class OnboardingView extends GetView<OnboardingController> {
                       const Spacer(),
 
                       // Bottom Next/GetStarted button
-                      SizedBox(
-                        width: double.infinity,
-                        height: 56,
-                        child: Obx(() {
-                          final isLast =
-                              controller.currentPage.value ==
-                              controller.slides.length - 1;
-                          return ElevatedButton(
-                            onPressed: controller.nextPage,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.brandPurple,
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(28),
-                              ),
-                              elevation: 0,
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  isLast ? 'Get Started' : 'Next',
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                const Icon(Icons.arrow_forward, size: 20),
-                              ],
-                            ),
-                          );
-                        }),
-                      ),
+                      Obx(() {
+                        final isLast =
+                            controller.currentPage.value ==
+                            controller.slides.length - 1;
+                        return CommonButton(
+                          text: isLast ? 'Get Started' : 'Next',
+                          onPressed: controller.nextPage,
+                          backgroundColor: AppColors.brandPurple,
+                          foregroundColor: Colors.white,
+                          height: 56,
+                          borderRadius: 28,
+                          suffixIcon: const Icon(Icons.arrow_forward, size: 20),
+                        );
+                      }),
                       const SizedBox(height: 12),
                     ],
                   ),

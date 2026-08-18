@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:url_launcher/url_launcher.dart';
+// import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/api_constants.dart';
+// import '../../../../core/constants/api_constants.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../study_materials/widgets/category_chip.dart';
 import '../controllers/book_store_controller.dart';
-import '../../../../core/utils/toast_helper.dart';
+// import '../../../../core/utils/toast_helper.dart';
 import '../models/book_model.dart';
 import 'book_detail_view.dart';
 import '../../../../shared/widgets/custom_network_image.dart';
@@ -274,6 +274,7 @@ class _BookStoreDashboardViewState extends State<BookStoreDashboardView>
                     ),
                   ),
                   const SizedBox(width: 8),
+                  /*
                   ElevatedButton.icon(
                     onPressed: () => _handlePdfRead(book.id),
                     icon: const Icon(
@@ -296,6 +297,7 @@ class _BookStoreDashboardViewState extends State<BookStoreDashboardView>
                       ),
                     ),
                   ),
+                  */
                 ],
               ),
             );
@@ -619,9 +621,7 @@ class _BookStoreDashboardViewState extends State<BookStoreDashboardView>
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            book.priceHardCopy != null
-                                ? "₹${book.priceHardCopy}"
-                                : "₹${book.priceSoftCopy}",
+                            "₹${book.priceHardCopy ?? 0}",
                             style: const TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w900,
@@ -663,6 +663,7 @@ class _BookStoreDashboardViewState extends State<BookStoreDashboardView>
     );
   }
 
+  /*
   Future<void> _handlePdfRead(String bookId) async {
     final result = await controller.downloadBookPdf(bookId);
     if (result != null) {
@@ -680,6 +681,7 @@ class _BookStoreDashboardViewState extends State<BookStoreDashboardView>
       }
     }
   }
+  */
 
   BoxFit fitCover(String url) => url.isNotEmpty ? BoxFit.cover : BoxFit.contain;
 }

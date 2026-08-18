@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import '../repositories/tests_repository.dart';
 import '../../../core/utils/toast_helper.dart';
+import '../../../core/utils/error_handler.dart';
 
 class TestSolutionsController extends GetxController {
   final TestsRepository _repository;
@@ -75,7 +76,7 @@ class TestSolutionsController extends GetxController {
         errorMessage.value = 'Failed to load solutions';
       }
     } catch (e) {
-      errorMessage.value = 'Error: $e';
+      errorMessage.value = AppErrorHandler.getErrorMessage(e);
     } finally {
       isLoading.value = false;
     }

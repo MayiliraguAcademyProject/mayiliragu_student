@@ -1,3 +1,4 @@
+import 'package:Mayiliragu/shared/widgets/common_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -134,19 +135,17 @@ class SubmitConfirmationDialog extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: ElevatedButton(
-                onPressed: () {
+              child: CommonButton(
+                  text: 'Submit',
+                  onPressed: () {
                   Get.back();
                   onSubmit();
                 },
-                style: ElevatedButton.styleFrom(
                   backgroundColor: hasSkippedOrFlagged ? const Color(0xFFF59E0B) : const Color(0xFF10B981),
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  borderRadius: 8,
+                  fullWidth: false,
                 ),
-                child: const Text('Submit'),
-              ),
             ),
           ],
         ),
