@@ -67,32 +67,40 @@ class BannerModel {
   final String title;
   final String imageUrl;
   final String? linkUrl;
-  final bool isActive;
-  final int order;
-  final String? linkType;
   final String? linkId;
+  final String? linkType;
+  final List<String>? curriculumJson;
+  final String? planDescription;
   final double? price;
   final double? offerPrice;
   final DateTime? offerValidUntil;
-  final String? planDescription;
   final int? validityDays;
-  final List<String>? curriculumJson;
+  final bool isActive;
+  final int order;
+  final bool isDeleted;
+  final String? deletedAt;
+  final String? createdAt;
+  final String? updatedAt;
 
   BannerModel({
     required this.id,
     required this.title,
     required this.imageUrl,
     this.linkUrl,
-    required this.isActive,
-    required this.order,
-    this.linkType,
     this.linkId,
+    this.linkType,
+    this.curriculumJson,
+    this.planDescription,
     this.price,
     this.offerPrice,
     this.offerValidUntil,
-    this.planDescription,
     this.validityDays,
-    this.curriculumJson,
+    required this.isActive,
+    required this.order,
+    this.isDeleted = false,
+    this.deletedAt,
+    this.createdAt,
+    this.updatedAt,
   });
 
   factory BannerModel.fromJson(Map<String, dynamic> json) {
@@ -114,14 +122,14 @@ class BannerModel {
     }
 
     return BannerModel(
-      id: json['id'] as String? ?? '',
-      title: json['title'] as String? ?? '',
-      imageUrl: json['imageUrl'] as String? ?? '',
-      linkUrl: json['linkUrl'] as String?,
-      isActive: json['isActive'] as bool? ?? false,
-      order: json['order'] as int? ?? 0,
-      linkType: json['linkType'] as String?,
-      linkId: json['linkId'] as String?,
+      id: json['id']?.toString() ?? '',
+      title: json['title']?.toString() ?? '',
+      imageUrl: json['imageUrl']?.toString() ?? '',
+      linkUrl: json['linkUrl']?.toString(),
+      linkId: json['linkId']?.toString(),
+      linkType: json['linkType']?.toString(),
+      curriculumJson: curriculum,
+      planDescription: json['planDescription']?.toString(),
       price: json['price'] is num 
           ? (json['price'] as num).toDouble() 
           : (json['price'] is String ? double.tryParse(json['price'] as String) : null),
@@ -131,9 +139,15 @@ class BannerModel {
       offerValidUntil: json['offerValidUntil'] != null 
           ? DateTime.tryParse(json['offerValidUntil'] as String) 
           : null,
-      planDescription: json['planDescription'] as String?,
-      validityDays: json['validityDays'] as int?,
-      curriculumJson: curriculum,
+      validityDays: json['validityDays'] is int
+          ? json['validityDays'] as int
+          : (json['validityDays'] is String ? int.tryParse(json['validityDays'] as String) : null),
+      isActive: json['isActive'] as bool? ?? true,
+      order: json['order'] as int? ?? 0,
+      isDeleted: json['isDeleted'] as bool? ?? false,
+      deletedAt: json['deletedAt']?.toString(),
+      createdAt: json['createdAt']?.toString(),
+      updatedAt: json['updatedAt']?.toString(),
     );
   }
 }
@@ -142,47 +156,54 @@ class EnrolledCourse {
   final String id;
   final String title;
   final String thumbnail;
+  final bool isDemo;
   final int totalLessons;
+  final int totalVideos;
   final double progressPercentage;
   final bool isEnrolled;
   final String? enrollmentRequestStatus;
-  final bool isDemo;
 
   EnrolledCourse({
     required this.id,
     required this.title,
     required this.thumbnail,
+    this.isDemo = false,
     required this.totalLessons,
+    this.totalVideos = 0,
     required this.progressPercentage,
     this.isEnrolled = true,
     this.enrollmentRequestStatus,
-    this.isDemo = false,
   });
 
   factory EnrolledCourse.fromJson(Map<String, dynamic> json) {
     return EnrolledCourse(
-      id: json['id'] as String? ?? '',
-      title: json['title'] as String? ?? '',
-      thumbnail: json['thumbnail'] as String? ?? '',
-      totalLessons: json['totalLessons'] as int? ?? 0,
-      progressPercentage: (json['progressPercentage'] as num?)?.toDouble() ?? 0.0,
-      isEnrolled: json['isEnrolled'] as bool? ?? true,
-      enrollmentRequestStatus: json['enrollmentRequestStatus'] as String?,
+      id: json['id']?.toString() ?? '',
+      title: json['title']?.toString() ?? '',
+      thumbnail: json['thumbnail']?.toString() ?? '',
       isDemo: json['isDemo'] as bool? ?? false,
+      totalLessons: json['totalLessons'] as int? ?? 0,
+      totalVideos: json['totalVideos'] as int? ?? 0,
+      progressPercentage: (json['progressPercentage'] as num?)?.toDouble() ?? 0.0,
+      isEnrolled: json['isEnrolled'] as bool? ?? false,
+      enrollmentRequestStatus: json['enrollmentRequestStatus']?.toString(),
     );
   }
 }
 
 class ContinueLearning {
+  final String? videoId;
   final String lessonId;
   final String lessonTitle;
+  final String? videoTitle;
   final String courseId;
   final int watchedSeconds;
   final int duration;
 
   ContinueLearning({
+    this.videoId,
     required this.lessonId,
     required this.lessonTitle,
+    this.videoTitle,
     required this.courseId,
     required this.watchedSeconds,
     required this.duration,
@@ -193,9 +214,11 @@ class ContinueLearning {
 
   factory ContinueLearning.fromJson(Map<String, dynamic> json) {
     return ContinueLearning(
-      lessonId: json['lessonId'] as String? ?? '',
-      lessonTitle: json['lessonTitle'] as String? ?? '',
-      courseId: json['courseId'] as String? ?? '',
+      videoId: json['videoId']?.toString(),
+      lessonId: json['lessonId']?.toString() ?? '',
+      lessonTitle: json['lessonTitle']?.toString() ?? '',
+      videoTitle: json['videoTitle']?.toString(),
+      courseId: json['courseId']?.toString() ?? '',
       watchedSeconds: json['watchedSeconds'] as int? ?? 0,
       duration: json['duration'] as int? ?? 1,
     );
@@ -203,21 +226,27 @@ class ContinueLearning {
 }
 
 class RecentlyWatched {
+  final String? videoId;
   final String lessonId;
   final String lessonTitle;
+  final String? videoTitle;
   final String lastViewedAt;
 
   RecentlyWatched({
+    this.videoId,
     required this.lessonId,
     required this.lessonTitle,
+    this.videoTitle,
     required this.lastViewedAt,
   });
 
   factory RecentlyWatched.fromJson(Map<String, dynamic> json) {
     return RecentlyWatched(
-      lessonId: json['lessonId'] as String? ?? '',
-      lessonTitle: json['lessonTitle'] as String? ?? '',
-      lastViewedAt: json['lastViewedAt'] as String? ?? '',
+      videoId: json['videoId']?.toString(),
+      lessonId: json['lessonId']?.toString() ?? '',
+      lessonTitle: json['lessonTitle']?.toString() ?? '',
+      videoTitle: json['videoTitle']?.toString(),
+      lastViewedAt: json['lastViewedAt']?.toString() ?? '',
     );
   }
 }
@@ -246,6 +275,8 @@ class QuickActionModel {
   final String route;
   final bool isEnabled;
   final int order;
+  final String? createdAt;
+  final String? updatedAt;
 
   QuickActionModel({
     required this.id,
@@ -254,16 +285,20 @@ class QuickActionModel {
     required this.route,
     required this.isEnabled,
     required this.order,
+    this.createdAt,
+    this.updatedAt,
   });
 
   factory QuickActionModel.fromJson(Map<String, dynamic> json) {
     return QuickActionModel(
-      id: json['id'] as String? ?? '',
-      title: json['title'] as String? ?? '',
-      icon: json['icon'] as String? ?? '',
-      route: json['route'] as String? ?? '',
+      id: json['id']?.toString() ?? '',
+      title: json['title']?.toString() ?? '',
+      icon: json['icon']?.toString() ?? '',
+      route: json['route']?.toString() ?? '',
       isEnabled: json['isEnabled'] as bool? ?? json['is_enabled'] as bool? ?? true,
       order: json['order'] as int? ?? 0,
+      createdAt: json['createdAt']?.toString(),
+      updatedAt: json['updatedAt']?.toString(),
     );
   }
 
@@ -275,6 +310,9 @@ class QuickActionModel {
       'route': route,
       'isEnabled': isEnabled,
       'order': order,
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
     };
   }
 }
+

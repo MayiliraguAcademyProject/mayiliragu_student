@@ -103,20 +103,36 @@ class _BannerProductDetailViewState extends State<BannerProductDetailView> {
     }
     futures.add(_paymentController.fetchPaymentSettings());
     futures.add(_dashboardController.fetchDashboardData());
+    if (Get.isRegistered<UserSessionController>()) {
+      futures.add(Get.find<UserSessionController>().loadSession());
+    }
     
     await Future.wait(futures);
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   bool get _isEnrolled {
     final linkType = widget.banner.linkType;
     final linkId = widget.banner.linkId;
 
+    // 1. Direct approved payment request check for this banner product
+    final req = _paymentController.existingRequest.value;
+    if (req != null && req.status == 'APPROVED') {
+      return true;
+    }
+
+    // 2. Course enrollment check
     if (linkType == 'COURSE') {
       final enrolledList = _dashboardController.dashboardData.value?.enrolledCourses ?? [];
-      return enrolledList.any((c) => c.id == linkId && c.isEnrolled);
+      final allCourses = _dashboardController.dashboardData.value?.allCourses ?? [];
+      if (enrolledList.any((c) => c.id == linkId && c.isEnrolled)) return true;
+      if (allCourses.any((c) => c.id == linkId && c.isEnrolled)) return true;
     } else if (linkType == 'TEST') {
+      // 3. Test / Premium enrollment check
       if (Get.isRegistered<UserSessionController>()) {
-        return Get.find<UserSessionController>().isPremium.value;
+        if (Get.find<UserSessionController>().isPremium.value) return true;
       }
     }
     return false;
@@ -325,139 +341,147 @@ class _BannerProductDetailViewState extends State<BannerProductDetailView> {
 
                          // Curriculum points list
                         if (banner.curriculumJson != null && banner.curriculumJson!.isNotEmpty) ...[
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'What You Get / Syllabus',
-                                style: AppTextStyles.subheading.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                  color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
-                                ),
-                              ),
-                              if (!_isEnrolled)
+                          Obx(() {
+                            final enrolled = _isEnrolled;
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
                                 Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Icon(
-                                      Icons.lock_outline_rounded,
-                                      size: 14,
-                                      color: isDark ? Colors.grey[500] : Colors.grey[600],
-                                    ),
-                                    const SizedBox(width: 4),
                                     Text(
-                                      'Locked',
-                                      style: AppTextStyles.body.copyWith(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                        color: isDark ? Colors.grey[500] : Colors.grey[600],
-                                      ),
-                                    ),
-                                  ],
-                                )
-                              else
-                                Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.lock_open_rounded,
-                                      size: 14,
-                                      color: Colors.green,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      'Unlocked',
-                                      style: AppTextStyles.body.copyWith(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.green,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          if (!_isEnrolled)
-                            GestureDetector(
-                              onTap: () {
-                                AppToast.validation(
-                                  'Purchase to unlock',
-                                  title: 'Curriculum Locked',
-                                );
-                              },
-                              child: Container(
-                                width: double.infinity,
-                                padding: const EdgeInsets.all(20),
-                                decoration: BoxDecoration(
-                                  color: isDark ? Colors.grey[900] : Colors.grey[50],
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(
-                                    color: isDark ? Colors.white10 : Colors.black12,
-                                  ),
-                                ),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.lock_outline_rounded,
-                                      size: 32,
-                                      color: isDark ? Colors.grey[600] : Colors.grey[400],
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      'Curriculum is Locked',
+                                      'What You Get / Syllabus',
                                       style: AppTextStyles.subheading.copyWith(
-                                        fontSize: 14,
                                         fontWeight: FontWeight.bold,
+                                        fontSize: 16,
                                         color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
                                       ),
                                     ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      'Purchase this plan to unlock the full course curriculum.',
-                                      style: AppTextStyles.body.copyWith(
-                                        fontSize: 12,
-                                        color: isDark ? Colors.white60 : Colors.black54,
+                                    if (!enrolled)
+                                      Row(
+                                        children: [
+                                          Icon(
+                                            Icons.lock_outline_rounded,
+                                            size: 14,
+                                            color: isDark ? Colors.grey[500] : Colors.grey[600],
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            'Locked',
+                                            style: AppTextStyles.body.copyWith(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.bold,
+                                              color: isDark ? Colors.grey[500] : Colors.grey[600],
+                                            ),
+                                          ),
+                                        ],
+                                      )
+                                    else
+                                      Row(
+                                        children: [
+                                          const Icon(
+                                            Icons.lock_open_rounded,
+                                            size: 14,
+                                            color: Colors.green,
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            'Unlocked',
+                                            style: AppTextStyles.body.copyWith(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.green,
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                      textAlign: TextAlign.center,
-                                    ),
                                   ],
                                 ),
-                              ),
-                            )
-                          else
-                            ListView.separated(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: banner.curriculumJson!.length,
-                              separatorBuilder: (context, index) => const SizedBox(height: 10),
-                              itemBuilder: (context, index) {
-                                final item = banner.curriculumJson![index];
-                                return Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Container(
-                                      margin: const EdgeInsets.only(top: 2),
-                                      child: const Icon(
-                                        Icons.check_circle_outline_rounded,
-                                        color: Colors.green,
-                                        size: 18,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    Expanded(
-                                      child: Text(
-                                        item,
-                                        style: AppTextStyles.body.copyWith(
-                                          fontSize: 13,
-                                          color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                                const SizedBox(height: 12),
+                                if (!enrolled)
+                                  GestureDetector(
+                                    onTap: () {
+                                      AppToast.validation(
+                                        'Purchase to unlock',
+                                        title: 'Curriculum Locked',
+                                      );
+                                    },
+                                    child: Container(
+                                      width: double.infinity,
+                                      padding: const EdgeInsets.all(20),
+                                      decoration: BoxDecoration(
+                                        color: isDark ? Colors.grey[900] : Colors.grey[50],
+                                        borderRadius: BorderRadius.circular(16),
+                                        border: Border.all(
+                                          color: isDark ? Colors.white10 : Colors.black12,
                                         ),
                                       ),
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.lock_outline_rounded,
+                                            size: 32,
+                                            color: isDark ? Colors.grey[600] : Colors.grey[400],
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Text(
+                                            'Curriculum is Locked',
+                                            style: AppTextStyles.subheading.copyWith(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold,
+                                              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            'Purchase this plan to unlock the full course curriculum.',
+                                            style: AppTextStyles.body.copyWith(
+                                              fontSize: 12,
+                                              color: isDark ? Colors.white60 : Colors.black54,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                  ],
-                                );
-                              },
-                            ),
+                                  )
+                                else
+                                  ListView.separated(
+                                    shrinkWrap: true,
+                                    physics: const NeverScrollableScrollPhysics(),
+                                    itemCount: banner.curriculumJson!.length,
+                                    separatorBuilder: (context, index) => const SizedBox(height: 10),
+                                    itemBuilder: (context, index) {
+                                      final item = banner.curriculumJson![index];
+                                      return Row(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Container(
+                                            margin: const EdgeInsets.only(top: 2),
+                                            child: const Icon(
+                                              Icons.check_circle_outline_rounded,
+                                              color: Colors.green,
+                                              size: 18,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 10),
+                                          Expanded(
+                                            child: Text(
+                                              item,
+                                              style: AppTextStyles.body.copyWith(
+                                                fontSize: 13,
+                                                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  ),
+                              ],
+                            );
+                          }),
                         ],
                       ],
                     ),
@@ -471,6 +495,7 @@ class _BannerProductDetailViewState extends State<BannerProductDetailView> {
           Obx(() {
             final isRequestLoading = _paymentController.isLoadingExisting.value;
             final req = _paymentController.existingRequest.value;
+            final enrolled = _isEnrolled;
 
             String buttonText = 'Buy Now';
             Widget? buttonIcon;
@@ -478,12 +503,22 @@ class _BannerProductDetailViewState extends State<BannerProductDetailView> {
             Color buttonColor = AppColors.primary;
             bool isBtnEnabled = true;
 
-            if (_isEnrolled) {
-              buttonText = 'Already Enrolled';
+            if (enrolled) {
+              buttonText = banner.linkType == 'COURSE' ? 'Access Course (Enrolled)' : 'Access Tests (Enrolled)';
               buttonIcon = const Icon(Icons.check_circle, color: Colors.white, size: 20);
-              buttonAction = null;
+              buttonAction = () {
+                if (banner.linkType == 'COURSE') {
+                  Get.back();
+                  if (Get.isRegistered<DashboardController>()) {
+                    Get.find<DashboardController>().changeTab(1);
+                  }
+                } else {
+                  Get.back();
+                  Get.toNamed(Routes.TEST_SECTIONS);
+                }
+              };
               buttonColor = Colors.green;
-              isBtnEnabled = false;
+              isBtnEnabled = true;
             } else if (req != null && req.status == 'PENDING') {
               buttonText = 'Payment Pending Review';
               buttonIcon = const Icon(Icons.pending_actions_rounded, color: Colors.white, size: 20);

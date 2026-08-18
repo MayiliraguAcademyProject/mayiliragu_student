@@ -56,6 +56,14 @@ class DashboardController extends GetxController {
     }
   }
 
+  void jumpToTab(int index) {
+    tabController.jumpToTab(index);
+  }
+
+  void changeTab(int index) {
+    tabController.jumpToTab(index);
+  }
+
   Future<void> fetchDashboardData() async {
     isLoading.value = true;
     errorMessage.value = '';
