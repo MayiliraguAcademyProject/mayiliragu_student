@@ -193,7 +193,7 @@ class DashboardHomeView extends GetView<DashboardController> {
                 icon: Icon(
                   Icons.notifications_outlined,
                   color: Theme.of(context).colorScheme.onSurface,
-                  size: 26,
+                  size: 18,
                 ),
                 onPressed: () {
                   Get.toNamed(Routes.NOTIFICATIONS);
@@ -201,8 +201,8 @@ class DashboardHomeView extends GetView<DashboardController> {
               ),
               if (count > 0)
                 Positioned(
-                  right: 6,
-                  top: 6,
+                  right: 14,
+                  top: 12,
                   child: IgnorePointer(
                     child: Container(
                       padding: const EdgeInsets.all(4),
@@ -211,19 +211,20 @@ class DashboardHomeView extends GetView<DashboardController> {
                         shape: BoxShape.circle,
                       ),
                       constraints: const BoxConstraints(
-                        minWidth: 16,
-                        minHeight: 16,
+                        minWidth: 8,
+                        minHeight: 8,
                       ),
-                      child: Center(
-                        child: Text(
-                          '$count',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 9,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
+                      // child:
+                      //  Center(
+                      //   child: Text(
+                      //     '$count',
+                      //     style: const TextStyle(
+                      //       color: Colors.white,
+                      //       fontSize: 9,
+                      //       fontWeight: FontWeight.bold,
+                      //     ),
+                      //   ),
+                      // ),
                     ),
                   ),
                 ),
