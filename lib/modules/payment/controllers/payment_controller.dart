@@ -59,12 +59,12 @@ class PaymentController extends GetxController {
 
   Future<void> selectScreenshot() async {
     try {
-      final result = await FilePicker.pickFiles(
+      final file = await FilePicker.pickFile(
         type: FileType.image,
       );
 
-      if (result != null && result.files.single.path != null) {
-        selectedImagePath.value = result.files.single.path;
+      if (file != null && file.path != null) {
+        selectedImagePath.value = file.path;
       }
     } catch (e) {
       AppToast.error('Failed to select screenshot');
