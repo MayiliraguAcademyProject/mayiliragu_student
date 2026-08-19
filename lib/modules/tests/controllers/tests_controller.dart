@@ -28,6 +28,8 @@ class TestsController extends GetxController {
 
   final categories = <CategoryModel>[].obs;
 
+  final selectedSubFilter = 'all'.obs;
+
   @override
   void onInit() {
     super.onInit();
@@ -71,7 +73,9 @@ class TestsController extends GetxController {
         topicNames.assignAll(loadedTopics);
         
         if (categories.isNotEmpty && (selectedCategory.value.isEmpty || !categories.any((c) => c.id == selectedCategory.value))) {
-          selectedCategory.value = categories.first.id;
+          // Default to first real category if available (e.g. cat_quant) or 'all'
+          final defaultCat = categories.firstWhere((c) => c.id != 'all', orElse: () => categories.first);
+          selectedCategory.value = defaultCat.id;
         }
       }
     } catch (e) {
@@ -109,7 +113,12 @@ class TestsController extends GetxController {
 
   void selectCategory(String categoryId) {
     selectedCategory.value = categoryId;
+    selectedSubFilter.value = 'all';
     fetchTests();
+  }
+
+  void selectSubFilter(String filterId) {
+    selectedSubFilter.value = filterId;
   }
 
   void switchTab(FilterTab tab) {
@@ -120,23 +129,61 @@ class TestsController extends GetxController {
     searchQuery.value = query;
   }
 
-  // Get filtered tests matching the search query
-  List<TestModel> get _searchedTests {
-    if (searchQuery.value.isEmpty) {
-      return testsList;
+  // Get available sub-topic filter pills for current selected category
+  List<Map<String, String>> get availableSubFilters {
+    final List<Map<String, String>> filters = [
+      {'id': 'all', 'name': 'All Quizzes'}
+    ];
+
+    if (selectedCategory.value == 'all') {
+      // Add all subjects
+      subjectNames.forEach((id, name) {
+        filters.add({'id': id, 'name': name});
+      });
+      return filters;
     }
-    final query = searchQuery.value.toLowerCase();
-    return testsList.where((test) {
-      final title = test.title.toLowerCase();
-      final desc = (test.description ?? '').toLowerCase();
-      return title.contains(query) || desc.contains(query);
-    }).toList();
+
+    final cat = categories.firstWhereOrNull((c) => c.id == selectedCategory.value);
+    if (cat != null) {
+      for (var sub in cat.subjects) {
+        filters.add({'id': sub.id, 'name': sub.name});
+        for (var top in sub.topics) {
+          filters.add({'id': top.id, 'name': top.name});
+        }
+      }
+    }
+    return filters;
+  }
+
+  // Get filtered tests matching category, sub-topic pill, and search query
+  List<TestModel> get filteredDrillTests {
+    var list = testsList.toList();
+
+    // Apply sub-topic pill filter
+    if (selectedSubFilter.value != 'all') {
+      final filterId = selectedSubFilter.value;
+      list = list.where((t) {
+        return t.subjectId == filterId || t.topicId == filterId;
+      }).toList();
+    }
+
+    // Apply search query
+    if (searchQuery.value.isNotEmpty) {
+      final query = searchQuery.value.toLowerCase().trim();
+      list = list.where((test) {
+        final title = test.title.toLowerCase();
+        final desc = (test.description ?? '').toLowerCase();
+        return title.contains(query) || desc.contains(query);
+      }).toList();
+    }
+
+    return list;
   }
 
   // Subject-wise grouping: Map<SubjectName/ID, List<TestModel>>
   Map<String, List<TestModel>> get subjectWiseTests {
     final Map<String, List<TestModel>> groups = {};
-    for (var test in _searchedTests) {
+    for (var test in filteredDrillTests) {
       // Include tests that have a subjectId
       final String subId = test.subjectId ?? 'General / Other';
       final String subName = subjectNames[subId] ?? subId;
@@ -152,7 +199,7 @@ class TestsController extends GetxController {
   // Topic-wise grouping: Map<SubjectName, Map<TopicName, List<TestModel>>>
   Map<String, Map<String, List<TestModel>>> get topicWiseTests {
     final Map<String, Map<String, List<TestModel>>> groups = {};
-    for (var test in _searchedTests) {
+    for (var test in filteredDrillTests) {
       final String subId = test.subjectId ?? 'general_other';
       final String subName = subjectNames[subId] ?? (test.subjectId == null ? 'General / Other' : subId);
 

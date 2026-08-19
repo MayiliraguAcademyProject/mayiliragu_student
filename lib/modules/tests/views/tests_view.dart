@@ -96,8 +96,11 @@ class TestsView extends GetView<TestsController> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Category Chips
+                      // Category Chips (Subject tabs)
                       _buildCategoryChips(controller),
+
+                      // Sub-topic Filter Pills (Smartkeeda style)
+                      _buildSubTopicFilterPills(controller),
                       const SizedBox(height: 20),
 
                       // Featured Card
@@ -254,6 +257,59 @@ class TestsView extends GetView<TestsController> {
     );
   }
 
+  Widget _buildSubTopicFilterPills(TestsController controller) {
+    return Builder(
+      builder: (context) {
+        final colorScheme = Theme.of(context).colorScheme;
+        return Obx(() {
+          final filters = controller.availableSubFilters;
+          if (filters.length <= 1) return const SizedBox.shrink();
+
+          return Padding(
+            padding: const EdgeInsets.only(top: 14.0),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: filters.map((filter) {
+                  final id = filter['id'] ?? 'all';
+                  final name = filter['name'] ?? '';
+                  final isSelected = controller.selectedSubFilter.value == id;
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: ChoiceChip(
+                      label: Text(
+                        name,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                          color: isSelected ? Colors.white : colorScheme.onSurface,
+                        ),
+                      ),
+                      selected: isSelected,
+                      selectedColor: AppColors.brandPurple,
+                      backgroundColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                      side: BorderSide(
+                        color: isSelected ? AppColors.brandPurple : colorScheme.outline.withValues(alpha: 0.3),
+                        width: 1,
+                      ),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                      showCheckmark: false,
+                      onSelected: (selected) {
+                        if (selected) {
+                          controller.selectSubFilter(id);
+                        }
+                      },
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          );
+        });
+      },
+    );
+  }
+
   Widget _buildFeaturedCard(TestsController controller) {
     if (controller.testsList.isEmpty) return const SizedBox.shrink();
 
@@ -394,6 +450,36 @@ class TestsView extends GetView<TestsController> {
           'No tests available in this category.',
           style: TextStyle(color: Colors.grey, fontSize: 14),
         ),
+      );
+    }
+
+    // If a specific sub-topic pill is selected, show direct drill cards list
+    if (controller.selectedSubFilter.value != 'all') {
+      final tests = controller.filteredDrillTests;
+      if (tests.isEmpty) {
+        return const Center(
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 40.0),
+            child: Text('No quizzes found for this topic.', style: TextStyle(color: Colors.grey)),
+          ),
+        );
+      }
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 8.0, bottom: 12.0),
+            child: Text(
+              'Available Practice Drills (${tests.length})',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+          ),
+          ...tests.map((test) => _buildTestCard(context, test)),
+        ],
       );
     }
 
