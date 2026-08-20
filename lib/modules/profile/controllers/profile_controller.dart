@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 import 'package:dio/dio.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import '../repositories/profile_repository.dart';
+import '../../../core/enums/user_role.dart';
+import '../../../core/utils/error_handler.dart';
 import '../../../core/utils/toast_helper.dart';
 import '../../../core/constants/api_constants.dart';
 import '../../../core/network/api_client.dart';
@@ -95,10 +97,10 @@ class ProfileController extends GetxController {
     storage.getThemeMode().then((mode) {
       if (mode == 'dark') {
         isDarkMode.value = true;
-      } else if (mode == 'light') {
-        isDarkMode.value = false;
-      } else {
+      } else if (mode == 'system') {
         isDarkMode.value = PlatformDispatcher.instance.platformBrightness == Brightness.dark;
+      } else {
+        isDarkMode.value = false;
       }
     });
   }
@@ -127,14 +129,14 @@ class ProfileController extends GetxController {
         userRole.value = data['role'] ?? '';
         userCreatedAt.value = data['createdAt'] ?? '';
         nameController.text = userName.value;
-        if (userId.value.isNotEmpty && userRole.value == 'STUDENT') {
+        if (userId.value.isNotEmpty && UserRole.fromString(userRole.value).isStudent) {
           await fetchStudentProfile(userId.value);
         }
       } else {
         AppToast.error('Failed to load profile details');
       }
     } catch (e) {
-      AppToast.error('Error loading profile: $e');
+      AppToast.error(AppErrorHandler.getErrorMessage(e, defaultMessage: 'Failed to load profile details.'));
     } finally {
       isLoading.value = false;
     }
@@ -157,7 +159,7 @@ class ProfileController extends GetxController {
         AppToast.error('Failed to update display name');
       }
     } catch (e) {
-      AppToast.error('Error updating name: $e');
+      AppToast.error(AppErrorHandler.getErrorMessage(e, defaultMessage: 'Failed to update name'));
     } finally {
       isUpdatingName.value = false;
     }
@@ -195,14 +197,7 @@ class ProfileController extends GetxController {
         AppToast.error(response.data['message'] ?? 'Failed to change password');
       }
     } catch (e) {
-      String msg = 'Error changing password: $e';
-      if (e is DioException && e.response?.data != null) {
-        final data = e.response?.data;
-        if (data is Map && data['message'] != null) {
-          msg = data['message'].toString();
-        }
-      }
-      AppToast.error(msg);
+      AppToast.error(AppErrorHandler.getErrorMessage(e, defaultMessage: 'Failed to change password'));
     } finally {
       isChangingPassword.value = false;
     }
@@ -218,7 +213,7 @@ class ProfileController extends GetxController {
       await storage.clearAll();
       Get.offAllNamed(Routes.LOGIN);
     } catch (e) {
-      AppToast.error('Logout failed: $e');
+      AppToast.error(AppErrorHandler.getErrorMessage(e, defaultMessage: 'Logout failed'));
     }
   }
 

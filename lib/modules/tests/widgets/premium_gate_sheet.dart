@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
+import '../../../../shared/widgets/common_button.dart';
 
 class PremiumGateSheet extends StatelessWidget {
   const PremiumGateSheet({super.key});
@@ -122,26 +123,13 @@ class PremiumGateSheet extends StatelessWidget {
           const SizedBox(height: 24),
 
           // Close Button
-          SizedBox(
-            width: double.infinity,
+          CommonButton(
+            text: AppStrings.gotIt,
+            onPressed: () => Navigator.of(context).pop(),
+            backgroundColor: AppColors.brandPurple,
+            foregroundColor: Colors.white,
             height: 48,
-            child: ElevatedButton(
-              onPressed: () => Navigator.of(context).pop(),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.brandPurple,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: const Text(
-                AppStrings.gotIt,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
+            borderRadius: 12,
           ),
           const SizedBox(height: 12),
         ],

@@ -4,6 +4,8 @@ class CourseDetailModel {
   final String description;
   final String thumbnail;
   final bool isEnrolled;
+  final bool isDemo;
+  final String? enrollmentRequestStatus;
   final List<ModuleModel> modules;
 
   CourseDetailModel({
@@ -12,6 +14,8 @@ class CourseDetailModel {
     required this.description,
     required this.thumbnail,
     this.isEnrolled = true,
+    this.isDemo = false,
+    this.enrollmentRequestStatus,
     required this.modules,
   });
 
@@ -23,6 +27,8 @@ class CourseDetailModel {
       description: json['description']?.toString() ?? '',
       thumbnail: json['thumbnail']?.toString() ?? '',
       isEnrolled: json['isEnrolled'] as bool? ?? true,
+      isDemo: json['isDemo'] as bool? ?? false,
+      enrollmentRequestStatus: json['enrollmentRequestStatus'] as String?,
       modules: modulesList
           .map((m) => ModuleModel.fromJson(m as Map<String, dynamic>))
           .toList(),
@@ -33,19 +39,64 @@ class CourseDetailModel {
 class ModuleModel {
   final String id;
   final String title;
-  final List<LessonModel> lessons;
+  final List<TopicModel> topics;
 
   ModuleModel({
     required this.id,
     required this.title,
-    required this.lessons,
+    required this.topics,
   });
 
   factory ModuleModel.fromJson(Map<String, dynamic> json) {
-    final lessonsList = json['lessons'] as List? ?? [];
+    final topicsList = json['topics'] as List? ?? [];
+    List<TopicModel> parsedTopics = [];
+
+    if (topicsList.isNotEmpty) {
+      parsedTopics = topicsList
+          .map((t) => TopicModel.fromJson(t as Map<String, dynamic>))
+          .toList();
+    } else if (json['lessons'] != null && (json['lessons'] as List).isNotEmpty) {
+      // Backward compatibility fallback: wrap legacy module lessons in a default topic
+      final lessonsList = (json['lessons'] as List)
+          .map((l) => LessonModel.fromJson(l as Map<String, dynamic>))
+          .toList();
+      parsedTopics = [
+        TopicModel(
+          id: 'topic-${json['id']}',
+          title: json['title']?.toString() ?? 'General',
+          description: null,
+          lessons: lessonsList,
+        )
+      ];
+    }
+
     return ModuleModel(
       id: json['id']?.toString() ?? '',
       title: json['title']?.toString() ?? '',
+      topics: parsedTopics,
+    );
+  }
+}
+
+class TopicModel {
+  final String id;
+  final String title;
+  final String? description;
+  final List<LessonModel> lessons;
+
+  TopicModel({
+    required this.id,
+    required this.title,
+    this.description,
+    required this.lessons,
+  });
+
+  factory TopicModel.fromJson(Map<String, dynamic> json) {
+    final lessonsList = json['lessons'] as List? ?? [];
+    return TopicModel(
+      id: json['id']?.toString() ?? '',
+      title: json['title']?.toString() ?? '',
+      description: json['description']?.toString(),
       lessons: lessonsList
           .map((l) => LessonModel.fromJson(l as Map<String, dynamic>))
           .toList(),
@@ -58,51 +109,123 @@ class LessonModel {
   final String title;
   final String description;
   final String? image;
-  final int duration;
-  final bool downloadEnabled;
-  final bool isLocked;
-  final LessonProgressModel? progress;
+  final List<VideoModel> videos;
 
   LessonModel({
     required this.id,
     required this.title,
     required this.description,
     this.image,
+    required this.videos,
+  });
+
+  // Backward compatibility getters
+  int get duration => totalDuration;
+  bool get downloadEnabled => videos.any((v) => v.downloadEnabled);
+  int get totalDuration => videos.fold(0, (sum, v) => sum + v.duration);
+  bool get isLocked => videos.isNotEmpty && videos.every((v) => v.isLocked);
+  bool get isCompleted => videos.isNotEmpty && videos.every((v) => v.progress?.completed == true);
+  VideoProgressModel? get progress {
+    if (videos.isEmpty) return null;
+    final totalWatched = videos.fold(0, (sum, v) => sum + (v.progress?.watchedSeconds ?? 0));
+    return VideoProgressModel(
+      completed: isCompleted,
+      watchedSeconds: totalWatched,
+    );
+  }
+
+  factory LessonModel.fromJson(Map<String, dynamic> json) {
+    final videosList = json['videos'] as List? ?? [];
+    List<VideoModel> parsedVideos = [];
+
+    if (videosList.isNotEmpty) {
+      parsedVideos = videosList
+          .map((v) => VideoModel.fromJson(v as Map<String, dynamic>))
+          .toList();
+    } else if (json['driveFileId'] != null) {
+      // Backward compatibility fallback for single video in lesson
+      parsedVideos = [
+        VideoModel(
+          id: json['id']?.toString() ?? '',
+          title: json['title']?.toString() ?? '',
+          description: json['description']?.toString(),
+          image: json['image']?.toString(),
+          driveFileId: json['driveFileId']?.toString() ?? '',
+          duration: json['duration'] as int? ?? 0,
+          downloadEnabled: json['downloadEnabled'] as bool? ?? false,
+          isLocked: json['isLocked'] as bool? ?? false,
+          progress: json['progress'] != null
+              ? VideoProgressModel.fromJson(json['progress'] as Map<String, dynamic>)
+              : null,
+        )
+      ];
+    }
+
+    return LessonModel(
+      id: json['id']?.toString() ?? '',
+      title: json['title']?.toString() ?? '',
+      description: json['description']?.toString() ?? '',
+      image: json['image']?.toString(),
+      videos: parsedVideos,
+    );
+  }
+}
+
+class VideoModel {
+  final String id;
+  final String title;
+  final String? description;
+  final String? image;
+  final String driveFileId;
+  final int duration;
+  final bool downloadEnabled;
+  final bool isLocked;
+  final VideoProgressModel? progress;
+
+  VideoModel({
+    required this.id,
+    required this.title,
+    this.description,
+    this.image,
+    required this.driveFileId,
     required this.duration,
     required this.downloadEnabled,
     this.isLocked = false,
     this.progress,
   });
 
-  factory LessonModel.fromJson(Map<String, dynamic> json) {
-    return LessonModel(
+  factory VideoModel.fromJson(Map<String, dynamic> json) {
+    return VideoModel(
       id: json['id']?.toString() ?? '',
       title: json['title']?.toString() ?? '',
-      description: json['description']?.toString() ?? '',
+      description: json['description']?.toString(),
       image: json['image']?.toString(),
+      driveFileId: json['driveFileId']?.toString() ?? '',
       duration: json['duration'] as int? ?? 0,
       downloadEnabled: json['downloadEnabled'] as bool? ?? false,
       isLocked: json['isLocked'] as bool? ?? false,
       progress: json['progress'] != null
-          ? LessonProgressModel.fromJson(json['progress'] as Map<String, dynamic>)
+          ? VideoProgressModel.fromJson(json['progress'] as Map<String, dynamic>)
           : null,
     );
   }
 }
 
-class LessonProgressModel {
+class VideoProgressModel {
   final bool completed;
   final int watchedSeconds;
 
-  LessonProgressModel({
+  VideoProgressModel({
     required this.completed,
     required this.watchedSeconds,
   });
 
-  factory LessonProgressModel.fromJson(Map<String, dynamic> json) {
-    return LessonProgressModel(
+  factory VideoProgressModel.fromJson(Map<String, dynamic> json) {
+    return VideoProgressModel(
       completed: json['completed'] as bool? ?? false,
       watchedSeconds: json['watchedSeconds'] as int? ?? 0,
     );
   }
 }
+
+typedef LessonProgressModel = VideoProgressModel;

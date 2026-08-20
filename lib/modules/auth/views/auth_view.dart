@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../app/routes/app_routes.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../shared/widgets/common_button.dart';
 import '../controllers/auth_controller.dart';
 
 class AuthView extends GetView<AuthController> {
@@ -13,12 +15,15 @@ class AuthView extends GetView<AuthController> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 24.0,
-              vertical: 16.0,
-            ),
+        child: GestureDetector(
+          onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+          behavior: HitTestBehavior.translucent,
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24.0,
+                vertical: 16.0,
+              ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -85,6 +90,7 @@ class AuthView extends GetView<AuthController> {
 
                         // Email field
                         TextField(
+                          key: const ValueKey('login_email_field'),
                           controller: controller.emailController,
                           style: TextStyle(
                             color: theme.colorScheme.onSurface,
@@ -139,6 +145,7 @@ class AuthView extends GetView<AuthController> {
                         // Password field
                         Obx(
                           () => TextField(
+                            key: const ValueKey('login_password_field'),
                             controller: controller.passwordController,
                             obscureText: controller.obscurePassword.value,
                             style: TextStyle(
@@ -190,25 +197,23 @@ class AuthView extends GetView<AuthController> {
                         ),
 
                         // Forgot Password button
-                        // Align(
-                        //   alignment: Alignment.centerRight,
-                        //   child: TextButton(
-                        //     onPressed: () {
-                        //       AppToast.info(
-                        //         'Please contact the administrator to reset your password.',
-                        //         title: 'Forgot Password',
-                        //       );
-                        //     },
-                        //     child: const Text(
-                        //       'Forgot Password?',
-                        //       style: TextStyle(
-                        //         color: AppColors.brandPurple,
-                        //         fontSize: 13,
-                        //         fontWeight: FontWeight.w600,
-                        //       ),
-                        //     ),
-                        //   ),
-                        // ),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: () {
+                              FocusManager.instance.primaryFocus?.unfocus();
+                              Get.toNamed(Routes.FORGOT_PASSWORD);
+                            },
+                            child: const Text(
+                              'Forgot Password?',
+                              style: TextStyle(
+                                color: AppColors.brandPurple,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ),
                         const SizedBox(height: 8),
 
                         // Error message
@@ -231,56 +236,97 @@ class AuthView extends GetView<AuthController> {
                           );
                         }),
 
-                        // Login button
-                        SizedBox(
-                          width: double.infinity,
-                          height: 54,
-                          child: Obx(() {
-                            return ElevatedButton(
-                              onPressed: controller.isLoading.value
-                                  ? null
-                                  : controller.login,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.brandPurple,
-                                foregroundColor: Colors.white,
-                                disabledBackgroundColor: AppColors.brandPurple
-                                    .withAlpha(153),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(27),
-                                ),
-                                elevation: 0,
-                              ),
-                              child: controller.isLoading.value
-                                  ? const SizedBox(
-                                      height: 24,
-                                      width: 24,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: Colors.white,
-                                      ),
-                                    )
-                                  : const Text(
-                                      'Login',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                            );
-                          }),
-                        ),
+                        Obx(() {
+                          return CommonButton(
+                            text: 'Login',
+                            isLoading: controller.isLoading.value,
+                            onPressed: controller.login,
+                            backgroundColor: AppColors.brandPurple,
+                            foregroundColor: Colors.white,
+                            height: 52,
+                            borderRadius: 26,
+                          );
+                        }),
                       ],
                     ),
                   ),
                 ),
-                const SizedBox(height: 36),
+                const SizedBox(height: 20),
 
-                // Footer: New student register text
+                // Register Link
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'New student? ',
+                      style: TextStyle(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        fontSize: 14,
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () => Get.toNamed(Routes.REGISTER),
+                      child: const Text(
+                        'Register here',
+                        style: TextStyle(
+                          color: AppColors.brandPurple,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // Or Divider
+                Row(
+                  children: [
+                    Expanded(child: Divider(color: theme.colorScheme.outline.withValues(alpha: 0.5))),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Text(
+                        'OR',
+                        style: TextStyle(
+                          color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    Expanded(child: Divider(color: theme.colorScheme.outline.withValues(alpha: 0.5))),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // Continue as Guest Button
+                OutlinedButton.icon(
+                  onPressed: controller.enterGuestMode,
+                  icon: const Icon(Icons.explore_outlined, color: AppColors.brandPurple, size: 18),
+                  label: const Text(
+                    'Explore as Guest',
+                    style: TextStyle(
+                      color: AppColors.brandPurple,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: AppColors.brandPurple, width: 1.2),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(26),
+                    ),
+                    minimumSize: const Size(double.infinity, 48),
+                  ),
+                ),
+                const SizedBox(height: 24),
               ],
             ),
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
 }
+}
+

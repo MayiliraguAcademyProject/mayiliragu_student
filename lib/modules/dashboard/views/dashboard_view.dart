@@ -19,6 +19,7 @@ class DashboardView extends GetView<DashboardController> {
     final inactiveColor = theme.colorScheme.onSurfaceVariant;
 
     return PersistentTabView(
+    
       controller: controller.tabController,
       backgroundColor: theme.colorScheme.surface,
       tabs: [

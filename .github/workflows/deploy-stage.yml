@@ -66,7 +66,7 @@ jobs:
       - name: Create Stage Environment
         run: |
           cat > .env.stage <<EOF
-          BASE_URL=${{ secrets.BASE_URL_STAGE }}
+          BASE_URL=${{ secrets.BASE_URL_STAGE || 'https://api-stage-mayiliragu.sathishdev.in/api' }}
           APP_NAME=Mayiliragu Stage
           ENABLE_LOGS=true
           EOF
@@ -90,7 +90,7 @@ jobs:
         with:
           token: "${{ secrets.GITHUB_TOKEN }}"
           tag_name: "v${{ steps.get_version.outputs.version }}-${{ steps.get_version.outputs.build_number }}-stage"
-          name: "Coconut Delivery Stage v${{ steps.get_version.outputs.version }}-${{ steps.get_version.outputs.build_number }}"
+          name: "Mayiliragu Student Stage v${{ steps.get_version.outputs.version }}-${{ steps.get_version.outputs.build_number }}"
           prerelease: true
           files: |
             build/app/outputs/flutter-apk/app-release.apk

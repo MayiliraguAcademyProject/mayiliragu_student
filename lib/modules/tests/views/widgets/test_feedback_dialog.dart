@@ -1,3 +1,4 @@
+import 'package:Mayiliragu/shared/widgets/common_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -168,25 +169,17 @@ class _TestFeedbackDialogState extends State<TestFeedbackDialog> {
                 const SizedBox(width: 12),
                 Expanded(
                   flex: 2,
-                  child: ElevatedButton(
-                    onPressed: () {
+                  child: CommonButton(
+                  text: 'Submit Feedback',
+                  onPressed: () {
                       Get.back();
                       widget.onSubmit(_selectedRating, _suggestionController.text.trim());
                     },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0F3CC9),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: const Text(
-                      'Submit Feedback',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ),
+                  backgroundColor: const Color(0xFF0F3CC9),
+                  foregroundColor: Colors.white,
+                  borderRadius: 12,
+                  fullWidth: false,
+                ),
                 ),
               ],
             ),

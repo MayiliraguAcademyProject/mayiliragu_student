@@ -1,3 +1,4 @@
+import 'package:Mayiliragu/shared/widgets/common_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -412,8 +413,9 @@ class TestRunnerView extends GetView<TestRunnerController> {
             ),
             Obx(() {
               final isLast = controller.currentIndex.value == controller.questions.length - 1;
-              return ElevatedButton(
-                onPressed: () {
+              return CommonButton(
+                  text: isLast ? 'Submit' : 'Next >',
+                  onPressed: () {
                   if (isLast) {
                     showDialog(
                       context: context,
@@ -435,14 +437,11 @@ class TestRunnerView extends GetView<TestRunnerController> {
                     controller.nextQuestion();
                   }
                 },
-                style: ElevatedButton.styleFrom(
                   backgroundColor: isLast ? const Color(0xFF10B981) : const Color(0xFF0F3CC9),
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                ),
-                child: Text(isLast ? 'Submit' : 'Next >'),
-              );
+                  borderRadius: 12,
+                  fullWidth: false,
+                );
             }),
           ],
         ),
@@ -463,14 +462,13 @@ class TestRunnerView extends GetView<TestRunnerController> {
             onPressed: () => Navigator.pop(context, false),
             child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFDC2626),
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Submit & Exit'),
-          ),
+          CommonButton(
+                  text: 'Submit & Exit',
+                  onPressed: () => Navigator.pop(context, true),
+                  backgroundColor: const Color(0xFFDC2626),
+                  foregroundColor: Colors.white,
+                  fullWidth: false,
+                ),
         ],
       ),
     );

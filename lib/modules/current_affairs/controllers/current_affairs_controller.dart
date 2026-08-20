@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import '../../../core/utils/error_handler.dart';
 import '../models/current_affairs_models.dart';
 import '../repositories/current_affairs_repository.dart';
 
@@ -68,7 +69,7 @@ class CurrentAffairsController extends GetxController {
         errorMessage.value = 'Failed to load current affairs';
       }
     } catch (e) {
-      errorMessage.value = 'Error: $e';
+      errorMessage.value = AppErrorHandler.getErrorMessage(e);
     } finally {
       isArticlesLoading.value = false;
     }
@@ -93,7 +94,7 @@ class CurrentAffairsController extends GetxController {
         errorMessage.value = 'Failed to load article details';
       }
     } catch (e) {
-      errorMessage.value = 'Error: $e';
+      errorMessage.value = AppErrorHandler.getErrorMessage(e);
     } finally {
       isDetailLoading.value = false;
     }
@@ -114,7 +115,7 @@ class CurrentAffairsController extends GetxController {
         quizzesList.assignAll(loaded);
       }
     } catch (e) {
-      errorMessage.value = 'Error: $e';
+      errorMessage.value = AppErrorHandler.getErrorMessage(e);
     } finally {
       isQuizLoading.value = false;
     }
@@ -130,7 +131,7 @@ class CurrentAffairsController extends GetxController {
         fetchAnalytics(); // Refresh progress stats
       }
     } catch (e) {
-      errorMessage.value = 'Error submitting quiz: $e';
+      errorMessage.value = AppErrorHandler.getErrorMessage(e, defaultMessage: 'Failed to submit quiz.');
     } finally {
       isQuizLoading.value = false;
     }

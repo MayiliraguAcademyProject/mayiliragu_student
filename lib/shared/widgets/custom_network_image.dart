@@ -27,11 +27,42 @@ class CustomNetworkImage extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
     
-    String resolvedUrl = imageUrl;
+    Widget buildErrorFallback() {
+      final fallback = errorWidget ?? Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          color: isDark ? Colors.grey[850] : Colors.grey[100],
+          borderRadius: borderRadius,
+        ),
+        child: Center(
+          child: Icon(
+            Icons.broken_image_rounded,
+            size: 24,
+            color: isDark ? Colors.grey[650] : Colors.grey[400],
+          ),
+        ),
+      );
+
+      if (borderRadius != null) {
+        return ClipRRect(
+          borderRadius: borderRadius!,
+          child: fallback,
+        );
+      }
+      return fallback;
+    }
+
+    final trimmedUrl = imageUrl.trim();
+    if (trimmedUrl.isEmpty) {
+      return buildErrorFallback();
+    }
+
+    String resolvedUrl = trimmedUrl;
     if (!resolvedUrl.startsWith('http://') && !resolvedUrl.startsWith('https://')) {
       final base = ApiConstants.baseUrl;
       final serverRoot = base.endsWith('/api') ? base.substring(0, base.length - 4) : base;
-      resolvedUrl = '$serverRoot$imageUrl';
+      resolvedUrl = '$serverRoot$trimmedUrl';
     }
 
     Widget imageWidget = CachedNetworkImage(
@@ -61,21 +92,7 @@ class CustomNetworkImage extends StatelessWidget {
           ),
         ),
       ),
-      errorWidget: (context, url, error) => errorWidget ?? Container(
-        width: width,
-        height: height,
-        decoration: BoxDecoration(
-          color: isDark ? Colors.grey[850] : Colors.grey[100],
-          borderRadius: borderRadius,
-        ),
-        child: Center(
-          child: Icon(
-            Icons.broken_image_rounded,
-            size: 24,
-            color: isDark ? Colors.grey[650] : Colors.grey[400],
-          ),
-        ),
-      ),
+      errorWidget: (context, url, error) => buildErrorFallback(),
     );
 
     if (borderRadius != null) {

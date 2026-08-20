@@ -1,3 +1,4 @@
+import 'package:Mayiliragu/shared/widgets/common_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/test_solutions_controller.dart';
@@ -49,10 +50,11 @@ class TestSolutionsView extends GetView<TestSolutionsController> {
                   style: const TextStyle(color: Colors.grey, fontSize: 14),
                 ),
                 const SizedBox(height: 16),
-                ElevatedButton(
+                CommonButton(
+                  text: 'Retry',
                   onPressed: () => controller.fetchAttemptDetails(),
-                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0F3CC9)),
-                  child: const Text('Retry', style: TextStyle(color: Colors.white)),
+                  backgroundColor: const Color(0xFF0F3CC9),
+                  fullWidth: false,
                 ),
               ],
             ),

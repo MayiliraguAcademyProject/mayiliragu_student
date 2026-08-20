@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
+import '../../../core/utils/error_handler.dart';
 import '../../tests/models/question_model.dart';
 import '../../tests/repositories/tests_repository.dart';
 import '../../../core/utils/toast_helper.dart';
@@ -43,7 +44,10 @@ class BookmarkedQuestionsController extends GetxController {
         errorMessage.value = 'Failed to load bookmarked questions';
       }
     } catch (e) {
-      errorMessage.value = 'Error loading bookmarks: $e';
+      errorMessage.value = AppErrorHandler.getErrorMessage(
+        e,
+        defaultMessage: 'Failed to load bookmarked questions. Please try again.',
+      );
     } finally {
       isLoading.value = false;
     }

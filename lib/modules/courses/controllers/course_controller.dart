@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../core/utils/error_handler.dart';
 import '../repositories/course_repository.dart';
 
 class CourseController extends GetxController {
@@ -13,6 +14,7 @@ class CourseController extends GetxController {
   final currentPage = 1.obs;
   final hasMore = true.obs;
   final limit = 10;
+  final isDemoOnly = false.obs;
   final errorMessage = ''.obs;
 
   final scrollController = ScrollController();
@@ -20,6 +22,11 @@ class CourseController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    if (Get.arguments is Map && Get.arguments['isDemoOnly'] == true) {
+      isDemoOnly.value = true;
+    } else {
+      isDemoOnly.value = false;
+    }
     fetchCourses();
     scrollController.addListener(_scrollListener);
   }
@@ -48,6 +55,7 @@ class CourseController extends GetxController {
       final response = await _repository.getCourses(
         page: currentPage.value,
         limit: limit,
+        isDemo: isDemoOnly.value ? true : null,
       );
 
       if (response.statusCode == 200) {
@@ -63,7 +71,7 @@ class CourseController extends GetxController {
         errorMessage.value = 'Failed to load courses';
       }
     } catch (e) {
-      errorMessage.value = 'Error: $e';
+      errorMessage.value = AppErrorHandler.getErrorMessage(e);
     } finally {
       isLoading.value = false;
     }
@@ -77,6 +85,7 @@ class CourseController extends GetxController {
       final response = await _repository.getCourses(
         page: currentPage.value,
         limit: limit,
+        isDemo: isDemoOnly.value ? true : null,
       );
 
       if (response.statusCode == 200) {

@@ -12,6 +12,8 @@ class BookModel {
   final double? priceSoftCopy;
   final int stockHardCopy;
   final String? pdfUrl;
+  final String? samplePdfUrl;
+  final List<String> samplePages;
   final String categoryId;
   final bool isActive;
   final bool isBookmarked;
@@ -29,6 +31,8 @@ class BookModel {
     this.priceSoftCopy,
     required this.stockHardCopy,
     this.pdfUrl,
+    this.samplePdfUrl,
+    this.samplePages = const [],
     required this.categoryId,
     required this.isActive,
     this.isBookmarked = false,
@@ -48,6 +52,8 @@ class BookModel {
       priceSoftCopy: json['priceSoftCopy'] != null ? (json['priceSoftCopy'] as num).toDouble() : null,
       stockHardCopy: json['stockHardCopy'] ?? 0,
       pdfUrl: json['pdfUrl'],
+      samplePdfUrl: json['samplePdfUrl'],
+      samplePages: json['samplePages'] != null ? List<String>.from(json['samplePages']) : [],
       categoryId: json['categoryId'] ?? '',
       isActive: json['isActive'] ?? true,
       isBookmarked: json['isBookmarked'] ?? false,

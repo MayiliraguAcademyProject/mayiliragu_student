@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../constants/app_colors.dart';
+import '../../shared/widgets/common_button.dart';
+import '../utils/toast_helper.dart';
 
 class UpdateRequiredDialog extends StatelessWidget {
   final String requiredVersion;
@@ -24,13 +25,9 @@ class UpdateRequiredDialog extends StatelessWidget {
         throw 'Could not launch $apkDownloadUrl';
       }
     } catch (e) {
-      Get.snackbar(
-        'Update Link Error',
+      AppToast.error(
         'Could not open download browser. Please copy link manually: $apkDownloadUrl',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.error,
-        colorText: Colors.white,
-        duration: const Duration(seconds: 8),
+        title: 'Update Link Error',
       );
     }
   }
@@ -105,31 +102,14 @@ class UpdateRequiredDialog extends StatelessWidget {
           ],
         ),
         actions: [
-          SizedBox(
-            width: double.infinity,
+          CommonButton(
+            text: 'Download Update',
+            onPressed: _handleDownload,
+            backgroundColor: AppColors.primary,
+            foregroundColor: Colors.white,
             height: 48,
-            child: ElevatedButton(
-              onPressed: _handleDownload,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                elevation: 0,
-              ),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.download_rounded, size: 20),
-                  SizedBox(width: 8),
-                  Text(
-                    'Download Update',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                  ),
-                ],
-              ),
-            ),
+            borderRadius: 12,
+            icon: const Icon(Icons.download_rounded, size: 20),
           ),
         ],
       ),

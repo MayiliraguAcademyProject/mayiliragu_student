@@ -2,6 +2,11 @@ abstract class Routes {
   Routes._();
   static const ONBOARDING = '/onboarding';
   static const LOGIN = '/login';
+  static const REGISTER = '/register';
+  static const OTP_VERIFICATION = '/otp-verification';
+  static const FORGOT_PASSWORD = '/forgot-password';
+  static const FORGOT_PASSWORD_OTP = '/forgot-password-otp';
+  static const RESET_PASSWORD = '/reset-password';
   static const DASHBOARD = '/dashboard';
   static const COURSES = '/courses';
   static const LESSON_DETAIL = '/lesson-detail';
@@ -18,4 +23,10 @@ abstract class Routes {
   static const NOTIFICATIONS = '/notifications';
   static const SPLASH = '/splash';
   static const BOOKMARKS = '/bookmarks';
+  static const BANNER_PRODUCT_DETAIL = '/banner-product-detail';
+  static const PAYMENT_QR = '/payment-qr';
+  static const PAYMENT_CONFIRMATION = '/payment-confirmation';
+  static const LIVE_VIDEOS = '/live-videos';
+  static const TESTIMONIALS = '/testimonials';
+  static const EXAM_UPDATES = '/exam-updates';
 }

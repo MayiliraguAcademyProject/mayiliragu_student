@@ -1,3 +1,4 @@
+import 'package:Mayiliragu/shared/widgets/common_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/constants/app_colors.dart';
@@ -14,13 +15,13 @@ class CourseListView extends GetView<CourseController> {
     final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'My Courses',
+        title: Obx(() => Text(
+          controller.isDemoOnly.value ? 'Demo Classes' : 'My Courses',
           style: AppTextStyles.heading.copyWith(
             fontSize: 20,
             color: colorScheme.onSurface,
           ),
-        ),
+        )),
         backgroundColor: colorScheme.surface,
         elevation: 0,
         iconTheme: IconThemeData(color: colorScheme.onSurface),
@@ -60,13 +61,12 @@ class CourseListView extends GetView<CourseController> {
                     style: AppTextStyles.body.copyWith(color: AppColors.error),
                   ),
                   const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: controller.fetchCourses,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.accent,
-                    ),
-                    child: const Text('Retry'),
-                  ),
+                  CommonButton(
+                  text: 'Retry',
+                  onPressed: controller.fetchCourses,
+                  backgroundColor: AppColors.accent,
+                  fullWidth: false,
+                ),
                 ],
               ),
             );
@@ -75,7 +75,7 @@ class CourseListView extends GetView<CourseController> {
           if (controller.coursesList.isEmpty) {
             return Center(
               child: Text(
-                'No courses available.',
+                controller.isDemoOnly.value ? 'No demo classes available.' : 'No courses available.',
                 style: AppTextStyles.body.copyWith(color: colorScheme.onSurface),
               ),
             );
@@ -112,6 +112,7 @@ class CourseListView extends GetView<CourseController> {
     final title = course['title'] ?? 'No Title';
     final thumbnail = course['thumbnail'] ?? '';
     final totalLessons = course['totalLessons'] ?? 0;
+    final isDemo = course['isDemo'] as bool? ?? false;
     final colorScheme = Theme.of(context).colorScheme;
 
     return Card(
@@ -129,12 +130,53 @@ class CourseListView extends GetView<CourseController> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            AspectRatio(
-              aspectRatio: 16 / 9,
-              child: CourseImage(
-                imageUrl: thumbnail,
-                fit: BoxFit.cover,
-              ),
+            Stack(
+              children: [
+                AspectRatio(
+                  aspectRatio: 16 / 9,
+                  child: CourseImage(
+                    imageUrl: thumbnail,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                if (isDemo)
+                  Positioned(
+                    top: 12,
+                    right: 12,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFFFF5722), Color(0xFFFF9800)],
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.3),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.play_circle_fill, color: Colors.white, size: 14),
+                          SizedBox(width: 4),
+                          Text(
+                            'DEMO COURSE',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
             ),
             Padding(
               padding: const EdgeInsets.all(16.0),
