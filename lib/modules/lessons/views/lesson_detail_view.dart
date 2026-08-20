@@ -283,8 +283,11 @@ class LessonDetailView extends GetView<LessonController> {
     return GetBuilder<LessonController>(
       builder: (controller) {
         if (controller.youtubeController != null) {
+          final currentKey = controller.activeVideoId.value ?? controller.youtubeController!.initialVideoId;
           return YoutubePlayerBuilder(
+            key: ValueKey('yt_builder_$currentKey'),
             player: YoutubePlayer(
+              key: ValueKey('yt_player_$currentKey'),
               controller: controller.youtubeController!,
               showVideoProgressIndicator: true,
               progressIndicatorColor: const Color(0xFF0D47A1),
@@ -307,15 +310,7 @@ class LessonDetailView extends GetView<LessonController> {
                 children: [
                   player,
                   // Cover the YouTube watermark (bottom-right corner)
-                  Positioned(
-                    bottom: 34,
-                    right: 0,
-                    child: Container(
-                      width: 80,
-                      height: 22,
-                      color: Colors.black,
-                    ),
-                  ),
+                 
                 ],
               );
               return _buildScaffold(context, controller, playerWithOverlay);
@@ -344,6 +339,7 @@ class LessonDetailView extends GetView<LessonController> {
   }
 
   Widget _buildScaffold(BuildContext context, LessonController controller, Widget playerWidget) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -373,11 +369,11 @@ class LessonDetailView extends GetView<LessonController> {
             if (video == null || video['downloadEnabled'] != true) {
               return const SizedBox.shrink();
             }
-            final driveFileId = lesson['driveFileId']?.toString() ?? '';
+            final driveFileId = video['driveFileId']?.toString() ?? '';
             if (LessonController.extractYoutubeId(driveFileId) != null) {
               return const SizedBox.shrink();
             }
-            final lessonId = lesson['id']?.toString() ?? '';
+            final videoId = video['id']?.toString() ?? '';
             final downloadService = Get.find<VideoDownloadService>();
 
             return Obx(() {
