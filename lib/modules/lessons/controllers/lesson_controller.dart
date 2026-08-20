@@ -69,9 +69,12 @@ class LessonController extends GetxController {
   @override
   void onReady() {
     super.onReady();
+    // Do not trigger duplicate fetch if already loading or loaded
     final String? lessonId = _extractLessonId();
     if (lessonId != null &&
-        (lessonId != _currentLessonId || lessonData.value == null)) {
+        lessonId != _currentLessonId &&
+        !isLoading.value &&
+        lessonData.value == null) {
       fetchLessonDetail(lessonId);
     }
   }
@@ -90,6 +93,7 @@ class LessonController extends GetxController {
   }
 
   Future<void> fetchLessonDetail(String id) async {
+    if (isLoading.value && _currentLessonId == id) return;
     try {
       isLoading.value = true;
       errorMessage.value = '';
@@ -145,18 +149,10 @@ class LessonController extends GetxController {
         errorMessage.value = 'Failed to load lesson details';
       }
     } catch (e) {
-      if (e is DioException) {
-        final resData = e.response?.data;
-        if (resData is Map && resData['message'] != null) {
-          errorMessage.value = resData['message'].toString();
-        } else if (e.response?.statusCode == 403) {
-          errorMessage.value = 'Access denied. Enrollment required to access this lesson.';
-        } else {
-          errorMessage.value = 'Failed to load lesson details. Please try again.';
-        }
-      } else {
-        errorMessage.value = e.toString().replaceFirst('Exception: ', '');
-      }
+      errorMessage.value = AppErrorHandler.getErrorMessage(
+        e,
+        defaultMessage: 'Failed to load lesson details',
+      );
     } finally {
       isLoading.value = false;
     }
@@ -164,7 +160,7 @@ class LessonController extends GetxController {
 
   Future<void> selectVideo(int index) async {
     if (index < 0 || index >= videos.length) return;
-    if (index == currentVideoIndex.value && betterPlayerController != null) return;
+    if (index == currentVideoIndex.value && (betterPlayerController != null || youtubeController != null)) return;
 
     // Check lock status
     final video = videos[index];
@@ -238,17 +234,18 @@ class LessonController extends GetxController {
   }) async {
     if (!isVideoPlayerSupported) return;
 
-    // Clean previous controller if any
-    betterPlayerController?.dispose();
-    betterPlayerController = null;
-
-    // Safely dispose any active players first
-    betterPlayerController?.dispose();
-    betterPlayerController = null;
+    // Safely clean previous controllers and timers
     _youtubeSeekTimer?.cancel();
     _youtubeSeekTimer = null;
-    youtubeController?.dispose();
+    try {
+      youtubeController?.dispose();
+    } catch (_) {}
     youtubeController = null;
+
+    try {
+      betterPlayerController?.dispose();
+    } catch (_) {}
+    betterPlayerController = null;
 
     final downloadService = Get.find<VideoDownloadService>();
     final isDownloadedOffline = downloadService.isDownloaded(
@@ -273,10 +270,12 @@ class LessonController extends GetxController {
           loop: false,
           isLive: false,
           forceHD: true,
-
           enableCaption: false,
           startAt: startSeconds,
+        
           showLiveFullscreenButton: false,
+         
+          hideThumbnail: true,
         ),
       );
 
@@ -317,7 +316,7 @@ class LessonController extends GetxController {
     final BetterPlayerDataSource dataSource;
 
     if (isDownloadedOffline) {
-      final localPath = downloadService.getLocalVideoPath(videoId);
+      final localPath = downloadService.getLocalVideoPath(_currentLessonId ?? '');
       dataSource = BetterPlayerDataSource(
         BetterPlayerDataSourceType.file,
         localPath!,
@@ -403,7 +402,6 @@ class LessonController extends GetxController {
         final videoPlayerController = betterPlayerController!.videoPlayerController;
         if (videoPlayerController != null) {
           final currentPos = videoPlayerController.value.position.inSeconds;
-          final totalDuration = videoPlayerController.value.duration?.inSeconds ?? 0;
 
           if (currentPos > 0) {
             // Restrict seeking forward beyond watched limit
@@ -581,6 +579,16 @@ class LessonController extends GetxController {
     }
   }
 
+  void _handleAutoAdvance() {
+    final nextIndex = currentVideoIndex.value + 1;
+    if (nextIndex < videos.length) {
+      final nextVideo = videos[nextIndex];
+      if (nextVideo['isLocked'] != true) {
+        selectVideo(nextIndex);
+      }
+    }
+  }
+
   Future<void> startVideoDownload() async {
     final video = currentVideo;
     if (video == null) return;
@@ -729,8 +737,7 @@ class LessonController extends GetxController {
     if (!confirm) return false;
 
     try {
-      final String? selectedDirectory = await FilePicker.platform
-          .getDirectoryPath();
+      final String? selectedDirectory = await FilePicker.getDirectoryPath();
       if (selectedDirectory != null && selectedDirectory.isNotEmpty) {
         final success = await downloadService.setCustomDownloadDirectory(
           selectedDirectory,
@@ -750,9 +757,16 @@ class LessonController extends GetxController {
   void onClose() {
     _syncProgressOnClose();
     _youtubeSeekTimer?.cancel();
+    _youtubeSeekTimer = null;
     if (isVideoPlayerSupported) {
-      betterPlayerController?.dispose();
-      youtubeController?.dispose();
+      try {
+        betterPlayerController?.dispose();
+      } catch (_) {}
+      betterPlayerController = null;
+      try {
+        youtubeController?.dispose();
+      } catch (_) {}
+      youtubeController = null;
     }
     _currentLessonId = null;
     lessonData.value = null;
