@@ -6,18 +6,39 @@ import '../models/test_model.dart';
 import '../models/category_model.dart';
 import '../repositories/tests_repository.dart';
 
-enum FilterTab { topicWise, subjectWise }
+enum TestMode { subjectWise, testSeries }
 
 class TestsController extends GetxController {
   final TestsRepository _repository;
 
   TestsController(this._repository);
 
-  final isLoading = false.obs;
-  final testsList = <TestModel>[].obs;
-  final selectedCategory = ''.obs; // Loaded dynamically
-  final activeTab = FilterTab.topicWise.obs; // Default: Topic Wise
-  final errorMessage = ''.obs;
+  // Active Tab Mode
+  final activeTestMode = TestMode.subjectWise.obs;
+
+  // Separate observable test lists
+  final subjectWiseTests = <TestModel>[].obs;
+  final testSeriesTests = <TestModel>[].obs;
+
+  // Separate loading & error observables
+  final isLoadingSubjectWise = false.obs;
+  final isLoadingTestSeries = false.obs;
+  final errorSubjectWise = ''.obs;
+  final errorTestSeries = ''.obs;
+
+  // General loading property for backward compatibility
+  bool get isLoading => activeTestMode.value == TestMode.subjectWise
+      ? isLoadingSubjectWise.value
+      : isLoadingTestSeries.value;
+
+  String get errorMessage => activeTestMode.value == TestMode.subjectWise
+      ? errorSubjectWise.value
+      : errorTestSeries.value;
+
+  // Subject-Wise category and sub-filters
+  final selectedCategory = ''.obs;
+  final selectedSubFilter = 'all'.obs;
+  final selectedDifficulty = 'all'.obs; // 'all' | 'EASY' | 'MEDIUM' | 'HARD'
 
   // Search query
   final searchQuery = ''.obs;
@@ -25,15 +46,23 @@ class TestsController extends GetxController {
   // Human-readable mapping configs loaded dynamically
   final subjectNames = <String, String>{}.obs;
   final topicNames = <String, String>{}.obs;
-
   final categories = <CategoryModel>[].obs;
-
-  final selectedSubFilter = 'all'.obs;
 
   @override
   void onInit() {
     super.onInit();
-    fetchCategories().then((_) => fetchTests());
+    fetchCategories().then((_) {
+      fetchSubjectWiseTests();
+      fetchTestSeriesTests();
+    });
+  }
+
+  Future<void> fetchTests() async {
+    await fetchCategories();
+    await Future.wait([
+      fetchSubjectWiseTests(),
+      fetchTestSeriesTests(),
+    ]);
   }
 
   Future<void> fetchCategories() async {
@@ -41,17 +70,17 @@ class TestsController extends GetxController {
       final response = await _repository.getCategories();
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data['data'] ?? [];
-        
+
         final List<CategoryModel> loadedCategories = [
           CategoryModel(
             id: 'all',
-            name: 'All',
+            name: 'All Subjects',
             description: 'All Categories',
             subjects: [],
           ),
           ...data.map((item) => CategoryModel.fromJson(item)),
         ];
-            
+
         final Map<String, String> loadedSubjects = {};
         final Map<String, String> loadedTopics = {};
 
@@ -71,58 +100,110 @@ class TestsController extends GetxController {
         categories.assignAll(loadedCategories);
         subjectNames.assignAll(loadedSubjects);
         topicNames.assignAll(loadedTopics);
-        
-        if (categories.isNotEmpty && (selectedCategory.value.isEmpty || !categories.any((c) => c.id == selectedCategory.value))) {
-          // Default to first real category if available (e.g. cat_quant) or 'all'
-          final defaultCat = categories.firstWhere((c) => c.id != 'all', orElse: () => categories.first);
+
+        if (categories.isNotEmpty &&
+            (selectedCategory.value.isEmpty ||
+                !categories.any((c) => c.id == selectedCategory.value))) {
+          final defaultCat = categories.firstWhere((c) => c.id != 'all',
+              orElse: () => categories.first);
           selectedCategory.value = defaultCat.id;
         }
       }
     } catch (e) {
-      errorMessage.value = AppErrorHandler.getErrorMessage(e);
+      errorSubjectWise.value = AppErrorHandler.getErrorMessage(e);
     }
   }
 
-  Future<void> fetchTests() async {
+  Future<void> clearImageCache() async {
     try {
-      // Clear image cache to refresh modified question assets
       await DefaultCacheManager().emptyCache();
       PaintingBinding.instance.imageCache.clear();
       PaintingBinding.instance.imageCache.clearLiveImages();
     } catch (_) {}
+  }
+
+  Future<void> fetchSubjectWiseTests() async {
+    await clearImageCache();
 
     try {
-      isLoading.value = true;
-      errorMessage.value = '';
-      
-      final response = await _repository.getTests(categoryId: selectedCategory.value);
-      
+      isLoadingSubjectWise.value = true;
+      errorSubjectWise.value = '';
+
+      final response = await _repository.getTests(
+        testMode: 'SUBJECT_WISE',
+        categoryId: selectedCategory.value,
+      );
+
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data['data'] ?? [];
-        final List<TestModel> loadedTests = data.map((item) => TestModel.fromJson(item)).toList();
-        testsList.assignAll(loadedTests);
+        final List<TestModel> loadedTests =
+            data.map((item) => TestModel.fromJson(item)).toList();
+        subjectWiseTests.assignAll(loadedTests);
       } else {
-        errorMessage.value = 'Failed to load tests';
+        errorSubjectWise.value = 'Failed to load subject-wise practice tests';
       }
     } catch (e) {
-      errorMessage.value = AppErrorHandler.getErrorMessage(e);
+      errorSubjectWise.value = AppErrorHandler.getErrorMessage(e);
     } finally {
-      isLoading.value = false;
+      isLoadingSubjectWise.value = false;
+    }
+  }
+
+  Future<void> fetchTestSeriesTests() async {
+    await clearImageCache();
+
+    try {
+      isLoadingTestSeries.value = true;
+      errorTestSeries.value = '';
+
+      final response = await _repository.getTests(
+        testMode: 'TEST_SERIES',
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data['data'] ?? [];
+        final List<TestModel> loadedTests =
+            data.map((item) => TestModel.fromJson(item)).toList();
+        testSeriesTests.assignAll(loadedTests);
+      } else {
+        errorTestSeries.value = 'Failed to load test series mocks';
+      }
+    } catch (e) {
+      errorTestSeries.value = AppErrorHandler.getErrorMessage(e);
+    } finally {
+      isLoadingTestSeries.value = false;
+    }
+  }
+
+  Future<void> refreshActiveMode() async {
+    if (activeTestMode.value == TestMode.subjectWise) {
+      await fetchSubjectWiseTests();
+    } else {
+      await fetchTestSeriesTests();
+    }
+  }
+
+  void switchMode(TestMode mode) {
+    activeTestMode.value = mode;
+    if (mode == TestMode.subjectWise && subjectWiseTests.isEmpty) {
+      fetchSubjectWiseTests();
+    } else if (mode == TestMode.testSeries && testSeriesTests.isEmpty) {
+      fetchTestSeriesTests();
     }
   }
 
   void selectCategory(String categoryId) {
     selectedCategory.value = categoryId;
     selectedSubFilter.value = 'all';
-    fetchTests();
+    fetchSubjectWiseTests();
   }
 
   void selectSubFilter(String filterId) {
     selectedSubFilter.value = filterId;
   }
 
-  void switchTab(FilterTab tab) {
-    activeTab.value = tab;
+  void selectDifficulty(String difficulty) {
+    selectedDifficulty.value = difficulty;
   }
 
   void updateSearch(String query) {
@@ -132,11 +213,10 @@ class TestsController extends GetxController {
   // Get available sub-topic filter pills for current selected category
   List<Map<String, String>> get availableSubFilters {
     final List<Map<String, String>> filters = [
-      {'id': 'all', 'name': 'All Quizzes'}
+      {'id': 'all', 'name': 'All Topics'}
     ];
 
     if (selectedCategory.value == 'all') {
-      // Add all subjects
       subjectNames.forEach((id, name) {
         filters.add({'id': id, 'name': name});
       });
@@ -155,9 +235,9 @@ class TestsController extends GetxController {
     return filters;
   }
 
-  // Get filtered tests matching category, sub-topic pill, and search query
-  List<TestModel> get filteredDrillTests {
-    var list = testsList.toList();
+  // Filtered Subject-Wise tests (category + sub-topic pill + difficulty chip + search)
+  List<TestModel> get filteredSubjectWiseTests {
+    var list = subjectWiseTests.toList();
 
     // Apply sub-topic pill filter
     if (selectedSubFilter.value != 'all') {
@@ -167,8 +247,16 @@ class TestsController extends GetxController {
       }).toList();
     }
 
+    // Apply difficulty filter
+    if (selectedDifficulty.value != 'all') {
+      final diff = selectedDifficulty.value.toUpperCase();
+      list = list.where((t) {
+        return (t.difficulty ?? '').toUpperCase() == diff;
+      }).toList();
+    }
+
     // Apply search query
-    if (searchQuery.value.isNotEmpty) {
+    if (searchQuery.value.trim().isNotEmpty) {
       final query = searchQuery.value.toLowerCase().trim();
       list = list.where((test) {
         final title = test.title.toLowerCase();
@@ -180,40 +268,19 @@ class TestsController extends GetxController {
     return list;
   }
 
-  // Subject-wise grouping: Map<SubjectName/ID, List<TestModel>>
-  Map<String, List<TestModel>> get subjectWiseTests {
-    final Map<String, List<TestModel>> groups = {};
-    for (var test in filteredDrillTests) {
-      // Include tests that have a subjectId
-      final String subId = test.subjectId ?? 'General / Other';
-      final String subName = subjectNames[subId] ?? subId;
+  // Filtered Test Series tests (search query)
+  List<TestModel> get filteredTestSeriesTests {
+    var list = testSeriesTests.toList();
 
-      if (!groups.containsKey(subName)) {
-        groups[subName] = [];
-      }
-      groups[subName]!.add(test);
+    if (searchQuery.value.trim().isNotEmpty) {
+      final query = searchQuery.value.toLowerCase().trim();
+      list = list.where((test) {
+        final title = test.title.toLowerCase();
+        final desc = (test.description ?? '').toLowerCase();
+        return title.contains(query) || desc.contains(query);
+      }).toList();
     }
-    return groups;
-  }
 
-  // Topic-wise grouping: Map<SubjectName, Map<TopicName, List<TestModel>>>
-  Map<String, Map<String, List<TestModel>>> get topicWiseTests {
-    final Map<String, Map<String, List<TestModel>>> groups = {};
-    for (var test in filteredDrillTests) {
-      final String subId = test.subjectId ?? 'general_other';
-      final String subName = subjectNames[subId] ?? (test.subjectId == null ? 'General / Other' : subId);
-
-      final String topId = test.topicId ?? 'general_other';
-      final String topName = topicNames[topId] ?? (test.topicId == null ? 'General' : topId);
-
-      if (!groups.containsKey(subName)) {
-        groups[subName] = {};
-      }
-      if (!groups[subName]!.containsKey(topName)) {
-        groups[subName]![topName] = [];
-      }
-      groups[subName]![topName]!.add(test);
-    }
-    return groups;
+    return list;
   }
 }
