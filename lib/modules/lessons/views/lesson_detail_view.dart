@@ -2,6 +2,7 @@ import 'package:Mayiliragu/shared/widgets/common_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:better_player_enhanced/better_player.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/guards/guest_auth_guard.dart';
@@ -279,6 +280,65 @@ class LessonDetailView extends GetView<LessonController> {
 
   @override
   Widget build(BuildContext context) {
+    return GetBuilder<LessonController>(
+      builder: (controller) {
+        if (controller.youtubeController != null) {
+          final currentKey = controller.activeVideoId.value ?? controller.youtubeController!.initialVideoId;
+          return YoutubePlayerBuilder(
+            key: ValueKey('yt_builder_$currentKey'),
+            player: YoutubePlayer(
+              key: ValueKey('yt_player_$currentKey'),
+              controller: controller.youtubeController!,
+              showVideoProgressIndicator: true,
+              progressIndicatorColor: const Color(0xFF0D47A1),
+              // Hide channel name, title bar and share icon in the overlay
+              topActions: const [],
+              bottomActions: [
+                const SizedBox(width: 8),
+                CurrentPosition(),
+                const SizedBox(width: 8),
+                ProgressBar(isExpanded: true),
+                const SizedBox(width: 8),
+                RemainingDuration(),
+                const PlaybackSpeedButton(),
+                const FullScreenButton(),
+              ],
+            ),
+            builder: (context, player) {
+              // Wrap in a Stack to cover the YouTube watermark logo
+              final playerWithOverlay = Stack(
+                children: [
+                  player,
+                  // Cover the YouTube watermark (bottom-right corner)
+                 
+                ],
+              );
+              return _buildScaffold(context, controller, playerWithOverlay);
+            },
+          );
+        } else {
+          final Widget betterPlayerWidget = controller.betterPlayerController != null
+              ? AspectRatio(
+                  aspectRatio: 16 / 9,
+                  child: BetterPlayer(
+                    controller: controller.betterPlayerController!,
+                  ),
+                )
+              : const AspectRatio(
+                  aspectRatio: 16 / 9,
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      color: Color(0xFF0D47A1),
+                    ),
+                  ),
+                );
+          return _buildScaffold(context, controller, betterPlayerWidget);
+        }
+      },
+    );
+  }
+
+  Widget _buildScaffold(BuildContext context, LessonController controller, Widget playerWidget) {
     final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
@@ -307,6 +367,10 @@ class LessonDetailView extends GetView<LessonController> {
           Obx(() {
             final video = controller.currentVideo;
             if (video == null || video['downloadEnabled'] != true) {
+              return const SizedBox.shrink();
+            }
+            final driveFileId = video['driveFileId']?.toString() ?? '';
+            if (LessonController.extractYoutubeId(driveFileId) != null) {
               return const SizedBox.shrink();
             }
             final videoId = video['id']?.toString() ?? '';
@@ -514,25 +578,7 @@ class LessonDetailView extends GetView<LessonController> {
             children: [
               // Video Player Region
               if (controller.isVideoPlayerSupported)
-                if (controller.betterPlayerController != null)
-                  AspectRatio(
-                    aspectRatio: 16 / 9,
-                    child: BetterPlayer(
-                      controller: controller.betterPlayerController!,
-                    ),
-                  )
-                else
-                  AspectRatio(
-                    aspectRatio: 16 / 9,
-                    child: Container(
-                      color: Colors.black87,
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          color: colorScheme.primary,
-                        ),
-                      ),
-                    ),
-                  )
+                playerWidget
               else
                 AspectRatio(
                   aspectRatio: 16 / 9,
