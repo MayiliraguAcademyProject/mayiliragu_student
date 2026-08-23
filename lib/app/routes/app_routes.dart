@@ -29,4 +29,6 @@ abstract class Routes {
   static const LIVE_VIDEOS = '/live-videos';
   static const TESTIMONIALS = '/testimonials';
   static const EXAM_UPDATES = '/exam-updates';
+  static const TEST_BATCHES = '/test-batches';
+  static const TEST_BATCH_DETAIL = '/test-batch-detail';
 }

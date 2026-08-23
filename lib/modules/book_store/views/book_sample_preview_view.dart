@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/api_constants.dart';
 import '../../../../core/utils/toast_helper.dart';
 import '../../../../shared/widgets/common_button.dart';
 import '../../../../shared/widgets/custom_network_image.dart';
+import '../../../../shared/widgets/pdf_viewer_screen.dart';
 import '../models/book_model.dart';
 import 'book_checkout_view.dart';
 
@@ -40,22 +39,17 @@ class _BookSamplePreviewViewState extends State<BookSamplePreviewView> {
     super.dispose();
   }
 
-  Future<void> _launchPdfUrl(String pdfUrl) async {
-    String fullUrl = pdfUrl;
-    if (!pdfUrl.startsWith('http://') && !pdfUrl.startsWith('https://')) {
-      final base = ApiConstants.baseUrl.replaceAll('/api', '');
-      fullUrl = '$base$pdfUrl';
+  void _launchPdfUrl(String pdfUrl) {
+    if (pdfUrl.trim().isEmpty) {
+      AppToast.error('Unable to open sample PDF', title: 'Error');
+      return;
     }
-    final uri = Uri.parse(fullUrl);
-    try {
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      } else {
-        AppToast.error('Unable to open sample PDF', title: 'Error');
-      }
-    } catch (e) {
-      AppToast.error('Could not open preview PDF', title: 'Error');
-    }
+    Get.to(
+      () => PdfViewerScreen(
+        pdfUrl: pdfUrl,
+        title: 'Sample - ${widget.book.title}',
+      ),
+    );
   }
 
   @override

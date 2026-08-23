@@ -13,10 +13,11 @@ import '../../../app/routes/app_pages.dart';
 import '../controllers/dashboard_controller.dart';
 import '../models/dashboard_model.dart';
 import '../../courses/views/course_detail_view.dart';
-import '../../courses/controllers/course_controller.dart';
+import '../../tests/views/tests_view.dart';
 import '../../tests/controllers/tests_controller.dart';
 import '../../../shared/widgets/custom_network_image.dart';
 import '../../../core/utils/toast_helper.dart';
+import '../../../core/controllers/user_session_controller.dart';
 
 class QuickActionPalette {
   final List<Color> gradient;
@@ -133,6 +134,11 @@ class DashboardHomeView extends GetView<DashboardController> {
       return const QuickActionPalette(
         gradient: [Color(0xFF0284C7), Color(0xFF0369A1)],
         badgeColor: Color(0xFF0369A1),
+      );
+    } else if (route.contains('batch') || route.contains('test-batch') || route.contains('kalki')) {
+      return const QuickActionPalette(
+        gradient: [Color(0xFF0284C7), Color(0xFF0F766E)],
+        badgeColor: Color(0xFF0F766E),
       );
     }
     return _defaultPalettes[index % _defaultPalettes.length];
@@ -401,19 +407,56 @@ class DashboardHomeView extends GetView<DashboardController> {
     );
   }
 
-  // Feature Grid UI Component (dynamic from backend QuickActionModel)
+  // Feature Grid UI Component (dynamic from backend QuickActionModel + TNPSC filter)
   Widget _buildFeatureGrid(BuildContext context) {
     return Obx(() {
       final backendActions = (controller.dashboardData.value?.quickActions ?? [])
           .where((a) => a.isEnabled)
           .toList();
 
-      if (backendActions.isEmpty) {
+      final userSession = Get.isRegistered<UserSessionController>()
+          ? Get.find<UserSessionController>()
+          : null;
+      final studentCategory = userSession?.studentProfile.value?.category?.toUpperCase() ?? '';
+      final isTnpscStudent = studentCategory.contains('TNPSC') ||
+          (controller.dashboardData.value?.allCourses ?? []).any((c) =>
+              c.title.toUpperCase().contains('TNPSC'));
+
+      // Filter or ensure Test Batch quick action visibility based on TNPSC
+      final actions = backendActions.where((a) {
+        final route = a.route.toLowerCase();
+        final title = a.title.toLowerCase();
+        final isTestBatch = route.contains('test-batch') || title.contains('test batch');
+        if (isTestBatch && !isTnpscStudent) {
+          return false;
+        }
+        return true;
+      }).toList();
+
+      // If TNPSC student and Test Batch isn't present in configured backend actions, add it dynamically
+      final hasTestBatchAction = actions.any((a) =>
+          a.route.toLowerCase().contains('test-batch') ||
+          a.title.toLowerCase().contains('test batch'));
+
+      if (isTnpscStudent && !hasTestBatchAction) {
+        actions.add(
+          QuickActionModel(
+            id: 'dynamic-test-batch',
+            title: AppStrings.testBatch,
+            route: Routes.TEST_BATCHES,
+            icon: 'layers',
+            order: 99,
+            isEnabled: true,
+          ),
+        );
+      }
+
+      if (actions.isEmpty) {
         return const SizedBox.shrink();
       }
 
       // Sort by order ascending
-      backendActions.sort((a, b) => a.order.compareTo(b.order));
+      actions.sort((a, b) => a.order.compareTo(b.order));
 
       return GridView.builder(
         shrinkWrap: true,
@@ -425,9 +468,9 @@ class DashboardHomeView extends GetView<DashboardController> {
           mainAxisSpacing: 14,
           childAspectRatio: 0.73,
         ),
-        itemCount: backendActions.length,
+        itemCount: actions.length,
         itemBuilder: (context, index) {
-          final action = backendActions[index];
+          final action = actions[index];
           final palette = _getPaletteForAction(action, index);
           final title = _formatTitle(action.title);
 
@@ -558,28 +601,44 @@ class DashboardHomeView extends GetView<DashboardController> {
   }
 
   void _handleActionTap(String targetRoute, String title) {
-    final route = targetRoute.trim().toLowerCase();
+    final route = targetRoute.trim().toLowerCase().replaceAll('_', '-');
+    final cleanTitle = title.trim().toLowerCase();
 
-    // 1. Tests Tab
-    if (route == '/tests' || route == 'tests' || route == '/online-tests' || route == 'online-tests') {
-      controller.tabController.jumpToTab(1);
+    Get.log('Dashboard Action Tap: route="$targetRoute", title="$title"');
+
+    // 1. External URLs (http:// or https://)
+    if (route.startsWith('http://') || route.startsWith('https://')) {
+      final uri = Uri.tryParse(targetRoute.trim());
+      if (uri != null) {
+        try {
+          launchUrl(uri, mode: LaunchMode.externalApplication);
+        } catch (e) {
+          Get.log('Error launching external URL: $e');
+        }
+      }
+      return;
+    }
+
+    // 2. Tests Tab / Screen
+    if (route == '/tests' || route == 'tests' || route == '/online-tests' || route == 'online-tests' ||
+        (cleanTitle.contains('test') && !cleanTitle.contains('batch') && !cleanTitle.contains('testimonial'))) {
+      Get.to(() => const TestsView());
       if (Get.isRegistered<TestsController>()) {
         Get.find<TestsController>().fetchTests();
       }
       return;
     }
 
-    // 2. Courses / Online Videos Tab
-    if (route == '/courses' || route == 'courses' || route == '/online-videos' || route == 'online-videos') {
-      controller.tabController.jumpToTab(2);
-      if (Get.isRegistered<CourseController>()) {
-        Get.find<CourseController>().fetchCourses();
-      }
+    // 3. Courses / Online Videos Screen
+    if (route == '/courses' || route == 'courses' || route == '/online-videos' || route == 'online-videos' ||
+        cleanTitle.contains('video course') || (cleanTitle.contains('course') && !cleanTitle.contains('demo'))) {
+      Get.toNamed(Routes.COURSES);
       return;
     }
 
-    // 3. Demo Courses
-    if (route == '/demo-courses' || route == '/demo-class' || route == 'demo-courses' || route == 'demo-class') {
+    // 4. Demo Courses
+    if (route == '/demo-courses' || route == '/demo-class' || route == 'demo-courses' || route == 'demo-class' ||
+        route == '/demo' || route == 'demo' || cleanTitle.contains('demo')) {
       final demoCourses = controller.dashboardData.value?.allCourses
               .where((c) => c.isDemo)
               .toList() ??
@@ -593,65 +652,81 @@ class DashboardHomeView extends GetView<DashboardController> {
       return;
     }
 
-    // 4. Current Affairs / Quiz
-    if (route == '/current-affairs' || route == 'current-affairs' || route == '/quiz' || route == 'quiz') {
+    // 5. Current Affairs / Quiz
+    if (route == '/current-affairs' || route == 'current-affairs' || route == '/quiz' || route == 'quiz' ||
+        cleanTitle.contains('current affair') || cleanTitle.contains('quiz')) {
       Get.toNamed(Routes.CURRENT_AFFAIRS);
       return;
     }
 
-    // 5. Study Materials
-    if (route == '/study-materials' || route == 'study-materials') {
+    // 6. Study Materials
+    if (route == '/study-materials' || route == 'study-materials' || route == '/materials' || route == 'materials' ||
+        cleanTitle.contains('study material') || cleanTitle.contains('material')) {
       Get.toNamed(Routes.STUDY_MATERIALS);
       return;
     }
 
-    // 6. Bookmarks
-    if (route == '/bookmarks' || route == 'bookmarks') {
+    // 7. Bookmarks
+    if (route == '/bookmarks' || route == 'bookmarks' || route == '/bookmark' || route == 'bookmark' ||
+        cleanTitle.contains('bookmark')) {
       Get.toNamed(Routes.BOOKMARKS);
       return;
     }
 
-    // 7. Book Store
-    if (route == '/book-store' || route == 'book-store' || route == '/books' || route == 'books') {
+    // 8. Book Store
+    if (route == '/book-store' || route == 'book-store' || route == '/books' || route == 'books' || route == '/book' || route == 'book' ||
+        cleanTitle.contains('book')) {
       Get.toNamed(Routes.BOOK_STORE);
       return;
     }
 
-    // 8. Live Videos / Streams
-    if (route == '/live-videos' || route == 'live-videos' || route == '/live-streams' || route == 'live-streams') {
+    // 9. Live Videos / Streams
+    if (route == '/live-videos' || route == 'live-videos' || route == '/live-streams' || route == 'live-streams' || route == '/live' || route == 'live' ||
+        cleanTitle.contains('live')) {
       Get.toNamed(Routes.LIVE_VIDEOS);
       return;
     }
 
-    // 9. Testimonials
-    if (route == '/testimonials' || route == 'testimonials') {
+    // 10. Testimonials
+    if (route == '/testimonials' || route == 'testimonials' || route == '/testimonial' || route == 'testimonial' || route == '/reviews' || route == 'reviews' ||
+        cleanTitle.contains('testimonial') || cleanTitle.contains('review')) {
       Get.toNamed(Routes.TESTIMONIALS);
       return;
     }
 
-    // 10. Exam Updates
-    if (route == '/exam-updates' || route == 'exam-updates') {
+    // 11. Exam Updates
+    if (route == '/exam-updates' || route == 'exam-updates' || route == '/exam-update' || route == 'exam-update' || route == '/updates' || route == 'updates' ||
+        cleanTitle.contains('exam update') || cleanTitle.contains('update')) {
       Get.toNamed(Routes.EXAM_UPDATES);
       return;
     }
 
-    // 11. Notifications
-    if (route == '/notifications' || route == 'notifications') {
+    // 12. Test Batches
+    if (route == '/test-batches' || route == 'test-batches' || route == '/test-batch' || route == 'test-batch' ||
+        cleanTitle.contains('test batch') || cleanTitle.contains('batch')) {
+      Get.toNamed(Routes.TEST_BATCHES);
+      return;
+    }
+
+    // 13. Notifications
+    if (route == '/notifications' || route == 'notifications' || route == '/notification' || route == 'notification' ||
+        cleanTitle.contains('notification')) {
       Get.toNamed(Routes.NOTIFICATIONS);
       return;
     }
 
-    // 12. Performance / Analytics
-    if (route == '/performance' || route == 'performance' || route == '/analytics' || route == 'analytics') {
+    // 14. Performance / Analytics
+    if (route == '/performance' || route == 'performance' || route == '/analytics' || route == 'analytics' ||
+        cleanTitle.contains('performance') || cleanTitle.contains('analytic')) {
       Get.toNamed(Routes.PERFORMANCE);
       return;
     }
 
-    // 13. Any registered GetPage route
+    // 15. Check Any registered GetPage route
     final normalizedRoute = targetRoute.startsWith('/') ? targetRoute : '/$targetRoute';
-    final isRegistered = AppPages.routes.any((page) => page.name == normalizedRoute || page.name == targetRoute);
+    final isRegistered = AppPages.routes.any((page) => page.name.toLowerCase() == normalizedRoute.toLowerCase() || page.name.toLowerCase() == route);
     if (isRegistered) {
-      Get.toNamed(isRegistered ? normalizedRoute : targetRoute);
+      Get.toNamed(normalizedRoute);
       return;
     }
 
@@ -736,6 +811,12 @@ class DashboardHomeView extends GetView<DashboardController> {
       case 'testimonials':
       case 'rate_review':
         return Icons.rate_review_rounded;
+      case 'layers':
+      case 'test_batch':
+      case 'test_batches':
+      case 'testbatch':
+      case 'kalki':
+        return Icons.layers_rounded;
       default:
         return Icons.widgets_rounded;
     }
@@ -1002,52 +1083,59 @@ class _BannerCarouselState extends State<BannerCarousel> {
               final banner = widget.banners[index];
               return GestureDetector(
                 onTap: () async {
-                  if (banner.linkType == 'COURSE' ||
+                  // 1. If banner is a product with plan description, price, offer, curriculum, or linkType COURSE/TEST
+                  if ((banner.planDescription != null && banner.planDescription!.trim().isNotEmpty) ||
+                      banner.offerPrice != null ||
+                      banner.price != null ||
+                      (banner.curriculumPdfUrl != null && banner.curriculumPdfUrl!.trim().isNotEmpty) ||
+                      (banner.curriculumJson != null && banner.curriculumJson!.isNotEmpty) ||
+                      banner.linkType == 'COURSE' ||
                       banner.linkType == 'TEST') {
                     Get.toNamed(
                       Routes.BANNER_PRODUCT_DETAIL,
                       arguments: banner,
                     );
-                  } else if (banner.linkUrl != null &&
-                      banner.linkUrl!.trim().isNotEmpty) {
+                    return;
+                  }
+
+                  // 2. If banner has linkUrl
+                  if (banner.linkUrl != null && banner.linkUrl!.trim().isNotEmpty) {
                     final link = banner.linkUrl!.trim();
                     final lower = link.toLowerCase();
+
                     if (lower == 'courses' || lower == '/courses') {
                       if (Get.isRegistered<DashboardController>()) {
-                        Get.find<DashboardController>().tabController.jumpToTab(
-                          2,
-                        );
+                        Get.find<DashboardController>().tabController.jumpToTab(2);
                       }
                     } else if (lower == 'tests' || lower == '/tests') {
                       if (Get.isRegistered<DashboardController>()) {
-                        Get.find<DashboardController>().tabController.jumpToTab(
-                          1,
-                        );
+                        Get.find<DashboardController>().tabController.jumpToTab(1);
                       }
-                    } else if (lower == 'books' ||
-                        lower == '/books' ||
-                        lower == 'book-store') {
+                    } else if (lower == 'books' || lower == '/books' || lower == 'book-store' || lower == '/book-store') {
                       Get.toNamed(Routes.BOOK_STORE);
-                    } else if (lower == 'current-affairs' ||
-                        lower == '/current-affairs') {
+                    } else if (lower == 'current-affairs' || lower == '/current-affairs') {
                       Get.toNamed(Routes.CURRENT_AFFAIRS);
-                    } else if (lower == 'study-materials' ||
-                        lower == '/study-materials') {
+                    } else if (lower == 'study-materials' || lower == '/study-materials') {
                       Get.toNamed(Routes.STUDY_MATERIALS);
-                    } else if (lower.startsWith('http://') ||
-                        lower.startsWith('https://')) {
+                    } else if (lower == 'test-batches' || lower == '/test-batches' || lower == 'test-batch' || lower == '/test-batch') {
+                      Get.toNamed(Routes.TEST_BATCHES);
+                    } else if (lower.startsWith('http://') || lower.startsWith('https://')) {
                       final uri = Uri.tryParse(link);
                       if (uri != null) {
                         try {
-                          await launchUrl(
-                            uri,
-                            mode: LaunchMode.externalApplication,
-                          );
+                          await launchUrl(uri, mode: LaunchMode.externalApplication);
                         } catch (_) {}
                       }
                     } else {
                       Get.to(() => CourseDetailView(courseId: link));
                     }
+                    return;
+                  }
+
+                  // 3. If banner has direct course linkId
+                  if (banner.linkId != null && banner.linkId!.trim().isNotEmpty) {
+                    Get.to(() => CourseDetailView(courseId: banner.linkId!.trim()));
+                    return;
                   }
                 },
                 child: Container(

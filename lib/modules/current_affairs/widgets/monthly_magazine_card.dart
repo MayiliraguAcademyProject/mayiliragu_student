@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:get/get.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../../core/constants/api_constants.dart';
+import '../../../shared/widgets/pdf_viewer_screen.dart';
 import '../models/current_affairs_models.dart';
 
 class MonthlyMagazineCard extends StatelessWidget {
@@ -54,20 +54,16 @@ class MonthlyMagazineCard extends StatelessWidget {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.download_for_offline_outlined, color: AppColors.brandPurple, size: 26),
-            onPressed: () async {
-              final pdfUrl = magazine.pdfUrl;
-              String url = pdfUrl;
-              if (!pdfUrl.startsWith('http://') && !pdfUrl.startsWith('https://')) {
-                // Dynamically resolve backend host domain
-                final base = ApiConstants.baseUrl.replaceAll('/api', '');
-                url = '$base$pdfUrl';
-              }
-              final uri = Uri.parse(url);
-              try {
-                await launchUrl(uri, mode: LaunchMode.externalApplication);
-              } catch (e) {
-                // error
+            icon: const Icon(Icons.remove_red_eye_outlined, color: AppColors.brandPurple, size: 26),
+            tooltip: 'View Magazine',
+            onPressed: () {
+              if (magazine.pdfUrl.trim().isNotEmpty) {
+                Get.to(
+                  () => PdfViewerScreen(
+                    pdfUrl: magazine.pdfUrl,
+                    title: magazine.title,
+                  ),
+                );
               }
             },
           ),
