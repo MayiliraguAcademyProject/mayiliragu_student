@@ -10,8 +10,12 @@ class TestsRepository {
     String? categoryId,
     String? subjectId,
     String? topicId,
+    String? testMode,
   }) async {
     final Map<String, dynamic> queryParams = {};
+    if (testMode != null && testMode.isNotEmpty) {
+      queryParams['testMode'] = testMode;
+    }
     if (categoryId != null && categoryId.isNotEmpty && categoryId != 'all') {
       queryParams['categoryId'] = categoryId;
     }
