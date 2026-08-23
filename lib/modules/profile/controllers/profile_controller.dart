@@ -88,7 +88,7 @@ class ProfileController extends GetxController {
       final packageInfo = await PackageInfo.fromPlatform();
       appVersion.value = "v${packageInfo.version}+${packageInfo.buildNumber}";
     } catch (e) {
-      appVersion.value = "v1.0.0";
+      appVersion.value = "v1.0.2";
     }
   }
 

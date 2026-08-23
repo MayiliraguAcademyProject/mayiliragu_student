@@ -1,3 +1,4 @@
+import 'package:Mayiliragu/modules/tests/models/category_model.dart';
 import 'package:Mayiliragu/shared/widgets/common_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -177,7 +178,7 @@ class TestsView extends GetView<TestsController> {
   }
 
   // ==========================================
-  // TAB 1: SUBJECT-WISE PRACTICE
+  // TAB 1: SUBJECT-WISE PRACTICE (FOLDER-BASED)
   // ==========================================
   Widget _buildSubjectWiseTab(BuildContext context, TestsController controller) {
     if (controller.isLoadingSubjectWise.value) {
@@ -219,222 +220,484 @@ class TestsView extends GetView<TestsController> {
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Obx(() {
+          final isSearching = controller.searchQuery.value.trim().isNotEmpty;
+          final activeFolder = controller.selectedFolderCategory.value;
+
+          // If search is active, show flat matching results across all folders
+          if (isSearching) {
+            return _buildSearchResultsView(context, controller);
+          }
+
+          // If no folder is selected, show the root Subject Folders Grid
+          if (activeFolder.isEmpty) {
+            return _buildRootFoldersView(context, controller);
+          }
+
+          // If a category folder is open, show folder contents (subtopics + tests)
+          return _buildInsideFolderView(context, controller, activeFolder);
+        }),
+      ),
+    );
+  }
+
+  // --- LEVEL 0: ROOT SUBJECT FOLDERS VIEW ---
+  Widget _buildRootFoldersView(BuildContext context, TestsController controller) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final realCategories = controller.categories.where((c) => c.id != 'all').toList();
+    final totalTests = controller.subjectWiseTests.length;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Header
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // Subject selection chips (ExamCategories)
-            _buildCategoryChips(controller),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Subject Folders',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    color: colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Select a subject folder to practice chapter-wise tests',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(
+                color: const Color(0xFF0F3CC9).withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                '$totalTests Total Tests',
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF0F3CC9),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
 
-            // Topic drill-down pills
-            _buildSubTopicFilterPills(controller),
-            const SizedBox(height: 12),
+        if (realCategories.isEmpty)
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 40),
+            alignment: Alignment.center,
+            child: Text(
+              'No subject categories configured yet.',
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+            ),
+          )
+        else
+          ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: realCategories.length,
+            separatorBuilder: (context, index) => const SizedBox(height: 10),
+            itemBuilder: (context, index) {
+              final cat = realCategories[index];
+              final testCount = controller.getCategoryTestCount(cat.id);
+              final subjectCount = cat.subjects.length;
 
-            // Difficulty filter row (All / Easy / Medium / Hard)
-            _buildDifficultyFilterRow(controller),
-            const SizedBox(height: 16),
+              return _buildFolderCard(
+                context: context,
+                title: cat.name,
+                subtitle: subjectCount > 0
+                    ? '$subjectCount Subjects • $testCount Tests'
+                    : '$testCount Practice Tests Available',
+                testCount: testCount,
+                iconData: _getCategoryIcon(cat.name),
+                gradientColors: _getCategoryGradient(index),
+                onTap: () => controller.openCategoryFolder(cat.id),
+              );
+            },
+          ),
+      ],
+    );
+  }
 
-            // Subject-Wise test cards list
-            _buildSubjectWiseTestsList(context, controller),
+  // --- LEVEL 1: INSIDE A SUBJECT FOLDER ---
+  Widget _buildInsideFolderView(
+    BuildContext context,
+    TestsController controller,
+    String categoryId,
+  ) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final currentCat = controller.categories.firstWhere(
+      (c) => c.id == categoryId,
+      orElse: () => CategoryModel(id: categoryId, name: 'Subject', description: '', subjects: []),
+    );
+
+    final tests = controller.filteredSubjectWiseTests;
+    final totalInCat = controller.getCategoryTestCount(categoryId);
+    final availableSubFilters = controller.availableSubFilters;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Navigation Breadcrumbs Bar
+        InkWell(
+          onTap: () => controller.navigateFolderBack(),
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6.0),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.arrow_back_rounded, size: 18, color: const Color(0xFF0F3CC9)),
+                const SizedBox(width: 6),
+                Text(
+                  'Back to Subjects',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF0F3CC9),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+
+        // Active Folder Title Banner
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF0F3CC9), Color(0xFF2563EB)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF0F3CC9).withValues(alpha: 0.25),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.folder_open_rounded, color: Colors.white, size: 24),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      currentCat.name,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '$totalInCat Practice Tests',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white.withValues(alpha: 0.85),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 14),
+
+        // Sub-Topic Pills (if multiple topics exist)
+        if (availableSubFilters.length > 1) ...[
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: availableSubFilters.map((f) {
+                final id = f['id'] ?? 'all';
+                final name = f['name'] ?? '';
+                final isSelected = controller.selectedSubFilter.value == id;
+                final subCount = id == 'all'
+                    ? totalInCat
+                    : (controller.getSubjectTestCount(id) > 0
+                        ? controller.getSubjectTestCount(id)
+                        : controller.getTopicTestCount(id));
+
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: ChoiceChip(
+                    label: Text(
+                      subCount > 0 ? '$name ($subCount)' : name,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                        color: isSelected ? Colors.white : colorScheme.onSurface,
+                      ),
+                    ),
+                    selected: isSelected,
+                    selectedColor: const Color(0xFF0F3CC9),
+                    backgroundColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+                    side: BorderSide(
+                      color: isSelected ? const Color(0xFF0F3CC9) : colorScheme.outline.withValues(alpha: 0.2),
+                      width: 1,
+                    ),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    showCheckmark: false,
+                    onSelected: (selected) {
+                      if (selected) {
+                        controller.selectSubFilter(id);
+                      }
+                    },
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+          const SizedBox(height: 14),
+        ],
+
+        // Tests List
+        if (tests.isEmpty)
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 48),
+            alignment: Alignment.center,
+            child: Column(
+              children: [
+                Icon(Icons.quiz_outlined, size: 48, color: Colors.grey.shade400),
+                const SizedBox(height: 12),
+                Text(
+                  'No quizzes available in this folder yet.',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+              ],
+            ),
+          )
+        else
+          ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: tests.length,
+            separatorBuilder: (context, index) => const SizedBox(height: 12),
+            itemBuilder: (context, index) {
+              return _buildSubjectWiseTestCard(context, controller, tests[index]);
+            },
+          ),
+      ],
+    );
+  }
+
+  // --- SEARCH RESULTS VIEW ---
+  Widget _buildSearchResultsView(BuildContext context, TestsController controller) {
+    final tests = controller.filteredSubjectWiseTests;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Search Results (${tests.length})',
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w800,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
+        ),
+        const SizedBox(height: 12),
+        if (tests.isEmpty)
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 40),
+            alignment: Alignment.center,
+            child: Text(
+              'No tests matching "${controller.searchQuery.value}"',
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+            ),
+          )
+        else
+          ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: tests.length,
+            separatorBuilder: (context, index) => const SizedBox(height: 12),
+            itemBuilder: (context, index) {
+              return _buildSubjectWiseTestCard(context, controller, tests[index]);
+            },
+          ),
+      ],
+    );
+  }
+
+  // --- FOLDER CARD COMPONENT ---
+  Widget _buildFolderCard({
+    required BuildContext context,
+    required String title,
+    required String subtitle,
+    required int testCount,
+    required IconData iconData,
+    required List<Color> gradientColors,
+    required VoidCallback onTap,
+  }) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(18),
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: colorScheme.surface,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: colorScheme.outline.withValues(alpha: 0.15),
+            width: 1.2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            // Gradient Folder Icon
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: gradientColors,
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(iconData, color: Colors.white, size: 24),
+            ),
+            const SizedBox(width: 14),
+
+            // Titles
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                      color: colorScheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    subtitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(width: 8),
+
+            // Test Count Pill Badge
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(
+                color: testCount > 0
+                    ? const Color(0xFF0F3CC9).withValues(alpha: 0.1)
+                    : Colors.grey.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                testCount == 1 ? '1 Test' : '$testCount Tests',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  color: testCount > 0 ? const Color(0xFF0F3CC9) : Colors.grey.shade600,
+                ),
+              ),
+            ),
+
+            const SizedBox(width: 6),
+            Icon(
+              Icons.chevron_right_rounded,
+              size: 20,
+              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildCategoryChips(TestsController controller) {
-    return Builder(
-      builder: (context) {
-        final colorScheme = Theme.of(context).colorScheme;
-        return SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: controller.categories.map((cat) {
-              final id = cat.id;
-              final name = cat.name;
-              return Obx(() {
-                final isSelected = controller.selectedCategory.value == id;
-                return GestureDetector(
-                  onTap: () => controller.selectCategory(id),
-                  child: Container(
-                    margin: const EdgeInsets.only(right: 8),
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: isSelected ? const Color(0xFF0F3CC9) : colorScheme.surface,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: isSelected ? Colors.transparent : colorScheme.outline.withValues(alpha: 0.4),
-                        width: 1,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Text(
-                          name,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                            color: isSelected ? Colors.white : colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                        if (isSelected) ...[
-                          const SizedBox(width: 4),
-                          const Icon(Icons.check, size: 12, color: Colors.white),
-                        ]
-                      ],
-                    ),
-                  ),
-                );
-              });
-            }).toList(),
-          ),
-        );
-      },
-    );
+  IconData _getCategoryIcon(String name) {
+    final lower = name.toLowerCase();
+    if (lower.contains('quant') || lower.contains('math') || lower.contains('arithmetic')) {
+      return Icons.calculate_rounded;
+    }
+    if (lower.contains('reason') || lower.contains('logic') || lower.contains('puzzle')) {
+      return Icons.psychology_rounded;
+    }
+    if (lower.contains('english') || lower.contains('verbal') || lower.contains('grammar')) {
+      return Icons.menu_book_rounded;
+    }
+    if (lower.contains('general') || lower.contains('awareness') || lower.contains('current')) {
+      return Icons.public_rounded;
+    }
+    if (lower.contains('tamil') || lower.contains('language')) {
+      return Icons.translate_rounded;
+    }
+    return Icons.folder_rounded;
   }
 
-  Widget _buildSubTopicFilterPills(TestsController controller) {
-    return Builder(
-      builder: (context) {
-        final colorScheme = Theme.of(context).colorScheme;
-        return Obx(() {
-          final filters = controller.availableSubFilters;
-          if (filters.length <= 1) return const SizedBox.shrink();
-
-          return Padding(
-            padding: const EdgeInsets.only(top: 10.0),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: filters.map((filter) {
-                  final id = filter['id'] ?? 'all';
-                  final name = filter['name'] ?? '';
-                  final isSelected = controller.selectedSubFilter.value == id;
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 6.0),
-                    child: ChoiceChip(
-                      label: Text(
-                        name,
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                          color: isSelected ? Colors.white : colorScheme.onSurface,
-                        ),
-                      ),
-                      selected: isSelected,
-                      selectedColor: const Color(0xFF0F3CC9),
-                      backgroundColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
-                      side: BorderSide(
-                        color: isSelected ? const Color(0xFF0F3CC9) : colorScheme.outline.withValues(alpha: 0.2),
-                        width: 1,
-                      ),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      showCheckmark: false,
-                      onSelected: (selected) {
-                        if (selected) {
-                          controller.selectSubFilter(id);
-                        }
-                      },
-                    ),
-                  );
-                }).toList(),
-              ),
-            ),
-          );
-        });
-      },
-    );
-  }
-
-  Widget _buildDifficultyFilterRow(TestsController controller) {
-    final levels = [
-      {'key': 'all', 'label': 'All Levels'},
-      {'key': 'EASY', 'label': 'Easy', 'color': const Color(0xFF10B981)},
-      {'key': 'MEDIUM', 'label': 'Medium', 'color': const Color(0xFFF59E0B)},
-      {'key': 'HARD', 'label': 'Hard', 'color': const Color(0xFFEF4444)},
+  List<Color> _getCategoryGradient(int index) {
+    final palettes = [
+      [const Color(0xFF0F3CC9), const Color(0xFF3B82F6)], // Blue
+      [const Color(0xFF7C3AED), const Color(0xFFA855F7)], // Purple
+      [const Color(0xFF059669), const Color(0xFF10B981)], // Emerald
+      [const Color(0xFFD97706), const Color(0xFFF59E0B)], // Amber
+      [const Color(0xFFDC2626), const Color(0xFFEF4444)], // Red
+      [const Color(0xFF0891B2), const Color(0xFF06B6D4)], // Cyan
     ];
-
-    return Obx(() {
-      final current = controller.selectedDifficulty.value;
-      return Row(
-        children: levels.map((lvl) {
-          final isSelected = current == lvl['key'];
-          final lvlColor = lvl['color'] as Color?;
-          return GestureDetector(
-            onTap: () => controller.selectDifficulty(lvl['key'] as String),
-            child: Container(
-              margin: const EdgeInsets.only(right: 6),
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? (lvlColor ?? const Color(0xFF0F3CC9)).withValues(alpha: 0.12)
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: isSelected
-                      ? (lvlColor ?? const Color(0xFF0F3CC9))
-                      : Colors.grey.withValues(alpha: 0.25),
-                  width: isSelected ? 1.5 : 1,
-                ),
-              ),
-              child: Text(
-                lvl['label'] as String,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
-                  color: isSelected
-                      ? (lvlColor ?? const Color(0xFF0F3CC9))
-                      : Colors.grey.shade700,
-                ),
-              ),
-            ),
-          );
-        }).toList(),
-      );
-    });
-  }
-
-  Widget _buildSubjectWiseTestsList(BuildContext context, TestsController controller) {
-    return Obx(() {
-      final tests = controller.filteredSubjectWiseTests;
-      if (tests.isEmpty) {
-        return Container(
-          padding: const EdgeInsets.symmetric(vertical: 48),
-          alignment: Alignment.center,
-          child: Column(
-            children: [
-              Icon(Icons.quiz_outlined, size: 48, color: Colors.grey.shade400),
-              const SizedBox(height: 12),
-              Text(
-                'No quizzes available for this combination yet.',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.grey.shade600,
-                ),
-              ),
-            ],
-          ),
-        );
-      }
-
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(bottom: 10.0),
-            child: Text(
-              'Practice Quizzes (${tests.length})',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w800,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-            ),
-          ),
-          ...tests.map((test) => _buildSubjectWiseTestCard(context, controller, test)),
-        ],
-      );
-    });
+    return palettes[index % palettes.length];
   }
 
   Widget _buildSubjectWiseTestCard(

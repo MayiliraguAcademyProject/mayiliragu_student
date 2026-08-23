@@ -36,9 +36,14 @@ class TestsController extends GetxController {
       : errorTestSeries.value;
 
   // Subject-Wise category and sub-filters
-  final selectedCategory = ''.obs;
+  final selectedCategory = 'all'.obs;
   final selectedSubFilter = 'all'.obs;
   final selectedDifficulty = 'all'.obs; // 'all' | 'EASY' | 'MEDIUM' | 'HARD'
+
+  // Folder-like hierarchy navigation
+  final selectedFolderCategory = ''.obs; // ID of active category folder ('': root level)
+  final selectedFolderSubject = ''.obs;  // ID of active subject folder ('': category level)
+  final selectedFolderTopic = ''.obs;    // ID of active topic folder ('': subject level)
 
   // Search query
   final searchQuery = ''.obs;
@@ -131,7 +136,6 @@ class TestsController extends GetxController {
 
       final response = await _repository.getTests(
         testMode: 'SUBJECT_WISE',
-        categoryId: selectedCategory.value,
       );
 
       if (response.statusCode == 200) {
@@ -192,10 +196,57 @@ class TestsController extends GetxController {
     }
   }
 
+  // Folder Navigation Methods
+  int getCategoryTestCount(String categoryId) {
+    if (categoryId == 'all') {
+      return subjectWiseTests.length;
+    }
+    return subjectWiseTests.where((t) => t.categoryId == categoryId).length;
+  }
+
+  int getSubjectTestCount(String subjectId) {
+    return subjectWiseTests.where((t) => t.subjectId == subjectId).length;
+  }
+
+  int getTopicTestCount(String topicId) {
+    return subjectWiseTests.where((t) => t.topicId == topicId).length;
+  }
+
+  void openCategoryFolder(String categoryId) {
+    selectedFolderCategory.value = categoryId;
+    selectedFolderSubject.value = '';
+    selectedFolderTopic.value = '';
+  }
+
+  void openSubjectFolder(String subjectId) {
+    selectedFolderSubject.value = subjectId;
+    selectedFolderTopic.value = '';
+  }
+
+  void openTopicFolder(String topicId) {
+    selectedFolderTopic.value = topicId;
+  }
+
+  void navigateFolderBack() {
+    if (selectedFolderTopic.value.isNotEmpty) {
+      selectedFolderTopic.value = '';
+    } else if (selectedFolderSubject.value.isNotEmpty) {
+      selectedFolderSubject.value = '';
+    } else if (selectedFolderCategory.value.isNotEmpty) {
+      selectedFolderCategory.value = '';
+    }
+  }
+
+  void resetFolderNavigation() {
+    selectedFolderCategory.value = '';
+    selectedFolderSubject.value = '';
+    selectedFolderTopic.value = '';
+  }
+
   void selectCategory(String categoryId) {
     selectedCategory.value = categoryId;
     selectedSubFilter.value = 'all';
-    fetchSubjectWiseTests();
+    openCategoryFolder(categoryId);
   }
 
   void selectSubFilter(String filterId) {
@@ -210,41 +261,68 @@ class TestsController extends GetxController {
     searchQuery.value = query;
   }
 
-  // Get available sub-topic filter pills for current selected category
+  // Get available sub-topic filter pills for current selected category based on actual tests
   List<Map<String, String>> get availableSubFilters {
     final List<Map<String, String>> filters = [
       {'id': 'all', 'name': 'All Topics'}
     ];
 
-    if (selectedCategory.value == 'all') {
-      subjectNames.forEach((id, name) {
-        filters.add({'id': id, 'name': name});
-      });
-      return filters;
-    }
+    final currentTests = selectedFolderCategory.value.isEmpty || selectedFolderCategory.value == 'all'
+        ? subjectWiseTests
+        : subjectWiseTests.where((t) => t.categoryId == selectedFolderCategory.value);
 
-    final cat = categories.firstWhereOrNull((c) => c.id == selectedCategory.value);
-    if (cat != null) {
-      for (var sub in cat.subjects) {
-        filters.add({'id': sub.id, 'name': sub.name});
-        for (var top in sub.topics) {
-          filters.add({'id': top.id, 'name': top.name});
+    final Set<String> seenIds = {'all'};
+
+    for (var test in currentTests) {
+      if (test.subjectId != null &&
+          test.subjectId!.isNotEmpty &&
+          !seenIds.contains(test.subjectId)) {
+        final name = subjectNames[test.subjectId!] ?? '';
+        if (name.isNotEmpty) {
+          seenIds.add(test.subjectId!);
+          filters.add({'id': test.subjectId!, 'name': name});
+        }
+      }
+
+      if (test.topicId != null &&
+          test.topicId!.isNotEmpty &&
+          !seenIds.contains(test.topicId)) {
+        final name = topicNames[test.topicId!] ?? '';
+        if (name.isNotEmpty) {
+          seenIds.add(test.topicId!);
+          filters.add({'id': test.topicId!, 'name': name});
         }
       }
     }
+
     return filters;
   }
 
-  // Filtered Subject-Wise tests (category + sub-topic pill + difficulty chip + search)
+  // Filtered Subject-Wise tests (folder drilldown + difficulty chip + search)
   List<TestModel> get filteredSubjectWiseTests {
     var list = subjectWiseTests.toList();
 
-    // Apply sub-topic pill filter
-    if (selectedSubFilter.value != 'all') {
-      final filterId = selectedSubFilter.value;
-      list = list.where((t) {
-        return t.subjectId == filterId || t.topicId == filterId;
+    // If search is active, return all matching tests across folders
+    if (searchQuery.value.trim().isNotEmpty) {
+      final query = searchQuery.value.toLowerCase().trim();
+      return list.where((test) {
+        final title = test.title.toLowerCase();
+        final desc = (test.description ?? '').toLowerCase();
+        return title.contains(query) || desc.contains(query);
       }).toList();
+    }
+
+    // Apply folder level filtering
+    if (selectedFolderCategory.value.isNotEmpty && selectedFolderCategory.value != 'all') {
+      list = list.where((t) => t.categoryId == selectedFolderCategory.value).toList();
+    }
+
+    if (selectedFolderSubject.value.isNotEmpty) {
+      list = list.where((t) => t.subjectId == selectedFolderSubject.value).toList();
+    }
+
+    if (selectedFolderTopic.value.isNotEmpty) {
+      list = list.where((t) => t.topicId == selectedFolderTopic.value).toList();
     }
 
     // Apply difficulty filter
@@ -252,16 +330,6 @@ class TestsController extends GetxController {
       final diff = selectedDifficulty.value.toUpperCase();
       list = list.where((t) {
         return (t.difficulty ?? '').toUpperCase() == diff;
-      }).toList();
-    }
-
-    // Apply search query
-    if (searchQuery.value.trim().isNotEmpty) {
-      final query = searchQuery.value.toLowerCase().trim();
-      list = list.where((test) {
-        final title = test.title.toLowerCase();
-        final desc = (test.description ?? '').toLowerCase();
-        return title.contains(query) || desc.contains(query);
       }).toList();
     }
 

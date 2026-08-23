@@ -4,7 +4,7 @@ class AppStrings {
   // App Metadata & Branding
   static const String appName = 'Mayiliragu Academy';
   static const String appTagline = 'Learn, Practice, Excel';
-  static const String appVersion = 'v1.0.0';
+  static const String appVersion = 'v1.0.2';
 
   // Navigation Tabs
   static const String tabHome = 'Home';

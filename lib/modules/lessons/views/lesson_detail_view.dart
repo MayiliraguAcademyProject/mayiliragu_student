@@ -139,7 +139,10 @@ class LessonDetailView extends GetView<LessonController> {
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.3), width: 1),
+        border: Border.all(
+          color: colorScheme.outlineVariant.withValues(alpha: 0.3),
+          width: 1,
+        ),
       ),
       child: Padding(
         padding: const EdgeInsets.all(14),
@@ -156,7 +159,10 @@ class LessonDetailView extends GetView<LessonController> {
                   },
                   borderRadius: BorderRadius.circular(6),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
                       color: colorScheme.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(6),
@@ -164,7 +170,11 @@ class LessonDetailView extends GetView<LessonController> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.play_arrow_rounded, size: 14, color: colorScheme.primary),
+                        Icon(
+                          Icons.play_arrow_rounded,
+                          size: 14,
+                          color: colorScheme.primary,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           formatDuration(note['timestamp'] as int? ?? 0),
@@ -194,10 +204,15 @@ class LessonDetailView extends GetView<LessonController> {
                     ),
                     const SizedBox(width: 12),
                     IconButton(
-                      icon: const Icon(Icons.delete_outline, size: 16, color: Colors.red),
+                      icon: const Icon(
+                        Icons.delete_outline,
+                        size: 16,
+                        color: Colors.red,
+                      ),
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
-                      onPressed: () => _showDeleteConfirmation(context, note['id']),
+                      onPressed: () =>
+                          _showDeleteConfirmation(context, note['id']),
                     ),
                   ],
                 ),
@@ -314,7 +329,8 @@ class LessonDetailView extends GetView<LessonController> {
 
             return Obx(() {
               final isDownloaded = downloadService.isDownloaded(videoId);
-              final isDownloading = downloadService.isDownloading[videoId] ?? false;
+              final isDownloading =
+                  downloadService.isDownloading[videoId] ?? false;
               final progress = downloadService.downloadProgress[videoId] ?? 0.0;
 
               if (isDownloading) {
@@ -410,9 +426,16 @@ class LessonDetailView extends GetView<LessonController> {
           }
 
           if (controller.errorMessage.value.isNotEmpty) {
-            final isRestricted = controller.errorMessage.value.toLowerCase().contains('access denied') ||
-                controller.errorMessage.value.toLowerCase().contains('enrollment required') ||
-                controller.errorMessage.value.toLowerCase().contains('restricted');
+            final isRestricted =
+                controller.errorMessage.value.toLowerCase().contains(
+                  'access denied',
+                ) ||
+                controller.errorMessage.value.toLowerCase().contains(
+                  'enrollment required',
+                ) ||
+                controller.errorMessage.value.toLowerCase().contains(
+                  'restricted',
+                );
 
             return Center(
               child: SingleChildScrollView(
@@ -430,14 +453,20 @@ class LessonDetailView extends GetView<LessonController> {
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        isRestricted ? Icons.lock_outline_rounded : Icons.error_outline_rounded,
-                        color: isRestricted ? AppColors.brandPurple : AppColors.error,
+                        isRestricted
+                            ? Icons.lock_outline_rounded
+                            : Icons.error_outline_rounded,
+                        color: isRestricted
+                            ? AppColors.brandPurple
+                            : AppColors.error,
                         size: 32,
                       ),
                     ),
                     const SizedBox(height: 18),
                     Text(
-                      isRestricted ? 'Access Restricted' : 'Unable to Load Lesson',
+                      isRestricted
+                          ? 'Access Restricted'
+                          : 'Unable to Load Lesson',
                       style: AppTextStyles.heading.copyWith(
                         fontSize: 18,
                         color: colorScheme.onSurface,
@@ -457,7 +486,9 @@ class LessonDetailView extends GetView<LessonController> {
                       CommonButton(
                         text: 'Sign In / Unlock Full Course',
                         onPressed: () {
-                          GuestAuthGuard.showForceLoginSheet(featureName: 'this lesson');
+                          GuestAuthGuard.showForceLoginSheet(
+                            featureName: 'this lesson',
+                          );
                         },
                         backgroundColor: AppColors.brandPurple,
                         foregroundColor: Colors.white,
@@ -469,7 +500,9 @@ class LessonDetailView extends GetView<LessonController> {
                         style: OutlinedButton.styleFrom(
                           foregroundColor: colorScheme.onSurface,
                           side: BorderSide(color: colorScheme.outline),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(24),
+                          ),
                           minimumSize: const Size(double.infinity, 48),
                         ),
                         child: const Text('Go Back'),
@@ -594,23 +627,34 @@ class LessonDetailView extends GetView<LessonController> {
                           color: colorScheme.primary,
                         ),
                         const SizedBox(width: 6),
-                        Obx(() => Text(
-                          'Study Notes (${controller.notes.length})',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: colorScheme.onSurface,
+                        Obx(
+                          () => Text(
+                            'Study Notes (${controller.notes.length})',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: colorScheme.onSurface,
+                            ),
                           ),
-                        )),
+                        ),
                       ],
                     ),
                     TextButton.icon(
                       onPressed: () => _showNoteBottomSheet(context),
                       icon: const Icon(Icons.add, size: 16),
-                      label: const Text('Add Note', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                      label: const Text(
+                        'Add Note',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       style: TextButton.styleFrom(
                         foregroundColor: colorScheme.primary,
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
                       ),
                     ),
                   ],
@@ -622,7 +666,9 @@ class LessonDetailView extends GetView<LessonController> {
                 child: Obx(() {
                   if (controller.isLoadingNotes.value) {
                     return Center(
-                      child: CircularProgressIndicator(color: colorScheme.primary),
+                      child: CircularProgressIndicator(
+                        color: colorScheme.primary,
+                      ),
                     );
                   }
                   if (controller.notes.isEmpty) {
@@ -650,19 +696,21 @@ class LessonDetailView extends GetView<LessonController> {
         final isComp = controller.isCompleted.value;
         return SafeArea(
           child: Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 20,
-              vertical: 12,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             decoration: BoxDecoration(
               color: colorScheme.surface,
               border: Border(
-                top: BorderSide(color: colorScheme.outlineVariant.withValues(alpha: 0.3), width: 1),
+                top: BorderSide(
+                  color: colorScheme.outlineVariant.withValues(alpha: 0.3),
+                  width: 1,
+                ),
               ),
             ),
             child: CommonButton(
               text: isComp ? 'Video Completed ✓' : 'Mark Video as Complete',
-              onPressed: isComp ? null : () => controller.markLessonAsComplete(),
+              onPressed: isComp
+                  ? null
+                  : () => controller.markLessonAsComplete(),
               height: 50,
               backgroundColor: isComp ? Colors.green : colorScheme.primary,
               borderRadius: 25,

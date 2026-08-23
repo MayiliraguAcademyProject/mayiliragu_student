@@ -10,14 +10,14 @@ class ApiClient {
   late final Dio dio;
   final SecureStorageService _storage = Get.find<SecureStorageService>();
   bool _isRefreshing = false;
-  final List<void Function(String token)> _retryQueue = [];
+  final List<void Function(String? newToken, dynamic error)> _retryQueue = [];
 
   ApiClient() {
     dio = Dio(
       BaseOptions(
         baseUrl: ApiConstants.baseUrl,
-        connectTimeout: const Duration(seconds: 10),
-        receiveTimeout: const Duration(seconds: 10),
+        connectTimeout: const Duration(seconds: 15),
+        receiveTimeout: const Duration(seconds: 15),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -29,18 +29,13 @@ class ApiClient {
       InterceptorsWrapper(
         onRequest: (options, handler) async {
           final token = await _storage.getAccessToken();
-          if (token != null) {
+          if (token != null && token.isNotEmpty) {
             options.headers['Authorization'] = 'Bearer $token';
           }
           return handler.next(options);
         },
         onError: (DioException e, handler) async {
-          if (e.response?.statusCode == 404) {
-            await _storage.clearAll();
-            Get.offAllNamed(Routes.LOGIN);
-            return handler.next(e);
-          }
-
+          // Handle Guest restricted mutations
           if (e.response?.statusCode == 403) {
             final resData = e.response?.data;
             if (resData is Map && resData['code'] == 'GUEST_RESTRICTED') {
@@ -49,6 +44,7 @@ class ApiClient {
             }
           }
 
+          // Handle 401 Unauthorized -> Refresh Access Token & Retry
           if (e.response?.statusCode == 401) {
             final role = await _storage.getUserRole();
             if (role == 'GUEST') {
@@ -57,17 +53,32 @@ class ApiClient {
               return handler.next(e);
             }
 
-            final requestPath = e.requestOptions.path;
-            if (requestPath != ApiConstants.login && requestPath != '/auth/refresh') {
+            final requestPath = e.requestOptions.path.toLowerCase();
+            final isAuthRoute = requestPath.contains('/auth/login') ||
+                requestPath.contains('/auth/refresh') ||
+                requestPath.contains('/auth/register') ||
+                requestPath.contains('/auth/verify-otp') ||
+                requestPath.contains('/auth/guest');
+
+            if (!isAuthRoute) {
               if (_isRefreshing) {
+                // Another request is already refreshing the token; queue this request
                 final retryCompleter = Completer<Response>();
-                _retryQueue.add((token) {
-                  e.requestOptions.headers['Authorization'] = 'Bearer $token';
-                  dio.fetch(e.requestOptions).then(
-                    (val) => retryCompleter.complete(val),
-                    onError: (err) => retryCompleter.completeError(err),
-                  );
+                _retryQueue.add((newToken, error) {
+                  if (error != null) {
+                    retryCompleter.completeError(error);
+                  } else if (newToken != null) {
+                    final newOptions = e.requestOptions;
+                    newOptions.headers['Authorization'] = 'Bearer $newToken';
+                    dio.fetch(newOptions).then(
+                      (val) => retryCompleter.complete(val),
+                      onError: (err) => retryCompleter.completeError(err),
+                    );
+                  } else {
+                    retryCompleter.completeError(e);
+                  }
                 });
+
                 try {
                   final response = await retryCompleter.future;
                   return handler.resolve(response);
@@ -88,38 +99,70 @@ class ApiClient {
 
               try {
                 final refreshToken = await _storage.getRefreshToken();
-                if (refreshToken != null) {
-                  final refreshDio = Dio(BaseOptions(baseUrl: ApiConstants.baseUrl));
-                  final refreshResponse = await refreshDio.post(
-                    '/auth/refresh',
-                    data: {'refreshToken': refreshToken},
-                  );
+                if (refreshToken == null || refreshToken.isEmpty) {
+                  _flushRetryQueue(null, e);
+                  _isRefreshing = false;
+                  await _storage.clearAll();
+                  Get.offAllNamed(Routes.LOGIN);
+                  return handler.next(e);
+                }
 
-                  if (refreshResponse.statusCode == 200) {
-                    final responseData = refreshResponse.data['data'];
-                    final newAccessToken = responseData['accessToken'];
-                    final newRefreshToken = responseData['refreshToken'];
-                    final role = await _storage.getUserRole() ?? '';
+                final refreshDio = Dio(
+                  BaseOptions(
+                    baseUrl: ApiConstants.baseUrl,
+                    connectTimeout: const Duration(seconds: 10),
+                    receiveTimeout: const Duration(seconds: 10),
+                  ),
+                );
 
+                final refreshResponse = await refreshDio.post(
+                  '/auth/refresh',
+                  data: {'refreshToken': refreshToken},
+                );
+
+                if (refreshResponse.statusCode == 200) {
+                  final dynamic body = refreshResponse.data;
+                  final dynamic responseData = (body is Map && body.containsKey('data')) ? body['data'] : body;
+
+                  final String newAccessToken = responseData['accessToken']?.toString() ?? '';
+                  final String newRefreshToken = responseData['refreshToken']?.toString() ?? refreshToken;
+                  final String userRole = await _storage.getUserRole() ?? '';
+
+                  if (newAccessToken.isNotEmpty) {
                     await _storage.saveTokens(
                       accessToken: newAccessToken,
                       refreshToken: newRefreshToken,
-                      role: role,
+                      role: userRole,
                     );
 
-                    for (final callback in _retryQueue) {
-                      callback(newAccessToken);
-                    }
-                    _retryQueue.clear();
+                    // Resume all queued requests
+                    _flushRetryQueue(newAccessToken, null);
                     _isRefreshing = false;
 
-                    e.requestOptions.headers['Authorization'] = 'Bearer $newAccessToken';
-                    final retryResponse = await dio.fetch(e.requestOptions);
-                    return handler.resolve(retryResponse);
+                    // Retry the failed original request with new token
+                    final retryOptions = e.requestOptions;
+                    retryOptions.headers['Authorization'] = 'Bearer $newAccessToken';
+                    try {
+                      final retryResponse = await dio.fetch(retryOptions);
+                      return handler.resolve(retryResponse);
+                    } catch (retryErr) {
+                      if (retryErr is DioException) {
+                        return handler.reject(retryErr);
+                      }
+                      return handler.reject(
+                        DioException(
+                          requestOptions: retryOptions,
+                          error: retryErr,
+                        ),
+                      );
+                    }
                   }
                 }
-              } catch (err) {
-                _retryQueue.clear();
+
+                // If response wasn't 200 or tokens empty
+                throw Exception('Failed to refresh token: status ${refreshResponse.statusCode}');
+              } catch (refreshErr) {
+                _flushRetryQueue(null, refreshErr);
                 _isRefreshing = false;
                 await _storage.clearAll();
                 Get.offAllNamed(Routes.LOGIN);
@@ -127,10 +170,18 @@ class ApiClient {
               }
             }
           }
+
           return handler.next(e);
         },
       ),
     );
+  }
+
+  void _flushRetryQueue(String? newToken, dynamic error) {
+    for (final callback in _retryQueue) {
+      callback(newToken, error);
+    }
+    _retryQueue.clear();
   }
 
   Future<bool> _shouldBlockGuestMutation(String path) async {
