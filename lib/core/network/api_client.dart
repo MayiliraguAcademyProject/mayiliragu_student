@@ -49,7 +49,7 @@ class ApiClient {
             final role = await _storage.getUserRole();
             if (role == 'GUEST') {
               await _storage.clearAll();
-              Get.offAllNamed(Routes.LOGIN);
+              _safeRedirectToLogin();
               return handler.next(e);
             }
 
@@ -103,7 +103,7 @@ class ApiClient {
                   _flushRetryQueue(null, e);
                   _isRefreshing = false;
                   await _storage.clearAll();
-                  Get.offAllNamed(Routes.LOGIN);
+                  _safeRedirectToLogin();
                   return handler.next(e);
                 }
 
@@ -165,7 +165,7 @@ class ApiClient {
                 _flushRetryQueue(null, refreshErr);
                 _isRefreshing = false;
                 await _storage.clearAll();
-                Get.offAllNamed(Routes.LOGIN);
+                _safeRedirectToLogin();
                 return handler.next(e);
               }
             }
@@ -182,6 +182,18 @@ class ApiClient {
       callback(newToken, error);
     }
     _retryQueue.clear();
+  }
+
+  void _safeRedirectToLogin() {
+    final current = Get.currentRoute;
+    if (current != Routes.LOGIN &&
+        current != Routes.REGISTER &&
+        current != Routes.FORGOT_PASSWORD &&
+        current != Routes.OTP_VERIFICATION &&
+        current != Routes.ONBOARDING &&
+        current != Routes.SPLASH) {
+      Get.offAllNamed(Routes.LOGIN);
+    }
   }
 
   Future<bool> _shouldBlockGuestMutation(String path) async {
