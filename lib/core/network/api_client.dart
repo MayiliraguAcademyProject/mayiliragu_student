@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide Response;
 import '../../app/routes/app_routes.dart';
 import '../constants/api_constants.dart';
@@ -96,10 +97,12 @@ class ApiClient {
               }
 
               _isRefreshing = true;
+              debugPrint('[AUTH] 401 detected on ${e.requestOptions.path}. Initiating automatic token refresh...');
 
               try {
                 final refreshToken = await _storage.getRefreshToken();
                 if (refreshToken == null || refreshToken.isEmpty) {
+                  debugPrint('[AUTH] No refresh token found. Redirecting to login.');
                   _flushRetryQueue(null, e);
                   _isRefreshing = false;
                   await _storage.clearAll();
@@ -115,6 +118,7 @@ class ApiClient {
                   ),
                 );
 
+                debugPrint('[AUTH] Sending refresh POST request to /auth/refresh...');
                 final refreshResponse = await refreshDio.post(
                   '/auth/refresh',
                   data: {'refreshToken': refreshToken},
@@ -134,6 +138,7 @@ class ApiClient {
                       refreshToken: newRefreshToken,
                       role: userRole,
                     );
+                    debugPrint('[AUTH] Token refreshed successfully! Retrying original request to ${e.requestOptions.path}...');
 
                     // Resume all queued requests
                     _flushRetryQueue(newAccessToken, null);
@@ -162,6 +167,7 @@ class ApiClient {
                 // If response wasn't 200 or tokens empty
                 throw Exception('Failed to refresh token: status ${refreshResponse.statusCode}');
               } catch (refreshErr) {
+                debugPrint('[AUTH] Token refresh failed: $refreshErr. Logging out user.');
                 _flushRetryQueue(null, refreshErr);
                 _isRefreshing = false;
                 await _storage.clearAll();
