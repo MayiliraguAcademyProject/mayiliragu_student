@@ -298,7 +298,9 @@ class LessonDetailView extends GetView<LessonController> {
     return GetBuilder<LessonController>(
       builder: (controller) {
         if (controller.youtubeController != null) {
-          final currentKey = controller.activeVideoId.value ?? controller.youtubeController!.initialVideoId;
+          final currentKey =
+              controller.activeVideoId.value ??
+              controller.youtubeController!.initialVideoId;
           return YoutubePlayerBuilder(
             key: ValueKey('yt_builder_$currentKey'),
             player: YoutubePlayer(
@@ -324,15 +326,16 @@ class LessonDetailView extends GetView<LessonController> {
               final playerWithOverlay = Stack(
                 children: [
                   player,
+
                   // Cover the YouTube watermark (bottom-right corner)
-                 
                 ],
               );
               return _buildScaffold(context, controller, playerWithOverlay);
             },
           );
         } else {
-          final Widget betterPlayerWidget = controller.betterPlayerController != null
+          final Widget betterPlayerWidget =
+              controller.betterPlayerController != null
               ? AspectRatio(
                   aspectRatio: 16 / 9,
                   child: BetterPlayer(
@@ -342,9 +345,7 @@ class LessonDetailView extends GetView<LessonController> {
               : const AspectRatio(
                   aspectRatio: 16 / 9,
                   child: Center(
-                    child: CircularProgressIndicator(
-                      color: Color(0xFF0D47A1),
-                    ),
+                    child: CircularProgressIndicator(color: Color(0xFF0D47A1)),
                   ),
                 );
           return _buildScaffold(context, controller, betterPlayerWidget);
@@ -353,7 +354,11 @@ class LessonDetailView extends GetView<LessonController> {
     );
   }
 
-  Widget _buildScaffold(BuildContext context, LessonController controller, Widget playerWidget) {
+  Widget _buildScaffold(
+    BuildContext context,
+    LessonController controller,
+    Widget playerWidget,
+  ) {
     final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(

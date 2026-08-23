@@ -307,26 +307,20 @@ class LessonController extends GetxController {
         final totalDuration = youtubeController!.metadata.duration.inSeconds;
 
         if (currentPos > 0) {
-          // Restrict seeking forward beyond watched limit
-          if (currentPos > maxWatchedSeconds + 3) {
-            youtubeController!.seekTo(Duration(seconds: maxWatchedSeconds));
-            AppToast.error('Skipping forward is restricted');
-          } else {
-            if (currentPos > maxWatchedSeconds) {
-              maxWatchedSeconds = currentPos;
-            }
-            _latestPosition = currentPos;
+          if (currentPos > maxWatchedSeconds) {
+            maxWatchedSeconds = currentPos;
+          }
+          _latestPosition = currentPos;
 
-            // Auto completion at 90%
-            if (!isCompleted.value &&
-                totalDuration > 0 &&
-                currentPos >= (totalDuration * 0.9)) {
-              isCompleted.value = true;
-              _syncProgress(currentPos);
-              _handleAutoAdvance();
-            } else if ((currentPos - _lastSyncedPosition).abs() >= 30) {
-              _syncProgress(currentPos);
-            }
+          // Auto completion at 90%
+          if (!isCompleted.value &&
+              totalDuration > 0 &&
+              currentPos >= (totalDuration * 0.9)) {
+            isCompleted.value = true;
+            _syncProgress(currentPos);
+            _handleAutoAdvance();
+          } else if ((currentPos - _lastSyncedPosition).abs() >= 30) {
+            _syncProgress(currentPos);
           }
         }
       });
@@ -446,28 +440,20 @@ class LessonController extends GetxController {
               videoPlayerController.value.duration?.inSeconds ?? 0;
 
           if (currentPos > 0) {
-            // Restrict seeking forward beyond watched limit
-            if (currentPos > maxWatchedSeconds + 3) {
-              betterPlayerController!.seekTo(
-                Duration(seconds: maxWatchedSeconds),
-              );
-              AppToast.error('Skipping forward is restricted');
-            } else {
-              if (currentPos > maxWatchedSeconds) {
-                maxWatchedSeconds = currentPos;
-              }
-              _latestPosition = currentPos;
+            if (currentPos > maxWatchedSeconds) {
+              maxWatchedSeconds = currentPos;
+            }
+            _latestPosition = currentPos;
 
-              // Auto completion at 90%
-              if (!isCompleted.value &&
-                  totalDuration > 0 &&
-                  currentPos >= (totalDuration * 0.9)) {
-                isCompleted.value = true;
-                _syncProgress(currentPos);
-                _handleAutoAdvance();
-              } else if ((currentPos - _lastSyncedPosition).abs() >= 30) {
-                _syncProgress(currentPos);
-              }
+            // Auto completion at 90%
+            if (!isCompleted.value &&
+                totalDuration > 0 &&
+                currentPos >= (totalDuration * 0.9)) {
+              isCompleted.value = true;
+              _syncProgress(currentPos);
+              _handleAutoAdvance();
+            } else if ((currentPos - _lastSyncedPosition).abs() >= 30) {
+              _syncProgress(currentPos);
             }
           }
         }
@@ -616,20 +602,12 @@ class LessonController extends GetxController {
         if (videoPlayerController != null) {
           final currentPos = videoPlayerController.value.position.inSeconds;
           final targetPos = currentPos + seconds;
-          if (targetPos > maxWatchedSeconds + 3) {
-            AppToast.error('Skipping forward is restricted');
-          } else {
-            betterPlayerController!.seekTo(Duration(seconds: targetPos));
-          }
+          betterPlayerController!.seekTo(Duration(seconds: targetPos));
         }
       } else if (youtubeController != null) {
         final currentPos = youtubeController!.value.position.inSeconds;
         final targetPos = currentPos + seconds;
-        if (targetPos > maxWatchedSeconds + 3) {
-          AppToast.error('Skipping forward is restricted');
-        } else {
-          youtubeController!.seekTo(Duration(seconds: targetPos));
-        }
+        youtubeController!.seekTo(Duration(seconds: targetPos));
       }
     }
   }

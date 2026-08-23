@@ -70,6 +70,8 @@ class BannerModel {
   final String? linkId;
   final String? linkType;
   final List<String>? curriculumJson;
+  final String? curriculumPdfUrl;
+  final String? curriculumPdfName;
   final String? planDescription;
   final double? price;
   final double? offerPrice;
@@ -90,6 +92,8 @@ class BannerModel {
     this.linkId,
     this.linkType,
     this.curriculumJson,
+    this.curriculumPdfUrl,
+    this.curriculumPdfName,
     this.planDescription,
     this.price,
     this.offerPrice,
@@ -129,6 +133,8 @@ class BannerModel {
       linkId: json['linkId']?.toString(),
       linkType: json['linkType']?.toString(),
       curriculumJson: curriculum,
+      curriculumPdfUrl: json['curriculumPdfUrl']?.toString() ?? json['curriculum_pdf_url']?.toString(),
+      curriculumPdfName: json['curriculumPdfName']?.toString() ?? json['curriculum_pdf_name']?.toString(),
       planDescription: json['planDescription']?.toString(),
       price: json['price'] is num 
           ? (json['price'] as num).toDouble() 

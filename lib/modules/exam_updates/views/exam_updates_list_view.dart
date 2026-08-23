@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:url_launcher/url_launcher.dart';
-import '../../../core/constants/api_constants.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/models/exam_update_model.dart';
 import '../../../core/utils/toast_helper.dart';
+import '../../../shared/widgets/pdf_viewer_screen.dart';
 import '../controllers/exam_updates_controller.dart';
 
 class ExamUpdatesListView extends GetView<ExamUpdatesController> {
@@ -99,7 +98,7 @@ class ExamUpdatesListView extends GetView<ExamUpdatesController> {
         ],
       ),
       child: InkWell(
-        onTap: () => _launchPdf(update.pdfUrl),
+        onTap: () => _openPdf(update.pdfUrl, update.title),
         borderRadius: BorderRadius.circular(20),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -169,29 +168,18 @@ class ExamUpdatesListView extends GetView<ExamUpdatesController> {
     );
   }
 
-  Future<void> _launchPdf(String pdfUrl) async {
-    if (pdfUrl.isEmpty) {
+  void _openPdf(String pdfUrl, String title) {
+    if (pdfUrl.trim().isEmpty) {
       AppToast.error('PDF URL is empty.');
       return;
     }
 
-    String fullUrl = pdfUrl;
-    if (!pdfUrl.startsWith('http://') && !pdfUrl.startsWith('https://')) {
-      final base = ApiConstants.baseUrl.replaceAll('/api', '');
-      fullUrl = '$base$pdfUrl';
-    }
-
-    final uri = Uri.parse(fullUrl);
-    try {
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      } else {
-        AppToast.error('Could not open PDF file.');
-      }
-    } catch (e) {
-      Get.log('Error launching S3 PDF: $e');
-      AppToast.error('Could not open PDF file.');
-    }
+    Get.to(
+      () => PdfViewerScreen(
+        pdfUrl: pdfUrl,
+        title: title,
+      ),
+    );
   }
 
   String _formatDate(DateTime date) {
