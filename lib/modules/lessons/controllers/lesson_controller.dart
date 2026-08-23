@@ -1,15 +1,16 @@
 import 'dart:async';
+import 'package:dio/dio.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:better_player_enhanced/better_player.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
-import 'package:flutter/material.dart';
-import 'package:file_picker/file_picker.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/api_constants.dart';
+import '../../../core/constants/app_colors.dart';
 import '../../../core/services/secure_storage_service.dart';
 import '../../../core/services/video_download_service.dart';
-import '../../../core/utils/toast_helper.dart';
 import '../../../core/utils/error_handler.dart';
+import '../../../core/utils/toast_helper.dart';
 import '../repositories/lesson_repository.dart';
 import '../repositories/notes_repository.dart';
 
@@ -125,7 +126,7 @@ class LessonController extends GetxController {
               'downloadEnabled': data['downloadEnabled'] ?? false,
               'isLocked': data['isLocked'] ?? false,
               'progress': data['progress'],
-            }
+            },
           ];
         } else {
           videos.value = [];
@@ -149,10 +150,25 @@ class LessonController extends GetxController {
         errorMessage.value = 'Failed to load lesson details';
       }
     } catch (e) {
-      errorMessage.value = AppErrorHandler.getErrorMessage(
-        e,
-        defaultMessage: 'Failed to load lesson details',
-      );
+      if (e is DioException) {
+        final resData = e.response?.data;
+        if (resData is Map && resData['message'] != null) {
+          errorMessage.value = resData['message'].toString();
+        } else if (e.response?.statusCode == 403) {
+          errorMessage.value =
+              'Access denied. Enrollment required to access this lesson.';
+        } else {
+          errorMessage.value = AppErrorHandler.getErrorMessage(
+            e,
+            defaultMessage: 'Failed to load lesson details. Please try again.',
+          );
+        }
+      } else {
+        errorMessage.value = AppErrorHandler.getErrorMessage(
+          e,
+          defaultMessage: 'Failed to load lesson details. Please try again.',
+        );
+      }
     } finally {
       isLoading.value = false;
     }
@@ -160,7 +176,10 @@ class LessonController extends GetxController {
 
   Future<void> selectVideo(int index) async {
     if (index < 0 || index >= videos.length) return;
-    if (index == currentVideoIndex.value && (betterPlayerController != null || youtubeController != null)) return;
+    if (index == currentVideoIndex.value &&
+        (betterPlayerController != null || youtubeController != null)) {
+      return;
+    }
 
     // Check lock status
     final video = videos[index];
@@ -183,7 +202,8 @@ class LessonController extends GetxController {
     activeVideoId.value = video['id']?.toString();
 
     int startSeconds = 0;
-    if (video['progress'] != null && video['progress']['watchedSeconds'] != null) {
+    if (video['progress'] != null &&
+        video['progress']['watchedSeconds'] != null) {
       startSeconds = video['progress']['watchedSeconds'] as int;
       _lastSyncedPosition = startSeconds;
     }
@@ -197,7 +217,11 @@ class LessonController extends GetxController {
     }
 
     final driveFileId = video['driveFileId']?.toString() ?? '';
-    await _initializeVideoPlayer(driveFileId, startSeconds: startSeconds, autoPlay: autoPlay);
+    await _initializeVideoPlayer(
+      driveFileId,
+      startSeconds: startSeconds,
+      autoPlay: autoPlay,
+    );
   }
 
   bool get isVideoPlayerSupported =>
@@ -264,7 +288,7 @@ class LessonController extends GetxController {
       youtubeController = YoutubePlayerController(
         initialVideoId: youtubeId,
         flags: YoutubePlayerFlags(
-          autoPlay: false,
+          autoPlay: autoPlay,
           mute: false,
           disableDragSeek: false,
           loop: false,
@@ -272,9 +296,7 @@ class LessonController extends GetxController {
           forceHD: true,
           enableCaption: false,
           startAt: startSeconds,
-        
           showLiveFullscreenButton: false,
-         
           hideThumbnail: true,
         ),
       );
@@ -282,6 +304,8 @@ class LessonController extends GetxController {
       _youtubeSeekTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
         if (youtubeController == null) return;
         final currentPos = youtubeController!.value.position.inSeconds;
+        final totalDuration = youtubeController!.metadata.duration.inSeconds;
+
         if (currentPos > 0) {
           // Restrict seeking forward beyond watched limit
           if (currentPos > maxWatchedSeconds + 3) {
@@ -292,7 +316,15 @@ class LessonController extends GetxController {
               maxWatchedSeconds = currentPos;
             }
             _latestPosition = currentPos;
-            if ((currentPos - _lastSyncedPosition).abs() >= 30) {
+
+            // Auto completion at 90%
+            if (!isCompleted.value &&
+                totalDuration > 0 &&
+                currentPos >= (totalDuration * 0.9)) {
+              isCompleted.value = true;
+              _syncProgress(currentPos);
+              _handleAutoAdvance();
+            } else if ((currentPos - _lastSyncedPosition).abs() >= 30) {
               _syncProgress(currentPos);
             }
           }
@@ -303,8 +335,10 @@ class LessonController extends GetxController {
         if (youtubeController == null) return;
         if (youtubeController!.value.playerState == PlayerState.ended) {
           if (!isCompleted.value) {
-            markLessonAsComplete();
+            isCompleted.value = true;
+            _syncProgress(_latestPosition);
           }
+          _handleAutoAdvance();
         }
       });
 
@@ -316,7 +350,9 @@ class LessonController extends GetxController {
     final BetterPlayerDataSource dataSource;
 
     if (isDownloadedOffline) {
-      final localPath = downloadService.getLocalVideoPath(_currentLessonId ?? '');
+      final localPath = downloadService.getLocalVideoPath(
+        _currentLessonId ?? '',
+      );
       dataSource = BetterPlayerDataSource(
         BetterPlayerDataSourceType.file,
         localPath!,
@@ -348,8 +384,11 @@ class LessonController extends GetxController {
 
         if (isGoogleDriveUrl || !driveFileId.startsWith('http')) {
           final token = await Get.find<SecureStorageService>().getAccessToken();
-          final tokenQuery = (token != null && token.isNotEmpty) ? '?token=$token' : '';
-          videoUrl = '${ApiConstants.baseUrl}/lessons/stream/$extractedId$tokenQuery';
+          final tokenQuery = (token != null && token.isNotEmpty)
+              ? '?token=$token'
+              : '';
+          videoUrl =
+              '${ApiConstants.baseUrl}/lessons/stream/$extractedId$tokenQuery';
           if (token != null) {
             headers = {'Authorization': 'Bearer $token'};
           }
@@ -399,9 +438,12 @@ class LessonController extends GetxController {
         }
       }
       if (event.betterPlayerEventType == BetterPlayerEventType.progress) {
-        final videoPlayerController = betterPlayerController!.videoPlayerController;
+        final videoPlayerController =
+            betterPlayerController!.videoPlayerController;
         if (videoPlayerController != null) {
           final currentPos = videoPlayerController.value.position.inSeconds;
+          final totalDuration =
+              videoPlayerController.value.duration?.inSeconds ?? 0;
 
           if (currentPos > 0) {
             // Restrict seeking forward beyond watched limit
@@ -415,7 +457,15 @@ class LessonController extends GetxController {
                 maxWatchedSeconds = currentPos;
               }
               _latestPosition = currentPos;
-              if ((currentPos - _lastSyncedPosition).abs() >= 30) {
+
+              // Auto completion at 90%
+              if (!isCompleted.value &&
+                  totalDuration > 0 &&
+                  currentPos >= (totalDuration * 0.9)) {
+                isCompleted.value = true;
+                _syncProgress(currentPos);
+                _handleAutoAdvance();
+              } else if ((currentPos - _lastSyncedPosition).abs() >= 30) {
                 _syncProgress(currentPos);
               }
             }
@@ -538,26 +588,48 @@ class LessonController extends GetxController {
   }
 
   void seekBackward([int seconds = 10]) {
-    if (isVideoPlayerSupported && betterPlayerController != null) {
-      final videoPlayerController = betterPlayerController!.videoPlayerController;
-      if (videoPlayerController != null) {
-        final currentPos = videoPlayerController.value.position.inSeconds;
-        final targetPos = (currentPos - seconds).clamp(
-          0,
-          videoPlayerController.value.duration?.inSeconds ?? currentPos,
-        );
-        betterPlayerController!.seekTo(Duration(seconds: targetPos));
+    if (isVideoPlayerSupported) {
+      if (betterPlayerController != null) {
+        final videoPlayerController =
+            betterPlayerController!.videoPlayerController;
+        if (videoPlayerController != null) {
+          final currentPos = videoPlayerController.value.position.inSeconds;
+          final targetPos = (currentPos - seconds).clamp(
+            0,
+            videoPlayerController.value.duration?.inSeconds ?? currentPos,
+          );
+          betterPlayerController!.seekTo(Duration(seconds: targetPos));
+        }
+      } else if (youtubeController != null) {
+        final currentPos = youtubeController!.value.position.inSeconds;
+        final targetPos = (currentPos - seconds).clamp(0, double.maxFinite.toInt());
+        youtubeController!.seekTo(Duration(seconds: targetPos));
       }
     }
   }
 
   void seekForward([int seconds = 10]) {
-    if (isVideoPlayerSupported && betterPlayerController != null) {
-      final videoPlayerController = betterPlayerController!.videoPlayerController;
-      if (videoPlayerController != null) {
-        final currentPos = videoPlayerController.value.position.inSeconds;
+    if (isVideoPlayerSupported) {
+      if (betterPlayerController != null) {
+        final videoPlayerController =
+            betterPlayerController!.videoPlayerController;
+        if (videoPlayerController != null) {
+          final currentPos = videoPlayerController.value.position.inSeconds;
+          final targetPos = currentPos + seconds;
+          if (targetPos > maxWatchedSeconds + 3) {
+            AppToast.error('Skipping forward is restricted');
+          } else {
+            betterPlayerController!.seekTo(Duration(seconds: targetPos));
+          }
+        }
+      } else if (youtubeController != null) {
+        final currentPos = youtubeController!.value.position.inSeconds;
         final targetPos = currentPos + seconds;
-        betterPlayerController!.seekTo(Duration(seconds: targetPos));
+        if (targetPos > maxWatchedSeconds + 3) {
+          AppToast.error('Skipping forward is restricted');
+        } else {
+          youtubeController!.seekTo(Duration(seconds: targetPos));
+        }
       }
     }
   }
@@ -575,7 +647,12 @@ class LessonController extends GetxController {
         _handleAutoAdvance();
       }
     } catch (e) {
-      AppToast.error(AppErrorHandler.getErrorMessage(e, defaultMessage: 'Failed to mark video as complete'));
+      AppToast.error(
+        AppErrorHandler.getErrorMessage(
+          e,
+          defaultMessage: 'Failed to mark video as complete',
+        ),
+      );
     }
   }
 
@@ -598,7 +675,9 @@ class LessonController extends GetxController {
     final customPath = await secureStorage.getDownloadDirPath();
 
     if (customPath == null || customPath.isEmpty) {
-      final bool picked = await _promptAndSelectDownloadDirectory(downloadService);
+      final bool picked = await _promptAndSelectDownloadDirectory(
+        downloadService,
+      );
       if (!picked) {
         AppToast.error('Download cancelled. Please select a download folder.');
         return;
@@ -633,8 +712,11 @@ class LessonController extends GetxController {
 
     if (isGoogleDriveUrl || !driveFileId.startsWith('http')) {
       final token = await Get.find<SecureStorageService>().getAccessToken();
-      final tokenQuery = (token != null && token.isNotEmpty) ? '?token=$token' : '';
-      videoUrl = '${ApiConstants.baseUrl}/lessons/stream/$extractedId$tokenQuery';
+      final tokenQuery = (token != null && token.isNotEmpty)
+          ? '?token=$token'
+          : '';
+      videoUrl =
+          '${ApiConstants.baseUrl}/lessons/stream/$extractedId$tokenQuery';
       if (token != null) {
         headers = {'Authorization': 'Bearer $token'};
       }
@@ -648,12 +730,14 @@ class LessonController extends GetxController {
       headers: headers,
       onComplete: () async {
         try {
-          await _repository.logVideoDownload(lessonId: _currentLessonId, videoId: vidId);
+          await _repository.logVideoDownload(
+            lessonId: _currentLessonId,
+            videoId: vidId,
+          );
         } catch (e) {
           debugPrint('Failed to log video download on backend: $e');
         }
         AppToast.success('Video downloaded successfully for offline viewing!');
-        // Reload player with offline file source
         int startSecs = 0;
         if (betterPlayerController != null) {
           startSecs =
@@ -671,7 +755,12 @@ class LessonController extends GetxController {
         update();
       },
       onError: (err) {
-        AppToast.error(AppErrorHandler.getErrorMessage(err, defaultMessage: 'Failed to download video'));
+        AppToast.error(
+          AppErrorHandler.getErrorMessage(
+            err,
+            defaultMessage: 'Failed to download video',
+          ),
+        );
       },
     );
   }
@@ -683,8 +772,7 @@ class LessonController extends GetxController {
     final downloadService = Get.find<VideoDownloadService>();
     await downloadService.deleteVideo(vidId);
     AppToast.info('Local offline video deleted successfully.');
-    // Reload player with network source
-    final driveFileId = lessonData.value!['driveFileId']?.toString() ?? '';
+    final driveFileId = video['driveFileId']?.toString() ?? '';
     int startSecs = 0;
     if (betterPlayerController != null) {
       startSecs =
@@ -693,7 +781,7 @@ class LessonController extends GetxController {
               ?.value
               .position
               .inSeconds ??
-          0;
+              0;
     } else if (youtubeController != null) {
       startSecs = youtubeController?.value.position.inSeconds ?? 0;
     }
