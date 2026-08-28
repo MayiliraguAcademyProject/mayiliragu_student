@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/api_constants.dart';
+import '../../../../shared/widgets/pdf_viewer_screen.dart';
 import '../controllers/study_materials_controller.dart';
 import '../widgets/version_item.dart';
-import '../../../../core/utils/toast_helper.dart';
 
 class StudyMaterialDetailView extends StatefulWidget {
   final String materialId;
@@ -35,22 +33,18 @@ class _StudyMaterialDetailViewState extends State<StudyMaterialDetailView> {
     return '${size.toStringAsFixed(1)} ${suffixes[i]}';
   }
 
-  Future<void> _handleDownload(String id) async {
+  Future<void> _handleDownload(String id, {String? title}) async {
     final controller = Get.find<StudyMaterialsController>();
     final result = await controller.downloadMaterial(id);
     if (result != null) {
-      final fileUrl = result['fileUrl'] as String;
-      String fullUrl = fileUrl;
-      if (!fileUrl.startsWith('http://') && !fileUrl.startsWith('https://')) {
-        // Dynamically get domain base from active ApiConstants.baseUrl
-        final base = ApiConstants.baseUrl.replaceAll('/api', '');
-        fullUrl = '$base$fileUrl';
-      }
-      final uri = Uri.parse(fullUrl);
-      try {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      } catch (e) {
-        AppToast.error('Could not launch download URL', title: 'Error');
+      final fileUrl = result['fileUrl'] as String?;
+      if (fileUrl != null && fileUrl.isNotEmpty) {
+        Get.to(
+          () => PdfViewerScreen(
+            pdfUrl: fileUrl,
+            title: title ?? controller.currentMaterial.value?.title ?? 'Study Material',
+          ),
+        );
       }
     }
   }

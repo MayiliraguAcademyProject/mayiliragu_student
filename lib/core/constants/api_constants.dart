@@ -29,5 +29,7 @@ class ApiConstants {
   static const liveStreams = '/live-streams';
   static const testimonials = '/testimonials';
   static const examUpdates = '/exam-updates';
+  static const testBatchesStudent = '/test-batches/student';
+  static String testBatchStudentDetail(String id) => '/test-batches/student/$id';
 }
 

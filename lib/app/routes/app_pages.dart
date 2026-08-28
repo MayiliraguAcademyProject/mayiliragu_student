@@ -51,6 +51,9 @@ import '../../modules/testimonials/bindings/testimonials_binding.dart';
 import '../../modules/testimonials/views/testimonials_list_view.dart';
 import '../../modules/exam_updates/bindings/exam_updates_binding.dart';
 import '../../modules/exam_updates/views/exam_updates_list_view.dart';
+import '../../modules/test_batches/bindings/test_batches_binding.dart';
+import '../../modules/test_batches/views/test_batches_list_view.dart';
+import '../../modules/test_batches/views/test_batch_detail_view.dart';
 import 'app_routes.dart';
 
 class AppPages {
@@ -201,6 +204,16 @@ class AppPages {
       name: Routes.EXAM_UPDATES,
       page: () => const ExamUpdatesListView(),
       binding: ExamUpdatesBinding(),
+    ),
+    GetPage(
+      name: Routes.TEST_BATCHES,
+      page: () => const TestBatchesListView(),
+      binding: TestBatchesBinding(),
+    ),
+    GetPage(
+      name: Routes.TEST_BATCH_DETAIL,
+      page: () => const TestBatchDetailView(),
+      binding: TestBatchesBinding(),
     ),
   ];
 }
