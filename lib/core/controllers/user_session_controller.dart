@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../enums/user_role.dart';
 import '../network/api_client.dart';
+import '../services/secure_storage_service.dart';
 import '../../shared/models/student_profile_model.dart';
 
 class UserSessionController extends GetxController {
@@ -11,6 +12,14 @@ class UserSessionController extends GetxController {
 
   Future<void> loadSession() async {
     try {
+      final storage = Get.find<SecureStorageService>();
+      final token = await storage.getAccessToken();
+      if (token == null || token.isEmpty) {
+        studentProfile.value = null;
+        isPremium.value = false;
+        return;
+      }
+
       isLoading.value = true;
       final apiClient = Get.find<ApiClient>();
       

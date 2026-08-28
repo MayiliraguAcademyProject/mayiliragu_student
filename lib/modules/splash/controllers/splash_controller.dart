@@ -12,6 +12,10 @@ class SplashController extends GetxController {
   final SecureStorageService _storage = Get.find<SecureStorageService>();
   final AppConfigService _configService = Get.find<AppConfigService>();
 
+  final Upgrader upgrader = Upgrader(
+    durationUntilAlertAgain: Duration.zero,
+  );
+
   final versionText = 'Version ...'.obs;
 
   @override
@@ -22,7 +26,7 @@ class SplashController extends GetxController {
 
   Future<void> _initializeApp() async {
     // 1. Get installed app version info
-    String installedVersion = '1.0.0';
+    String installedVersion = '1.0.2';
     try {
       final PackageInfo packageInfo = await PackageInfo.fromPlatform();
       installedVersion = packageInfo.version;
@@ -33,7 +37,6 @@ class SplashController extends GetxController {
 
     // 2. Upgrader store check (Play Store / App Store)
     try {
-      final upgrader = Upgrader();
       await upgrader.initialize();
       if (upgrader.isUpdateAvailable()) {
         Get.log('Upgrader: Update is available. Halting navigation to force update.');

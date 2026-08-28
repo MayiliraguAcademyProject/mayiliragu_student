@@ -10,7 +10,7 @@ class SplashView extends GetView<SplashController> {
   @override
   Widget build(BuildContext context) {
     return UpgradeAlert(
-      upgrader: Upgrader(),
+      upgrader: controller.upgrader,
       showIgnore: false,
       showLater: false,
       barrierDismissible: false,

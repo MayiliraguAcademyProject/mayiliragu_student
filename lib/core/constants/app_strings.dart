@@ -4,7 +4,7 @@ class AppStrings {
   // App Metadata & Branding
   static const String appName = 'Mayiliragu Academy';
   static const String appTagline = 'Learn, Practice, Excel';
-  static const String appVersion = 'v1.0.0';
+  static const String appVersion = 'v1.0.2';
 
   // Navigation Tabs
   static const String tabHome = 'Home';
@@ -211,4 +211,15 @@ class AppStrings {
   static const String examUpdates = 'Exam Updates';
   static const String noExamUpdates = 'No exam updates available.';
   static const String failedToLoadExamUpdates = 'Failed to load exam updates.';
+
+  // Test Batches
+  static const String testBatches = 'Test Batches';
+  static const String testBatch = 'Test Batch';
+  static const String noTestBatches = 'No test batches available for your stream.';
+  static const String failedToLoadTestBatches = 'Failed to load test batches.';
+  static const String schedule = 'Schedule';
+  static const String questions = 'Questions';
+  static const String omrSheet = 'OMR Sheet';
+  static const String viewPdf = 'View PDF';
+  static const String downloadPdf = 'Download PDF';
 }

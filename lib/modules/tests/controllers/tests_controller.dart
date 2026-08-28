@@ -6,18 +6,44 @@ import '../models/test_model.dart';
 import '../models/category_model.dart';
 import '../repositories/tests_repository.dart';
 
-enum FilterTab { topicWise, subjectWise }
+enum TestMode { subjectWise, testSeries }
 
 class TestsController extends GetxController {
   final TestsRepository _repository;
 
   TestsController(this._repository);
 
-  final isLoading = false.obs;
-  final testsList = <TestModel>[].obs;
-  final selectedCategory = ''.obs; // Loaded dynamically
-  final activeTab = FilterTab.topicWise.obs; // Default: Topic Wise
-  final errorMessage = ''.obs;
+  // Active Tab Mode
+  final activeTestMode = TestMode.subjectWise.obs;
+
+  // Separate observable test lists
+  final subjectWiseTests = <TestModel>[].obs;
+  final testSeriesTests = <TestModel>[].obs;
+
+  // Separate loading & error observables
+  final isLoadingSubjectWise = false.obs;
+  final isLoadingTestSeries = false.obs;
+  final errorSubjectWise = ''.obs;
+  final errorTestSeries = ''.obs;
+
+  // General loading property for backward compatibility
+  bool get isLoading => activeTestMode.value == TestMode.subjectWise
+      ? isLoadingSubjectWise.value
+      : isLoadingTestSeries.value;
+
+  String get errorMessage => activeTestMode.value == TestMode.subjectWise
+      ? errorSubjectWise.value
+      : errorTestSeries.value;
+
+  // Subject-Wise category and sub-filters
+  final selectedCategory = 'all'.obs;
+  final selectedSubFilter = 'all'.obs;
+  final selectedDifficulty = 'all'.obs; // 'all' | 'EASY' | 'MEDIUM' | 'HARD'
+
+  // Folder-like hierarchy navigation
+  final selectedFolderCategory = ''.obs; // ID of active category folder ('': root level)
+  final selectedFolderSubject = ''.obs;  // ID of active subject folder ('': category level)
+  final selectedFolderTopic = ''.obs;    // ID of active topic folder ('': subject level)
 
   // Search query
   final searchQuery = ''.obs;
@@ -25,13 +51,23 @@ class TestsController extends GetxController {
   // Human-readable mapping configs loaded dynamically
   final subjectNames = <String, String>{}.obs;
   final topicNames = <String, String>{}.obs;
-
   final categories = <CategoryModel>[].obs;
 
   @override
   void onInit() {
     super.onInit();
-    fetchCategories().then((_) => fetchTests());
+    fetchCategories().then((_) {
+      fetchSubjectWiseTests();
+      fetchTestSeriesTests();
+    });
+  }
+
+  Future<void> fetchTests() async {
+    await fetchCategories();
+    await Future.wait([
+      fetchSubjectWiseTests(),
+      fetchTestSeriesTests(),
+    ]);
   }
 
   Future<void> fetchCategories() async {
@@ -39,17 +75,17 @@ class TestsController extends GetxController {
       final response = await _repository.getCategories();
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data['data'] ?? [];
-        
+
         final List<CategoryModel> loadedCategories = [
           CategoryModel(
             id: 'all',
-            name: 'All',
+            name: 'All Subjects',
             description: 'All Categories',
             subjects: [],
           ),
           ...data.map((item) => CategoryModel.fromJson(item)),
         ];
-            
+
         final Map<String, String> loadedSubjects = {};
         final Map<String, String> loadedTopics = {};
 
@@ -69,104 +105,250 @@ class TestsController extends GetxController {
         categories.assignAll(loadedCategories);
         subjectNames.assignAll(loadedSubjects);
         topicNames.assignAll(loadedTopics);
-        
-        if (categories.isNotEmpty && (selectedCategory.value.isEmpty || !categories.any((c) => c.id == selectedCategory.value))) {
-          selectedCategory.value = categories.first.id;
+
+        if (categories.isNotEmpty &&
+            (selectedCategory.value.isEmpty ||
+                !categories.any((c) => c.id == selectedCategory.value))) {
+          final defaultCat = categories.firstWhere((c) => c.id != 'all',
+              orElse: () => categories.first);
+          selectedCategory.value = defaultCat.id;
         }
       }
     } catch (e) {
-      errorMessage.value = AppErrorHandler.getErrorMessage(e);
+      errorSubjectWise.value = AppErrorHandler.getErrorMessage(e);
     }
   }
 
-  Future<void> fetchTests() async {
+  Future<void> clearImageCache() async {
     try {
-      // Clear image cache to refresh modified question assets
       await DefaultCacheManager().emptyCache();
       PaintingBinding.instance.imageCache.clear();
       PaintingBinding.instance.imageCache.clearLiveImages();
     } catch (_) {}
+  }
+
+  Future<void> fetchSubjectWiseTests() async {
+    await clearImageCache();
 
     try {
-      isLoading.value = true;
-      errorMessage.value = '';
-      
-      final response = await _repository.getTests(categoryId: selectedCategory.value);
-      
+      isLoadingSubjectWise.value = true;
+      errorSubjectWise.value = '';
+
+      final response = await _repository.getTests(
+        testMode: 'SUBJECT_WISE',
+      );
+
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data['data'] ?? [];
-        final List<TestModel> loadedTests = data.map((item) => TestModel.fromJson(item)).toList();
-        testsList.assignAll(loadedTests);
+        final List<TestModel> loadedTests =
+            data.map((item) => TestModel.fromJson(item)).toList();
+        subjectWiseTests.assignAll(loadedTests);
       } else {
-        errorMessage.value = 'Failed to load tests';
+        errorSubjectWise.value = 'Failed to load subject-wise practice tests';
       }
     } catch (e) {
-      errorMessage.value = AppErrorHandler.getErrorMessage(e);
+      errorSubjectWise.value = AppErrorHandler.getErrorMessage(e);
     } finally {
-      isLoading.value = false;
+      isLoadingSubjectWise.value = false;
     }
+  }
+
+  Future<void> fetchTestSeriesTests() async {
+    await clearImageCache();
+
+    try {
+      isLoadingTestSeries.value = true;
+      errorTestSeries.value = '';
+
+      final response = await _repository.getTests(
+        testMode: 'TEST_SERIES',
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data['data'] ?? [];
+        final List<TestModel> loadedTests =
+            data.map((item) => TestModel.fromJson(item)).toList();
+        testSeriesTests.assignAll(loadedTests);
+      } else {
+        errorTestSeries.value = 'Failed to load test series mocks';
+      }
+    } catch (e) {
+      errorTestSeries.value = AppErrorHandler.getErrorMessage(e);
+    } finally {
+      isLoadingTestSeries.value = false;
+    }
+  }
+
+  Future<void> refreshActiveMode() async {
+    if (activeTestMode.value == TestMode.subjectWise) {
+      await fetchSubjectWiseTests();
+    } else {
+      await fetchTestSeriesTests();
+    }
+  }
+
+  void switchMode(TestMode mode) {
+    activeTestMode.value = mode;
+    if (mode == TestMode.subjectWise && subjectWiseTests.isEmpty) {
+      fetchSubjectWiseTests();
+    } else if (mode == TestMode.testSeries && testSeriesTests.isEmpty) {
+      fetchTestSeriesTests();
+    }
+  }
+
+  // Folder Navigation Methods
+  int getCategoryTestCount(String categoryId) {
+    if (categoryId == 'all') {
+      return subjectWiseTests.length;
+    }
+    return subjectWiseTests.where((t) => t.categoryId == categoryId).length;
+  }
+
+  int getSubjectTestCount(String subjectId) {
+    return subjectWiseTests.where((t) => t.subjectId == subjectId).length;
+  }
+
+  int getTopicTestCount(String topicId) {
+    return subjectWiseTests.where((t) => t.topicId == topicId).length;
+  }
+
+  void openCategoryFolder(String categoryId) {
+    selectedFolderCategory.value = categoryId;
+    selectedFolderSubject.value = '';
+    selectedFolderTopic.value = '';
+  }
+
+  void openSubjectFolder(String subjectId) {
+    selectedFolderSubject.value = subjectId;
+    selectedFolderTopic.value = '';
+  }
+
+  void openTopicFolder(String topicId) {
+    selectedFolderTopic.value = topicId;
+  }
+
+  void navigateFolderBack() {
+    if (selectedFolderTopic.value.isNotEmpty) {
+      selectedFolderTopic.value = '';
+    } else if (selectedFolderSubject.value.isNotEmpty) {
+      selectedFolderSubject.value = '';
+    } else if (selectedFolderCategory.value.isNotEmpty) {
+      selectedFolderCategory.value = '';
+    }
+  }
+
+  void resetFolderNavigation() {
+    selectedFolderCategory.value = '';
+    selectedFolderSubject.value = '';
+    selectedFolderTopic.value = '';
   }
 
   void selectCategory(String categoryId) {
     selectedCategory.value = categoryId;
-    fetchTests();
+    selectedSubFilter.value = 'all';
+    openCategoryFolder(categoryId);
   }
 
-  void switchTab(FilterTab tab) {
-    activeTab.value = tab;
+  void selectSubFilter(String filterId) {
+    selectedSubFilter.value = filterId;
+  }
+
+  void selectDifficulty(String difficulty) {
+    selectedDifficulty.value = difficulty;
   }
 
   void updateSearch(String query) {
     searchQuery.value = query;
   }
 
-  // Get filtered tests matching the search query
-  List<TestModel> get _searchedTests {
-    if (searchQuery.value.isEmpty) {
-      return testsList;
+  // Get available sub-topic filter pills for current selected category based on actual tests
+  List<Map<String, String>> get availableSubFilters {
+    final List<Map<String, String>> filters = [
+      {'id': 'all', 'name': 'All Topics'}
+    ];
+
+    final currentTests = selectedFolderCategory.value.isEmpty || selectedFolderCategory.value == 'all'
+        ? subjectWiseTests
+        : subjectWiseTests.where((t) => t.categoryId == selectedFolderCategory.value);
+
+    final Set<String> seenIds = {'all'};
+
+    for (var test in currentTests) {
+      if (test.subjectId != null &&
+          test.subjectId!.isNotEmpty &&
+          !seenIds.contains(test.subjectId)) {
+        final name = subjectNames[test.subjectId!] ?? '';
+        if (name.isNotEmpty) {
+          seenIds.add(test.subjectId!);
+          filters.add({'id': test.subjectId!, 'name': name});
+        }
+      }
+
+      if (test.topicId != null &&
+          test.topicId!.isNotEmpty &&
+          !seenIds.contains(test.topicId)) {
+        final name = topicNames[test.topicId!] ?? '';
+        if (name.isNotEmpty) {
+          seenIds.add(test.topicId!);
+          filters.add({'id': test.topicId!, 'name': name});
+        }
+      }
     }
-    final query = searchQuery.value.toLowerCase();
-    return testsList.where((test) {
-      final title = test.title.toLowerCase();
-      final desc = (test.description ?? '').toLowerCase();
-      return title.contains(query) || desc.contains(query);
-    }).toList();
+
+    return filters;
   }
 
-  // Subject-wise grouping: Map<SubjectName/ID, List<TestModel>>
-  Map<String, List<TestModel>> get subjectWiseTests {
-    final Map<String, List<TestModel>> groups = {};
-    for (var test in _searchedTests) {
-      // Include tests that have a subjectId
-      final String subId = test.subjectId ?? 'General / Other';
-      final String subName = subjectNames[subId] ?? subId;
+  // Filtered Subject-Wise tests (folder drilldown + difficulty chip + search)
+  List<TestModel> get filteredSubjectWiseTests {
+    var list = subjectWiseTests.toList();
 
-      if (!groups.containsKey(subName)) {
-        groups[subName] = [];
-      }
-      groups[subName]!.add(test);
+    // If search is active, return all matching tests across folders
+    if (searchQuery.value.trim().isNotEmpty) {
+      final query = searchQuery.value.toLowerCase().trim();
+      return list.where((test) {
+        final title = test.title.toLowerCase();
+        final desc = (test.description ?? '').toLowerCase();
+        return title.contains(query) || desc.contains(query);
+      }).toList();
     }
-    return groups;
+
+    // Apply folder level filtering
+    if (selectedFolderCategory.value.isNotEmpty && selectedFolderCategory.value != 'all') {
+      list = list.where((t) => t.categoryId == selectedFolderCategory.value).toList();
+    }
+
+    if (selectedFolderSubject.value.isNotEmpty) {
+      list = list.where((t) => t.subjectId == selectedFolderSubject.value).toList();
+    }
+
+    if (selectedFolderTopic.value.isNotEmpty) {
+      list = list.where((t) => t.topicId == selectedFolderTopic.value).toList();
+    }
+
+    // Apply difficulty filter
+    if (selectedDifficulty.value != 'all') {
+      final diff = selectedDifficulty.value.toUpperCase();
+      list = list.where((t) {
+        return (t.difficulty ?? '').toUpperCase() == diff;
+      }).toList();
+    }
+
+    return list;
   }
 
-  // Topic-wise grouping: Map<SubjectName, Map<TopicName, List<TestModel>>>
-  Map<String, Map<String, List<TestModel>>> get topicWiseTests {
-    final Map<String, Map<String, List<TestModel>>> groups = {};
-    for (var test in _searchedTests) {
-      final String subId = test.subjectId ?? 'general_other';
-      final String subName = subjectNames[subId] ?? (test.subjectId == null ? 'General / Other' : subId);
+  // Filtered Test Series tests (search query)
+  List<TestModel> get filteredTestSeriesTests {
+    var list = testSeriesTests.toList();
 
-      final String topId = test.topicId ?? 'general_other';
-      final String topName = topicNames[topId] ?? (test.topicId == null ? 'General' : topId);
-
-      if (!groups.containsKey(subName)) {
-        groups[subName] = {};
-      }
-      if (!groups[subName]!.containsKey(topName)) {
-        groups[subName]![topName] = [];
-      }
-      groups[subName]![topName]!.add(test);
+    if (searchQuery.value.trim().isNotEmpty) {
+      final query = searchQuery.value.toLowerCase().trim();
+      list = list.where((test) {
+        final title = test.title.toLowerCase();
+        final desc = (test.description ?? '').toLowerCase();
+        return title.contains(query) || desc.contains(query);
+      }).toList();
     }
-    return groups;
+
+    return list;
   }
 }
