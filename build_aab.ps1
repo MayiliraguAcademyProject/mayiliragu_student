@@ -107,9 +107,9 @@ if ($Version -ne '') {
     }
 } else {
     switch ($BumpType) {
-        'patch' { $newPatch = $patch + 1 }
-        'minor' { $newMinor = $minor + 1; $newPatch = 0 }
-        'major' { $newMajor = $major + 1; $newMinor = 0; $newPatch = 0 }
+        'patch' { $newPatch = $patch + 1; $newBuildNum = 1 }
+        'minor' { $newMinor = $minor + 1; $newPatch = 0; $newBuildNum = 1 }
+        'major' { $newMajor = $major + 1; $newMinor = 0; $newPatch = 0; $newBuildNum = 1 }
     }
 }
 

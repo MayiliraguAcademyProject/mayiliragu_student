@@ -28,6 +28,26 @@ class _ProfileOnboardingViewState extends State<ProfileOnboardingView> {
   }
 
   void _nextStep() {
+    bool isValid = false;
+    switch (_activeStep) {
+      case 0:
+        isValid = controller.validateDemographicsStep();
+        break;
+      case 1:
+        isValid = controller.validateContactStep();
+        break;
+      case 2:
+        isValid = controller.validateAddressStep();
+        break;
+      case 3:
+        isValid = controller.validateEducationStep();
+        break;
+      default:
+        isValid = true;
+    }
+
+    if (!isValid) return;
+
     if (_activeStep < _totalSteps - 1) {
       setState(() {
         _activeStep++;

@@ -467,13 +467,13 @@ class _DescriptiveLayoutState extends State<DescriptiveLayout> {
 
   Future<void> _pickFile() async {
     try {
-      FilePickerResult? result = await FilePicker.pickFiles(
+      final file = await FilePicker.pickFile(
         type: FileType.custom,
         allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
       );
 
-      if (result != null && result.files.single.name.isNotEmpty) {
-        final fileName = result.files.single.name;
+      if (file != null && file.name.isNotEmpty) {
+        final fileName = file.name;
         widget.onAttachmentChanged('/uploads/$fileName');
       }
     } catch (e) {

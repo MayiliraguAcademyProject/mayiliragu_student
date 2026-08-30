@@ -6,6 +6,13 @@ class CourseDetailModel {
   final bool isEnrolled;
   final bool isDemo;
   final String? enrollmentRequestStatus;
+  final bool isActive;
+  final DateTime? startDate;
+  final DateTime? endDate;
+  final String? availabilityStatus;
+  final int? timeRemainingSeconds;
+  final String? timeRemainingText;
+  final bool isAvailableForStudy;
   final List<ModuleModel> modules;
 
   CourseDetailModel({
@@ -16,8 +23,25 @@ class CourseDetailModel {
     this.isEnrolled = true,
     this.isDemo = false,
     this.enrollmentRequestStatus,
+    this.isActive = true,
+    this.startDate,
+    this.endDate,
+    this.availabilityStatus,
+    this.timeRemainingSeconds,
+    this.timeRemainingText,
+    this.isAvailableForStudy = true,
     required this.modules,
   });
+
+  bool get isUpcoming =>
+      availabilityStatus == 'upcoming' ||
+      (startDate != null && DateTime.now().isBefore(startDate!));
+
+  bool get isClosingSoon => availabilityStatus == 'closing_soon';
+
+  bool get isExpired =>
+      availabilityStatus == 'expired' ||
+      (endDate != null && DateTime.now().isAfter(endDate!));
 
   factory CourseDetailModel.fromJson(Map<String, dynamic> json) {
     final modulesList = json['modules'] as List? ?? [];
@@ -29,6 +53,17 @@ class CourseDetailModel {
       isEnrolled: json['isEnrolled'] as bool? ?? true,
       isDemo: json['isDemo'] as bool? ?? false,
       enrollmentRequestStatus: json['enrollmentRequestStatus'] as String?,
+      isActive: json['isActive'] as bool? ?? true,
+      startDate: json['startDate'] != null
+          ? DateTime.tryParse(json['startDate'].toString())?.toLocal()
+          : null,
+      endDate: json['endDate'] != null
+          ? DateTime.tryParse(json['endDate'].toString())?.toLocal()
+          : null,
+      availabilityStatus: json['availabilityStatus']?.toString(),
+      timeRemainingSeconds: json['timeRemainingSeconds'] as int?,
+      timeRemainingText: json['timeRemainingText']?.toString(),
+      isAvailableForStudy: json['isAvailableForStudy'] as bool? ?? true,
       modules: modulesList
           .map((m) => ModuleModel.fromJson(m as Map<String, dynamic>))
           .toList(),

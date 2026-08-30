@@ -27,13 +27,13 @@ class _PaymentProofViewState extends State<PaymentProofView> {
 
   Future<void> _pickImage() async {
     try {
-      final result = await FilePicker.pickFiles(
+      final file = await FilePicker.pickFile(
         type: FileType.image,
       );
 
-      if (result != null && result.files.single.path != null) {
+      if (file != null && file.path != null) {
         setState(() {
-          _selectedImagePath = result.files.single.path;
+          _selectedImagePath = file.path;
         });
       }
     } catch (e) {
