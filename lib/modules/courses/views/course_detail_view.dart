@@ -921,7 +921,55 @@ class CourseDetailView extends StatelessWidget {
                       ),
                     ),
                   ],
-                  if (!canPlayLesson) ...[
+                  if (course.isUpcoming) ...[
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.schedule_rounded,
+                          size: 12,
+                          color: Colors.blue.shade700,
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            (course.timeRemainingText != null && course.timeRemainingText!.isNotEmpty)
+                                ? (course.timeRemainingText!.toLowerCase().startsWith('starts')
+                                    ? course.timeRemainingText!
+                                    : 'Starts in ${course.timeRemainingText!}')
+                                : 'Available when course starts',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.blue.shade700,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ] else if (course.isExpired) ...[
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.timer_off_outlined,
+                          size: 12,
+                          color: Colors.red.shade700,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Course access expired',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.red.shade700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ] else if (!course.isEnrolled && !course.isDemo) ...[
                     const SizedBox(height: 4),
                     Row(
                       children: [
@@ -932,7 +980,7 @@ class CourseDetailView extends StatelessWidget {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          'Purchase required to play',
+                          'Enrollment required to play',
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,

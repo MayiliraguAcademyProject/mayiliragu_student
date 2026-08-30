@@ -79,6 +79,7 @@ class TestBatchModel {
   final String? omrPdfName;
   final int order;
   final bool isEnabled;
+  final bool isAvailableForGuest;
   final int totalCategories;
   final int totalQuestionPapers;
   final List<TestBatchCategoryModel> categories;
@@ -95,6 +96,7 @@ class TestBatchModel {
     this.omrPdfName,
     this.order = 0,
     this.isEnabled = true,
+    this.isAvailableForGuest = false,
     this.totalCategories = 0,
     this.totalQuestionPapers = 0,
     this.categories = const [],
@@ -114,6 +116,7 @@ class TestBatchModel {
       omrPdfName: json['omrPdfName'] as String? ?? json['omr_pdf_name'] as String?,
       order: json['order'] as int? ?? 0,
       isEnabled: json['isEnabled'] as bool? ?? json['is_enabled'] as bool? ?? true,
+      isAvailableForGuest: json['isAvailableForGuest'] as bool? ?? json['is_available_for_guest'] as bool? ?? false,
       totalCategories: json['totalCategories'] as int? ?? rawCats.length,
       totalQuestionPapers: json['totalQuestionPapers'] as int? ??
           rawCats.fold<int>(0, (sum, cat) => sum + ((cat['questionPapers'] as List?)?.length ?? 0)),
