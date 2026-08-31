@@ -8,6 +8,7 @@ class NotificationModel {
   final DateTime? readAt;
   final String title;
   final String body;
+  final String? pdfUrl;
 
   NotificationModel({
     required this.id,
@@ -19,6 +20,7 @@ class NotificationModel {
     this.readAt,
     required this.title,
     required this.body,
+    this.pdfUrl,
   });
 
   factory NotificationModel.fromJson(Map<String, dynamic> json) {
@@ -33,6 +35,7 @@ class NotificationModel {
       readAt: json['readAt'] != null ? DateTime.parse(json['readAt'] as String) : null,
       title: campaignJson?['title'] as String? ?? 'Notification',
       body: campaignJson?['body'] as String? ?? '',
+      pdfUrl: campaignJson?['pdfUrl'] as String? ?? json['pdfUrl'] as String?,
     );
   }
 }
