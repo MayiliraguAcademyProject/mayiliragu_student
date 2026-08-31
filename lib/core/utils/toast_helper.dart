@@ -109,7 +109,11 @@ class AppToast {
     );
   }
 
-  static void info(String message, {String title = 'Info'}) {
+  static void info(
+    String message, {
+    String title = 'Info',
+    Duration duration = const Duration(seconds: 3),
+  }) {
     Get.rawSnackbar(
       titleText: Text(
         title,
@@ -128,7 +132,7 @@ class AppToast {
       snackPosition: SnackPosition.TOP,
       borderRadius: 12,
       margin: const EdgeInsets.all(16),
-      duration: const Duration(seconds: 3),
+      duration: duration,
       boxShadows: [
         BoxShadow(
           color: Colors.black.withAlpha(40),
@@ -138,4 +142,44 @@ class AppToast {
       ],
     );
   }
+
+  static void otp(
+    String otp, {
+    String title = 'Verification Code',
+    Duration duration = const Duration(seconds: 10),
+  }) {
+    Get.rawSnackbar(
+      titleText: Text(
+        title,
+        style: AppTextStyles.body.copyWith(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+          fontSize: 15,
+        ),
+      ),
+      messageText: Text(
+        'Your code is: $otp',
+        style: AppTextStyles.body.copyWith(
+          color: Colors.white,
+          fontWeight: FontWeight.w600,
+          fontSize: 16,
+          letterSpacing: 1.2,
+        ),
+      ),
+      icon: const Icon(Icons.vpn_key_outlined, color: Colors.amberAccent, size: 28),
+      backgroundColor: AppColors.accentDark,
+      snackPosition: SnackPosition.TOP,
+      borderRadius: 12,
+      margin: const EdgeInsets.all(16),
+      duration: duration,
+      boxShadows: [
+        BoxShadow(
+          color: Colors.black.withAlpha(50),
+          blurRadius: 10,
+          offset: const Offset(0, 4),
+        ),
+      ],
+    );
+  }
 }
+

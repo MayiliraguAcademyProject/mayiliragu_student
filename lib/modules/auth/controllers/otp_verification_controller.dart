@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
+import '../../../core/utils/toast_helper.dart';
 import '../../../../core/services/secure_storage_service.dart';
 import '../../../../core/services/notification_service.dart';
 import '../../../../core/controllers/user_session_controller.dart';
@@ -150,6 +151,19 @@ class OtpVerificationController extends GetxController {
       final response = await _authRepository.resendOtp(email: email.value);
       if (response.statusCode == 200) {
         successMessage.value = 'A new verification code has been sent to your email.';
+        final resData = response.data;
+        final otp = (resData is Map && resData['data'] is Map && resData['data']['otp'] != null)
+            ? resData['data']['otp'].toString()
+            : (resData is Map && resData['otp'] != null)
+                ? resData['otp'].toString()
+                : null;
+
+        if (otp != null && otp.isNotEmpty) {
+          AppToast.otp(otp, title: 'New OTP Code');
+        } else {
+          AppToast.success('New verification code sent.');
+        }
+
         startCountdown(60);
       } else {
         errorMessage.value = response.data['message'] ?? 'Failed to resend code';
