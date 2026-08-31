@@ -113,6 +113,11 @@ class CourseListView extends GetView<CourseController> {
     final thumbnail = course['thumbnail'] ?? '';
     final totalLessons = course['totalLessons'] ?? 0;
     final isDemo = course['isDemo'] as bool? ?? false;
+    final availabilityStatus = course['availabilityStatus']?.toString();
+    final timeRemainingText = course['timeRemainingText']?.toString();
+    final isUpcoming = availabilityStatus == 'upcoming';
+    final isClosingSoon = availabilityStatus == 'closing_soon';
+    final isExpired = availabilityStatus == 'expired';
     final colorScheme = Theme.of(context).colorScheme;
 
     return Card(
@@ -170,6 +175,61 @@ class CourseListView extends GetView<CourseController> {
                               fontSize: 10,
                               fontWeight: FontWeight.w800,
                               letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                // Availability Status Overlay Badge
+                if (isUpcoming || isClosingSoon || isExpired)
+                  Positioned(
+                    top: 12,
+                    left: 12,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: isUpcoming
+                              ? [const Color(0xFF1E40AF), const Color(0xFF3B82F6)]
+                              : isClosingSoon
+                                  ? [const Color(0xFFB45309), const Color(0xFFF59E0B)]
+                                  : [const Color(0xFF475569), const Color(0xFF64748B)],
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.35),
+                            blurRadius: 5,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            isUpcoming
+                                ? Icons.schedule_rounded
+                                : isClosingSoon
+                                    ? Icons.timer_outlined
+                                    : Icons.lock_clock_rounded,
+                            color: Colors.white,
+                            size: 13,
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            isUpcoming
+                                ? (timeRemainingText != null ? 'UPCOMING • $timeRemainingText' : 'UPCOMING')
+                                : isClosingSoon
+                                    ? (timeRemainingText != null ? 'CLOSING SOON • $timeRemainingText' : 'CLOSING SOON')
+                                    : 'EXPIRED',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 0.4,
                             ),
                           ),
                         ],

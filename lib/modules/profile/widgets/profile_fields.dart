@@ -9,6 +9,7 @@ class ProfileTextField extends StatelessWidget {
   final TextInputType keyboardType;
   final List<TextInputFormatter>? inputFormatters;
   final int maxLines;
+  final bool isRequired;
 
   const ProfileTextField({
     super.key,
@@ -18,6 +19,7 @@ class ProfileTextField extends StatelessWidget {
     this.keyboardType = TextInputType.text,
     this.inputFormatters,
     this.maxLines = 1,
+    this.isRequired = true,
   });
 
   @override
@@ -30,9 +32,19 @@ class ProfileTextField extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label.toUpperCase(),
-            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.primary),
+          RichText(
+            text: TextSpan(
+              text: label.toUpperCase(),
+              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.primary),
+              children: isRequired
+                  ? const [
+                      TextSpan(
+                        text: ' *',
+                        style: TextStyle(color: Colors.red, fontSize: 11, fontWeight: FontWeight.bold),
+                      ),
+                    ]
+                  : null,
+            ),
           ),
           const SizedBox(height: 6),
           TextField(
@@ -64,6 +76,7 @@ class ProfileDropdownField extends StatelessWidget {
   final String? value;
   final List<String> items;
   final ValueChanged<String?> onChanged;
+  final bool isRequired;
 
   const ProfileDropdownField({
     super.key,
@@ -71,6 +84,7 @@ class ProfileDropdownField extends StatelessWidget {
     required this.value,
     required this.items,
     required this.onChanged,
+    this.isRequired = true,
   });
 
   @override
@@ -83,9 +97,19 @@ class ProfileDropdownField extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label.toUpperCase(),
-            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.primary),
+          RichText(
+            text: TextSpan(
+              text: label.toUpperCase(),
+              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.primary),
+              children: isRequired
+                  ? const [
+                      TextSpan(
+                        text: ' *',
+                        style: TextStyle(color: Colors.red, fontSize: 11, fontWeight: FontWeight.bold),
+                      ),
+                    ]
+                  : null,
+            ),
           ),
           const SizedBox(height: 6),
           DropdownButtonFormField<String>(
@@ -113,11 +137,13 @@ class ProfileDropdownField extends StatelessWidget {
 class ProfileDatePickerField extends StatelessWidget {
   final String label;
   final TextEditingController controller;
+  final bool isRequired;
 
   const ProfileDatePickerField({
     super.key,
     required this.label,
     required this.controller,
+    this.isRequired = true,
   });
 
   @override
@@ -130,9 +156,19 @@ class ProfileDatePickerField extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label.toUpperCase(),
-            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.primary),
+          RichText(
+            text: TextSpan(
+              text: label.toUpperCase(),
+              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.primary),
+              children: isRequired
+                  ? const [
+                      TextSpan(
+                        text: ' *',
+                        style: TextStyle(color: Colors.red, fontSize: 11, fontWeight: FontWeight.bold),
+                      ),
+                    ]
+                  : null,
+            ),
           ),
           const SizedBox(height: 6),
           TextField(
