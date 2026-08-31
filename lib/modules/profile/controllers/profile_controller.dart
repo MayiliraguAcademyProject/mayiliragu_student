@@ -269,7 +269,173 @@ class ProfileController extends GetxController {
     }
   }
 
+  bool validateDemographicsStep() {
+    if (selectedGender.value.trim().isEmpty) {
+      AppToast.validation('Please select your gender');
+      return false;
+    }
+    if (dobController.text.trim().isEmpty) {
+      AppToast.validation('Please select your date of birth');
+      return false;
+    }
+    if (bloodGroupController.text.trim().isEmpty) {
+      AppToast.validation('Please enter your blood group');
+      return false;
+    }
+    final aadh = aadhaarController.text.trim();
+    if (aadh.isEmpty) {
+      AppToast.validation('Please enter your Aadhaar number');
+      return false;
+    }
+    if (aadh.length != 12) {
+      AppToast.validation('Aadhaar number must be exactly 12 digits');
+      return false;
+    }
+    if (nationalityController.text.trim().isEmpty) {
+      AppToast.validation('Please enter your nationality');
+      return false;
+    }
+    if (selectedCategory.value.trim().isEmpty) {
+      AppToast.validation('Please select your category');
+      return false;
+    }
+    return true;
+  }
+
+  bool validateContactStep() {
+    final mob = mobileController.text.trim();
+    if (mob.isEmpty) {
+      AppToast.validation('Please enter your mobile number');
+      return false;
+    }
+    if (mob.length != 10) {
+      AppToast.validation('Mobile number must be exactly 10 digits');
+      return false;
+    }
+
+    final wa = whatsappController.text.trim();
+    if (wa.isEmpty) {
+      AppToast.validation('Please enter your WhatsApp number');
+      return false;
+    }
+    if (wa.length != 10) {
+      AppToast.validation('WhatsApp number must be exactly 10 digits');
+      return false;
+    }
+
+    final emg = emergencyController.text.trim();
+    if (emg.isEmpty) {
+      AppToast.validation('Please enter an emergency contact number');
+      return false;
+    }
+    if (emg.length != 10) {
+      AppToast.validation('Emergency contact must be exactly 10 digits');
+      return false;
+    }
+
+    final parentName = parentNameController.text.trim();
+    if (parentName.isEmpty) {
+      AppToast.validation('Please enter parent/guardian name');
+      return false;
+    }
+
+    final pmob = parentMobileController.text.trim();
+    if (pmob.isEmpty) {
+      AppToast.validation('Please enter parent mobile number');
+      return false;
+    }
+    if (pmob.length != 10) {
+      AppToast.validation('Parent mobile number must be exactly 10 digits');
+      return false;
+    }
+
+    return true;
+  }
+
+  bool validateAddressStep() {
+    if (currentAddressController.text.trim().isEmpty) {
+      AppToast.validation('Please enter current address');
+      return false;
+    }
+    if (permanentAddressController.text.trim().isEmpty) {
+      AppToast.validation('Please enter permanent address');
+      return false;
+    }
+    if (cityController.text.trim().isEmpty) {
+      AppToast.validation('Please enter city');
+      return false;
+    }
+    if (districtController.text.trim().isEmpty) {
+      AppToast.validation('Please enter district');
+      return false;
+    }
+    if (selectedState.value.trim().isEmpty) {
+      AppToast.validation('Please select state');
+      return false;
+    }
+    final pin = pinCodeController.text.trim();
+    if (pin.isEmpty) {
+      AppToast.validation('Please enter PIN code');
+      return false;
+    }
+    if (pin.length != 6) {
+      AppToast.validation('PIN Code must be exactly 6 digits');
+      return false;
+    }
+    return true;
+  }
+
+  bool validateEducationStep() {
+    if (qualificationController.text.trim().isEmpty) {
+      AppToast.validation('Please enter highest qualification');
+      return false;
+    }
+    if (degreeController.text.trim().isEmpty) {
+      AppToast.validation('Please enter degree');
+      return false;
+    }
+    if (collegeController.text.trim().isEmpty) {
+      AppToast.validation('Please enter college name');
+      return false;
+    }
+    final yop = yearOfPassingController.text.trim();
+    if (yop.isEmpty) {
+      AppToast.validation('Please enter year of passing');
+      return false;
+    }
+    final yopInt = int.tryParse(yop);
+    if (yopInt == null || yop.length != 4 || yopInt < 1950 || yopInt > DateTime.now().year + 5) {
+      AppToast.validation('Please enter a valid 4-digit year of passing');
+      return false;
+    }
+    final pct = percentageController.text.trim();
+    if (pct.isEmpty) {
+      AppToast.validation('Please enter percentage or CGPA');
+      return false;
+    }
+    final pctNum = double.tryParse(pct);
+    if (pctNum == null || pctNum <= 0 || pctNum > 100) {
+      AppToast.validation('Please enter a valid percentage (1-100) or CGPA');
+      return false;
+    }
+    if (selectedMedium.value.trim().isEmpty) {
+      AppToast.validation('Please select medium of education');
+      return false;
+    }
+    return true;
+  }
+
+  bool validateAllSteps() {
+    return validateDemographicsStep() &&
+        validateContactStep() &&
+        validateAddressStep() &&
+        validateEducationStep();
+  }
+
   Future<bool> updateStudentProfile({bool isOnboarding = false}) async {
+    if (isOnboarding && !validateAllSteps()) {
+      return false;
+    }
     final mob = mobileController.text.trim();
     if (mob.isNotEmpty && mob.length != 10) {
       AppToast.validation('Mobile number must be exactly 10 digits');
@@ -281,7 +447,7 @@ class ProfileController extends GetxController {
       return false;
     }
     final emg = emergencyController.text.trim();
-    if (emg.isNotEmpty && wa.length != 10) {
+    if (emg.isNotEmpty && emg.length != 10) {
       AppToast.validation('Emergency contact must be exactly 10 digits');
       return false;
     }

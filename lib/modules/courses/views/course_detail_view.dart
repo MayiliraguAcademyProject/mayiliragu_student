@@ -86,6 +86,224 @@ class CourseDetailView extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Availability Schedule Banners
+                      if (course.isUpcoming) ...[
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          margin: const EdgeInsets.only(bottom: 20),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [
+                                Color(0xFF1E3A8A),
+                                Color(0xFF2563EB),
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF2563EB).withValues(alpha: 0.25),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.2),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.schedule_rounded,
+                                  color: Colors.white,
+                                  size: 26,
+                                ),
+                              ),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        const Text(
+                                          'Upcoming Course',
+                                          style: TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        if (course.timeRemainingText != null) ...[
+                                          const SizedBox(width: 8),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                            decoration: BoxDecoration(
+                                              color: Colors.white.withValues(alpha: 0.25),
+                                              borderRadius: BorderRadius.circular(20),
+                                            ),
+                                            child: Text(
+                                              course.timeRemainingText!,
+                                              style: const TextStyle(
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.w800,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      course.startDate != null
+                                          ? 'Scheduled release on ${course.startDate!.day}/${course.startDate!.month}/${course.startDate!.year} at ${course.startDate!.hour.toString().padLeft(2, '0')}:${course.startDate!.minute.toString().padLeft(2, '0')}. Video playback unlocks when the course begins.'
+                                          : 'This course is launching soon! Curriculum is viewable below.',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.white.withValues(alpha: 0.9),
+                                        height: 1.3,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ] else if (course.isClosingSoon) ...[
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          margin: const EdgeInsets.only(bottom: 20),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [
+                                Color(0xFF92400E),
+                                Color(0xFFD97706),
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFFD97706).withValues(alpha: 0.25),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.2),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.timer_outlined,
+                                  color: Colors.white,
+                                  size: 26,
+                                ),
+                              ),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        const Text(
+                                          'Closing Soon',
+                                          style: TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        if (course.timeRemainingText != null) ...[
+                                          const SizedBox(width: 8),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                            decoration: BoxDecoration(
+                                              color: Colors.white.withValues(alpha: 0.25),
+                                              borderRadius: BorderRadius.circular(20),
+                                            ),
+                                            child: Text(
+                                              course.timeRemainingText!,
+                                              style: const TextStyle(
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.w800,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Access to this course will close soon. Make sure to complete your lessons before the expiration date.',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.white.withValues(alpha: 0.9),
+                                        height: 1.3,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ] else if (course.isExpired) ...[
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          margin: const EdgeInsets.only(bottom: 20),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.surfaceContainerHighest,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.lock_clock_rounded,
+                                color: theme.colorScheme.error,
+                                size: 28,
+                              ),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Course Expired',
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold,
+                                        color: theme.colorScheme.error,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      'The scheduled access window for this course has ended.',
+                                      style: AppTextStyles.body.copyWith(
+                                        fontSize: 12,
+                                        color: textColorPrimary.withValues(alpha: 0.8),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+
                       if (course.isDemo) ...[
                         Container(
                           padding: const EdgeInsets.all(16),
@@ -147,7 +365,7 @@ class CourseDetailView extends StatelessWidget {
                             ],
                           ),
                         ),
-                      ] else if (!course.isEnrolled) ...[
+                      ] else if (!course.isEnrolled && !course.isUpcoming) ...[
                         Container(
                           padding: const EdgeInsets.all(16),
                           margin: const EdgeInsets.only(bottom: 20),
@@ -487,7 +705,7 @@ class CourseDetailView extends StatelessWidget {
     final durationMinutes = (durationSeconds / 60).toStringAsFixed(1);
     final watchedSeconds = lesson.progress?.watchedSeconds ?? 0;
     final isCompleted = lesson.isCompleted;
-    final canPlayLesson = course.isEnrolled || course.isDemo;
+    final canPlayLesson = (course.isEnrolled || course.isDemo) && !course.isUpcoming;
     final isLocked = !canPlayLesson || (course.isEnrolled && lesson.isLocked);
     final theme = Theme.of(context);
 
@@ -521,22 +739,29 @@ class CourseDetailView extends StatelessWidget {
       subtitleText = '$countLabel • $durationFormatted';
     }
 
-    final VoidCallback onItemTap = !canPlayLesson
-        ? () => _showPurchaseDialog(context, course)
-        : (isLocked
-              ? () {
-                  AppToast.validation(
-                    'Please watch and complete the previous lesson video to unlock.',
-                    title: 'Lesson Locked',
-                  );
-                }
-              : () async {
-                  await Get.toNamed(Routes.LESSON_DETAIL, arguments: lesson.id);
-                  final controller = Get.find<CourseDetailController>(
-                    tag: courseId,
-                  );
-                  controller.fetchCourseDetails();
-                });
+    final VoidCallback onItemTap = course.isUpcoming
+        ? () {
+            AppToast.validation(
+              'This course is scheduled to start on ${course.startDate != null ? "${course.startDate!.day}/${course.startDate!.month}/${course.startDate!.year}" : "soon"}. Video playback will unlock once it starts.',
+              title: 'Upcoming Course',
+            );
+          }
+        : (!canPlayLesson
+            ? () => _showPurchaseDialog(context, course)
+            : (isLocked
+                ? () {
+                    AppToast.validation(
+                      'Please watch and complete the previous lesson video to unlock.',
+                      title: 'Lesson Locked',
+                    );
+                  }
+                : () async {
+                    await Get.toNamed(Routes.LESSON_DETAIL, arguments: lesson.id);
+                    final controller = Get.find<CourseDetailController>(
+                      tag: courseId,
+                    );
+                    controller.fetchCourseDetails();
+                  }));
 
     return InkWell(
       onTap: onItemTap,
@@ -696,7 +921,55 @@ class CourseDetailView extends StatelessWidget {
                       ),
                     ),
                   ],
-                  if (!canPlayLesson) ...[
+                  if (course.isUpcoming) ...[
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.schedule_rounded,
+                          size: 12,
+                          color: Colors.blue.shade700,
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            (course.timeRemainingText != null && course.timeRemainingText!.isNotEmpty)
+                                ? (course.timeRemainingText!.toLowerCase().startsWith('starts')
+                                    ? course.timeRemainingText!
+                                    : 'Starts in ${course.timeRemainingText!}')
+                                : 'Available when course starts',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.blue.shade700,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ] else if (course.isExpired) ...[
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.timer_off_outlined,
+                          size: 12,
+                          color: Colors.red.shade700,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Course access expired',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.red.shade700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ] else if (!course.isEnrolled && !course.isDemo) ...[
                     const SizedBox(height: 4),
                     Row(
                       children: [
@@ -707,7 +980,7 @@ class CourseDetailView extends StatelessWidget {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          'Purchase required to play',
+                          'Enrollment required to play',
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
