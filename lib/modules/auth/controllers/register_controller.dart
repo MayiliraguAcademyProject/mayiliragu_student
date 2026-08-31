@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
+import '../../../core/utils/toast_helper.dart';
 import '../../../../app/routes/app_routes.dart';
 import '../repositories/auth_repository.dart';
 
@@ -72,14 +73,26 @@ class RegisterController extends GetxController {
       );
 
       if (response.statusCode == 201 || response.statusCode == 200) {
+        final resData = response.data;
+        final otp = (resData is Map && resData['data'] is Map && resData['data']['otp'] != null)
+            ? resData['data']['otp'].toString()
+            : (resData is Map && resData['otp'] != null)
+                ? resData['otp'].toString()
+                : null;
+
         // Navigate to OTP verification screen
         Get.toNamed(
           Routes.OTP_VERIFICATION,
           arguments: {
             'email': email,
             'name': name,
+            'otp': otp,
           },
         );
+
+        if (otp != null && otp.isNotEmpty) {
+          AppToast.otp(otp, title: 'Your OTP Code');
+        }
       } else {
         errorMessage.value = response.data['message'] ?? 'Registration failed. Please try again.';
       }

@@ -72,7 +72,20 @@ class ForgotPasswordController extends GetxController {
         email.value = inputEmail;
         otpController.clear();
         startCountdown(60);
-        AppToast.success('Verification code sent to your email.');
+
+        final resData = response.data;
+        final otp = (resData is Map && resData['data'] is Map && resData['data']['otp'] != null)
+            ? resData['data']['otp'].toString()
+            : (resData is Map && resData['otp'] != null)
+                ? resData['otp'].toString()
+                : null;
+
+        if (otp != null && otp.isNotEmpty) {
+          AppToast.otp(otp, title: 'Your Reset Code');
+        } else {
+          AppToast.success('Verification code sent to your email.');
+        }
+
         Get.toNamed(Routes.FORGOT_PASSWORD_OTP);
       } else {
         errorMessage.value = response.data['message'] ?? 'Failed to send verification code.';
@@ -116,7 +129,19 @@ class ForgotPasswordController extends GetxController {
       final response = await _authRepository.forgotPasswordResendOtp(email: email.value);
       if (response.statusCode == 200) {
         successMessage.value = 'A new verification code has been sent to your email.';
-        AppToast.success('New verification code sent.');
+        final resData = response.data;
+        final otp = (resData is Map && resData['data'] is Map && resData['data']['otp'] != null)
+            ? resData['data']['otp'].toString()
+            : (resData is Map && resData['otp'] != null)
+                ? resData['otp'].toString()
+                : null;
+
+        if (otp != null && otp.isNotEmpty) {
+          AppToast.otp(otp, title: 'New Reset Code');
+        } else {
+          AppToast.success('New verification code sent.');
+        }
+
         startCountdown(60);
       } else {
         errorMessage.value = response.data['message'] ?? 'Failed to resend verification code.';
