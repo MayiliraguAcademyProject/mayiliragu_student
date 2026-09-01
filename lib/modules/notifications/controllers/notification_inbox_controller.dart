@@ -81,6 +81,7 @@ class NotificationInboxController extends GetxController {
           readAt: DateTime.now(),
           title: current.title,
           body: current.body,
+          pdfUrl: current.pdfUrl,
         );
       }
     }

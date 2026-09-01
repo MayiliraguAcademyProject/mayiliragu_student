@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
+import '../../../core/utils/toast_helper.dart';
 import '../../../core/models/live_stream_model.dart';
 import '../controllers/live_videos_controller.dart';
 import 'live_video_player_view.dart';
@@ -156,10 +157,9 @@ class LiveVideosListView extends GetView<LiveVideosController> {
             return;
           }
           if (videoId.isEmpty) {
-            Get.snackbar(
-              AppStrings.unsupportedLink,
+            AppToast.validation(
               AppStrings.invalidVideoSourceUrl,
-              snackPosition: SnackPosition.BOTTOM,
+              title: AppStrings.unsupportedLink,
             );
             return;
           }

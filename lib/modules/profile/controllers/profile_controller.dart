@@ -1,7 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:dio/dio.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import '../repositories/profile_repository.dart';
 import '../../../core/enums/user_role.dart';
@@ -515,14 +514,9 @@ class ProfileController extends GetxController {
         return false;
       }
     } catch (e) {
-      String msg = 'Error updating profile: $e';
-      if (e is DioException && e.response?.data != null) {
-        final data = e.response?.data;
-        if (data is Map && data['message'] != null) {
-          msg = data['message'].toString();
-        }
-      }
-      AppToast.error(msg);
+      AppToast.error(
+        AppErrorHandler.getErrorMessage(e, defaultMessage: 'Failed to update profile. Please try again.'),
+      );
       return false;
     } finally {
       isUpdatingStudentProfile.value = false;
@@ -542,14 +536,9 @@ class ProfileController extends GetxController {
         AppToast.error(response.data['message'] ?? 'Failed to delete account');
       }
     } catch (e) {
-      String msg = 'Error deleting account: $e';
-      if (e is DioException && e.response?.data != null) {
-        final data = e.response?.data;
-        if (data is Map && data['message'] != null) {
-          msg = data['message'].toString();
-        }
-      }
-      AppToast.error(msg);
+      AppToast.error(
+        AppErrorHandler.getErrorMessage(e, defaultMessage: 'Failed to delete account. Please try again.'),
+      );
     } finally {
       isDeletingAccount.value = false;
     }

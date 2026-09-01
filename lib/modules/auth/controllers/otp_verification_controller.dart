@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
+import '../../../core/utils/error_handler.dart';
 import '../../../core/utils/toast_helper.dart';
 import '../../../../core/services/secure_storage_service.dart';
 import '../../../../core/services/notification_service.dart';
@@ -125,16 +126,10 @@ class OtpVerificationController extends GetxController {
         errorMessage.value = response.data['message'] ?? 'Verification failed';
       }
     } catch (e) {
-      if (e is DioException) {
-        final resData = e.response?.data;
-        if (resData is Map && resData['message'] != null) {
-          errorMessage.value = resData['message'].toString();
-        } else {
-          errorMessage.value = 'Invalid or expired verification code';
-        }
-      } else {
-        errorMessage.value = 'An unexpected error occurred. Please try again.';
-      }
+      errorMessage.value = AppErrorHandler.getErrorMessage(
+        e,
+        defaultMessage: 'Invalid or expired verification code',
+      );
     } finally {
       isLoading.value = false;
     }
@@ -175,13 +170,17 @@ class OtpVerificationController extends GetxController {
           final retryAfter = resData['retryAfter'] ?? 60;
           startCountdown(retryAfter);
           errorMessage.value = resData['message'] ?? 'Please wait before requesting another code.';
-        } else if (resData is Map && resData['message'] != null) {
-          errorMessage.value = resData['message'].toString();
         } else {
-          errorMessage.value = 'Failed to resend code. Please try again.';
+          errorMessage.value = AppErrorHandler.getErrorMessage(
+            e,
+            defaultMessage: 'Failed to resend code. Please try again.',
+          );
         }
       } else {
-        errorMessage.value = 'Failed to resend code. Please try again.';
+        errorMessage.value = AppErrorHandler.getErrorMessage(
+          e,
+          defaultMessage: 'Failed to resend code. Please try again.',
+        );
       }
     } finally {
       isResending.value = false;

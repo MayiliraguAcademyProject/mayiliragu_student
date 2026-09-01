@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
+import '../../../core/utils/error_handler.dart';
 import '../../../core/utils/toast_helper.dart';
 import '../../../../app/routes/app_routes.dart';
 import '../repositories/auth_repository.dart';
@@ -101,13 +102,17 @@ class RegisterController extends GetxController {
         final resData = e.response?.data;
         if (resData is Map && resData['code'] == 'EMAIL_ALREADY_EXISTS') {
           errorMessage.value = 'An account with this email already exists. Please log in.';
-        } else if (resData is Map && resData['message'] != null) {
-          errorMessage.value = resData['message'].toString();
         } else {
-          errorMessage.value = 'Registration failed. Please check your details and try again.';
+          errorMessage.value = AppErrorHandler.getErrorMessage(
+            e,
+            defaultMessage: 'Registration failed. Please check your details and try again.',
+          );
         }
       } else {
-        errorMessage.value = 'An unexpected error occurred. Please try again.';
+        errorMessage.value = AppErrorHandler.getErrorMessage(
+          e,
+          defaultMessage: 'An unexpected error occurred. Please try again.',
+        );
       }
     } finally {
       isLoading.value = false;
