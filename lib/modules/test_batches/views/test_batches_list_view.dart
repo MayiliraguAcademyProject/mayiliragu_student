@@ -81,6 +81,7 @@ class TestBatchesListView extends GetView<TestBatchesController> {
 
   Widget _buildBatchCard(BuildContext context, TestBatchModel batch, bool isDark) {
     return Container(
+      width: double.infinity,
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: isDark ? AppColors.cardBgDark : AppColors.cardBg,
@@ -98,6 +99,8 @@ class TestBatchesListView extends GetView<TestBatchesController> {
       ),
       child: InkWell(
         onTap: () {
+
+          print("tabbed");
           controller.fetchBatchDetail(batch.id);
           Get.toNamed(Routes.TEST_BATCH_DETAIL, arguments: batch);
         },
@@ -105,7 +108,7 @@ class TestBatchesListView extends GetView<TestBatchesController> {
         child: Padding(
           padding: const EdgeInsets.all(18.0),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Header: Badge & Arrow
               Row(
@@ -243,26 +246,33 @@ class TestBatchesListView extends GetView<TestBatchesController> {
         ? (isDark ? AppColors.accent : const Color(0xFFEA580C))
         : (isDark ? AppColors.textSecondaryDark.withValues(alpha: 0.5) : AppColors.textSecondary.withValues(alpha: 0.5));
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 12, color: color),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 10.5,
-              fontWeight: FontWeight.w600,
-              color: color,
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 7),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: color.withValues(alpha: 0.15)),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 13, color: color),
+            const SizedBox(width: 4),
+            Flexible(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: color,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

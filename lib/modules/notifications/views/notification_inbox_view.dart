@@ -1,4 +1,5 @@
 import 'package:Mayiliragu/shared/widgets/common_button.dart';
+import 'package:Mayiliragu/shared/widgets/pdf_viewer_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/constants/app_colors.dart';
@@ -100,6 +101,8 @@ class NotificationInboxView extends GetView<NotificationInboxController> {
                 }
 
                 final notification = controller.notifications[index];
+                final hasPdf = notification.pdfUrl != null && notification.pdfUrl!.trim().isNotEmpty;
+
                 return Container(
                   margin: const EdgeInsets.only(bottom: 12),
                   decoration: BoxDecoration(
@@ -119,7 +122,15 @@ class NotificationInboxView extends GetView<NotificationInboxController> {
                   ),
                   child: ListTile(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                    onTap: () => controller.markAsRead(notification),
+                    onTap: () {
+                      controller.markAsRead(notification);
+                      if (hasPdf) {
+                        Get.to(() => PdfViewerScreen(
+                              pdfUrl: notification.pdfUrl!,
+                              title: notification.title,
+                            ));
+                      }
+                    },
                     title: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -158,6 +169,37 @@ class NotificationInboxView extends GetView<NotificationInboxController> {
                               height: 1.3,
                             ),
                           ),
+                          if (hasPdf)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 8),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: AppColors.brandPurple.withValues(alpha: 0.08),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: AppColors.brandPurple.withValues(alpha: 0.2),
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.picture_as_pdf, size: 16, color: Colors.redAccent),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      'View Attached Document',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                        color: colorScheme.onSurface,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    const Icon(Icons.arrow_forward_ios, size: 10, color: AppColors.brandPurple),
+                                  ],
+                                ),
+                              ),
+                            ),
                           const SizedBox(height: 8),
                           Text(
                             _formatDate(notification.sentAt),

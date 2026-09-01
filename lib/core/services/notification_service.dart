@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:convert';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
@@ -6,6 +7,7 @@ import '../network/api_client.dart';
 import '../constants/api_constants.dart';
 import '../services/secure_storage_service.dart';
 import '../models/notification_model.dart';
+import '../../shared/widgets/pdf_viewer_screen.dart';
 
 class NotificationService extends GetxService {
   final FirebaseMessaging _fcm = FirebaseMessaging.instance;
@@ -64,20 +66,20 @@ class NotificationService extends GetxService {
             ),
             iOS: const DarwinNotificationDetails(),
           ),
-          payload: message.data['route'],
+          payload: jsonEncode(message.data),
         );
       }
     });
 
     // 4. Background Click Handling
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      _handleNotificationClick(message.data['route']);
+      _handleNotificationClick(message.data);
     });
 
     // 5. App opened from terminated state via notification click
     final initialMessage = await _fcm.getInitialMessage();
     if (initialMessage != null) {
-      _handleNotificationClick(initialMessage.data['route']);
+      _handleNotificationClick(initialMessage.data);
     }
 
     // 6. Token refresh handler
@@ -86,9 +88,39 @@ class NotificationService extends GetxService {
     });
   }
 
-  void _handleNotificationClick(String? route) {
-    if (route != null && route.isNotEmpty) {
-      Get.toNamed(route);
+  void _handleNotificationClick(dynamic rawPayload) {
+    if (rawPayload == null) return;
+
+    if (rawPayload is Map) {
+      final pdfUrl = rawPayload['pdfUrl'] as String?;
+      final title = rawPayload['title'] as String? ?? 'Document';
+      final route = rawPayload['route'] as String?;
+
+      if (pdfUrl != null && pdfUrl.isNotEmpty) {
+        Get.to(() => PdfViewerScreen(pdfUrl: pdfUrl, title: title));
+        return;
+      }
+      if (route != null && route.isNotEmpty) {
+        Get.toNamed(route);
+      }
+      return;
+    }
+
+    if (rawPayload is String && rawPayload.isNotEmpty) {
+      try {
+        final decoded = jsonDecode(rawPayload);
+        if (decoded is Map) {
+          _handleNotificationClick(decoded);
+          return;
+        }
+      } catch (_) {}
+
+      // Fallback string payload
+      if (rawPayload.startsWith('http://') || rawPayload.startsWith('https://')) {
+        Get.to(() => PdfViewerScreen(pdfUrl: rawPayload, title: 'Document'));
+      } else {
+        Get.toNamed(rawPayload);
+      }
     }
   }
 
