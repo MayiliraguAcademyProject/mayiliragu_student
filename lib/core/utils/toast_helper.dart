@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../constants/app_colors.dart';
 import '../theme/app_text_styles.dart';
+import 'error_handler.dart';
 
 class AppToast {
   AppToast._();
@@ -41,6 +42,8 @@ class AppToast {
   }
 
   static void error(String message, {String title = 'Error'}) {
+    final cleanMessage = AppErrorHandler.getErrorMessage(message);
+
     Get.rawSnackbar(
       titleText: Text(
         title,
@@ -51,7 +54,7 @@ class AppToast {
         ),
       ),
       messageText: Text(
-        message,
+        cleanMessage,
         style: AppTextStyles.body.copyWith(color: Colors.white70, fontSize: 13),
       ),
       icon: const Icon(Icons.error_outline, color: Colors.white, size: 28),

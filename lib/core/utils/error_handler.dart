@@ -14,12 +14,27 @@ class AppErrorHandler {
       if (resData is Map) {
         if (resData['message'] != null &&
             resData['message'].toString().trim().isNotEmpty) {
-          return resData['message'].toString().trim();
+          final msg = resData['message'].toString().trim();
+          if (!_isRawTechnicalError(msg)) return msg;
         }
         if (resData['error'] != null &&
             resData['error'].toString().trim().isNotEmpty) {
-          return resData['error'].toString().trim();
+          final errStr = resData['error'].toString().trim();
+          if (!_isRawTechnicalError(errStr)) return errStr;
         }
+      }
+
+      final statusCode = error.response?.statusCode;
+      if (statusCode == 401) {
+        return 'Session expired. Please log in again.';
+      } else if (statusCode == 403) {
+        return 'Access denied. You do not have permission to access this content.';
+      } else if (statusCode == 404) {
+        return 'The requested resource was not found.';
+      } else if (statusCode == 502 || statusCode == 503 || statusCode == 504) {
+        return 'Server is temporarily unavailable. Please try again shortly.';
+      } else if (statusCode != null && statusCode >= 500) {
+        return 'Server error occurred. Please try again later.';
       }
 
       switch (error.type) {
@@ -29,18 +44,6 @@ class AppErrorHandler {
           return 'Connection timed out. Please check your internet connection.';
         case DioExceptionType.connectionError:
           return 'Unable to connect to the server. Please check your network.';
-        case DioExceptionType.badResponse:
-          final statusCode = error.response?.statusCode;
-          if (statusCode == 401) {
-            return 'Session expired. Please log in again.';
-          } else if (statusCode == 403) {
-            return 'Access denied. You do not have permission to access this content.';
-          } else if (statusCode == 404) {
-            return 'The requested content was not found.';
-          } else if (statusCode != null && statusCode >= 500) {
-            return 'Server is temporarily unavailable. Please try again later.';
-          }
-          return defaultMessage;
         case DioExceptionType.cancel:
           return 'Request was cancelled.';
         default:
@@ -49,13 +52,38 @@ class AppErrorHandler {
     }
 
     final str = error.toString();
-    if (str.startsWith('Exception: ')) {
-      return str.replaceFirst('Exception: ', '');
+    if (_isRawTechnicalError(str)) {
+      if (str.contains('502') || str.contains('503') || str.contains('504')) {
+        return 'Server is temporarily unavailable. Please try again shortly.';
+      }
+      if (str.contains('500')) {
+        return 'Server error occurred. Please try again later.';
+      }
+      return 'Unable to connect to the server. Please check your network connection.';
     }
-    if (str.contains('DioException') || str.contains('SocketException') || str.contains('HttpException')) {
-      return 'Network connection error. Please try again.';
+
+    if (str.startsWith('Exception: ')) {
+      final clean = str.replaceFirst('Exception: ', '').trim();
+      return _isRawTechnicalError(clean) ? defaultMessage : clean;
     }
 
     return str;
+  }
+
+  static bool _isRawTechnicalError(String text) {
+    final lower = text.toLowerCase();
+    return lower.contains('dioexception') ||
+        lower.contains('socketexception') ||
+        lower.contains('httpexception') ||
+        lower.contains('handshakeexception') ||
+        lower.contains('requestoptions') ||
+        lower.contains('validatestatus') ||
+        lower.contains('status code of 502') ||
+        lower.contains('bad response') ||
+        lower.contains('syntaxerror') ||
+        lower.contains('formatexception') ||
+        lower.contains('clientexception') ||
+        lower.contains('<!doctype html') ||
+        lower.contains('<html');
   }
 }

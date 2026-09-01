@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
+import '../../../core/utils/error_handler.dart';
 import '../../../core/utils/toast_helper.dart';
 import '../../../../app/routes/app_routes.dart';
 import '../repositories/auth_repository.dart';
@@ -100,13 +101,15 @@ class ForgotPasswordController extends GetxController {
           Get.toNamed(Routes.FORGOT_PASSWORD_OTP);
           return;
         }
-        if (resData is Map && resData['message'] != null) {
-          errorMessage.value = resData['message'].toString();
-        } else {
-          errorMessage.value = 'No account found with this email address.';
-        }
+        errorMessage.value = AppErrorHandler.getErrorMessage(
+          e,
+          defaultMessage: 'No account found with this email address.',
+        );
       } else {
-        errorMessage.value = 'An unexpected error occurred. Please try again.';
+        errorMessage.value = AppErrorHandler.getErrorMessage(
+          e,
+          defaultMessage: 'An unexpected error occurred. Please try again.',
+        );
       }
     } finally {
       isLoading.value = false;
@@ -153,13 +156,17 @@ class ForgotPasswordController extends GetxController {
           final retryAfter = resData['retryAfter'] ?? 60;
           startCountdown(retryAfter);
           errorMessage.value = resData['message'] ?? 'Please wait before requesting another code.';
-        } else if (resData is Map && resData['message'] != null) {
-          errorMessage.value = resData['message'].toString();
         } else {
-          errorMessage.value = 'Failed to resend code. Please try again.';
+          errorMessage.value = AppErrorHandler.getErrorMessage(
+            e,
+            defaultMessage: 'Failed to resend code. Please try again.',
+          );
         }
       } else {
-        errorMessage.value = 'Failed to resend code. Please try again.';
+        errorMessage.value = AppErrorHandler.getErrorMessage(
+          e,
+          defaultMessage: 'Failed to resend code. Please try again.',
+        );
       }
     } finally {
       isResending.value = false;
@@ -167,9 +174,9 @@ class ForgotPasswordController extends GetxController {
   }
 
   Future<void> verifyOtp() async {
-    final otp = otpController.text.trim();
-    if (otp.length != 6) {
-      errorMessage.value = 'Please enter the 6-digit verification code.';
+    final inputOtp = otpController.text.trim();
+    if (inputOtp.length != 6) {
+      errorMessage.value = 'Please enter a valid 6-digit verification code.';
       return;
     }
 
@@ -180,36 +187,30 @@ class ForgotPasswordController extends GetxController {
 
     isLoading.value = true;
     errorMessage.value = '';
-    successMessage.value = '';
 
     try {
       final response = await _authRepository.forgotPasswordVerifyOtp(
         email: email.value,
-        otp: otp,
+        otp: inputOtp,
       );
 
       if (response.statusCode == 200) {
-        final responseData = response.data['data'] as Map<String, dynamic>;
-        resetToken.value = responseData['resetToken'] as String;
-        _timer?.cancel();
-        newPasswordController.clear();
-        confirmPasswordController.clear();
-        AppToast.success('Code verified successfully.');
+        final resData = response.data;
+        resetToken.value = (resData is Map && resData['data'] is Map && resData['data']['resetToken'] != null)
+            ? resData['data']['resetToken'].toString()
+            : (resData is Map && resData['resetToken'] != null)
+                ? resData['resetToken'].toString()
+                : '';
+
         Get.toNamed(Routes.RESET_PASSWORD);
       } else {
         errorMessage.value = response.data['message'] ?? 'Verification failed.';
       }
     } catch (e) {
-      if (e is DioException) {
-        final resData = e.response?.data;
-        if (resData is Map && resData['message'] != null) {
-          errorMessage.value = resData['message'].toString();
-        } else {
-          errorMessage.value = 'Invalid or expired verification code.';
-        }
-      } else {
-        errorMessage.value = 'An unexpected error occurred. Please try again.';
-      }
+      errorMessage.value = AppErrorHandler.getErrorMessage(
+        e,
+        defaultMessage: 'Invalid or expired verification code.',
+      );
     } finally {
       isLoading.value = false;
     }
@@ -262,16 +263,10 @@ class ForgotPasswordController extends GetxController {
         errorMessage.value = response.data['message'] ?? 'Failed to reset password.';
       }
     } catch (e) {
-      if (e is DioException) {
-        final resData = e.response?.data;
-        if (resData is Map && resData['message'] != null) {
-          errorMessage.value = resData['message'].toString();
-        } else {
-          errorMessage.value = 'Failed to reset password. Please try again.';
-        }
-      } else {
-        errorMessage.value = 'An unexpected error occurred. Please try again.';
-      }
+      errorMessage.value = AppErrorHandler.getErrorMessage(
+        e,
+        defaultMessage: 'Failed to reset password. Please try again.',
+      );
     } finally {
       isLoading.value = false;
     }

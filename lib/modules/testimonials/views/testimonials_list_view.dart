@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
+import '../../../core/utils/toast_helper.dart';
 import '../../../core/models/testimonial_model.dart';
 import '../../live_videos/views/live_video_player_view.dart';
 import '../controllers/testimonials_controller.dart';
@@ -105,10 +106,9 @@ class TestimonialsListView extends GetView<TestimonialsController> {
       child: InkWell(
         onTap: () {
           if (videoId.isEmpty) {
-            Get.snackbar(
-              AppStrings.unsupportedLink,
+            AppToast.validation(
               AppStrings.testimonialUrlParseError,
-              snackPosition: SnackPosition.BOTTOM,
+              title: AppStrings.unsupportedLink,
             );
             return;
           }

@@ -74,7 +74,7 @@ class BookmarkedQuestionsController extends GetxController {
         }
       }
     } catch (e) {
-      AppToast.error('Failed to remove bookmark');
+      AppToast.error(AppErrorHandler.getErrorMessage(e, defaultMessage: 'Failed to remove bookmark'));
     }
   }
 

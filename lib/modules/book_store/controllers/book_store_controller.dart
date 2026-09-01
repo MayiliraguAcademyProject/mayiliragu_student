@@ -1,3 +1,4 @@
+import 'package:Mayiliragu/core/utils/error_handler.dart';
 import 'package:get/get.dart';
 import '../../study_materials/models/study_material_models.dart';
 import '../../study_materials/repositories/study_materials_repository.dart';
@@ -273,7 +274,7 @@ class BookStoreController extends GetxController {
         return order;
       }
     } catch (e) {
-      AppToast.error(e.toString().replaceAll('Exception:', ''), title: 'Order Error');
+      AppToast.error(AppErrorHandler.getErrorMessage(e, defaultMessage: 'Failed to place order.'), title: 'Order Error');
     } finally {
       isPlacingOrder.value = false;
     }
@@ -320,7 +321,7 @@ class BookStoreController extends GetxController {
         return true;
       }
     } catch (e) {
-      AppToast.error(e.toString().replaceAll('Exception:', ''), title: 'Upload Error');
+      AppToast.error(AppErrorHandler.getErrorMessage(e, defaultMessage: 'Failed to upload payment proof.'), title: 'Upload Error');
     } finally {
       isPlacingOrder.value = false;
     }
