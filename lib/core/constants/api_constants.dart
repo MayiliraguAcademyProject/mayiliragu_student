@@ -31,5 +31,7 @@ class ApiConstants {
   static const examUpdates = '/exam-updates';
   static const testBatchesStudent = '/test-batches/student';
   static String testBatchStudentDetail(String id) => '/test-batches/student/$id';
+  static String testBatchSubmitOmr(String paperId) => '/test-batches/question-papers/$paperId/omr-submission';
+  static String testBatchUpdateMarks(String paperId) => '/test-batches/question-papers/$paperId/omr-submission/marks';
+  static String testBatchAnswerKey(String paperId) => '/test-batches/question-papers/$paperId/answer-key';
 }
-

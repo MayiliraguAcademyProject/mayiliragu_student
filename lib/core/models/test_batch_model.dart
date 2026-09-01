@@ -2,9 +2,16 @@ class TestBatchPaperModel {
   final String id;
   final String categoryId;
   final String title;
-  final String fileUrl;
+  final String? fileUrl;
   final String fileName;
   final int? fileSize;
+  final DateTime? unlocksAt;
+  final bool isLocked;
+  final bool hasSubmittedOmr;
+  final bool answerKeyAvailable;
+  final int? totalMarks;
+  final String? omrFileUrl;
+  final String? omrFileName;
   final int order;
   final bool isEnabled;
 
@@ -12,21 +19,39 @@ class TestBatchPaperModel {
     required this.id,
     required this.categoryId,
     required this.title,
-    required this.fileUrl,
+    this.fileUrl,
     required this.fileName,
     this.fileSize,
+    this.unlocksAt,
+    this.isLocked = false,
+    this.hasSubmittedOmr = false,
+    this.answerKeyAvailable = false,
+    this.totalMarks,
+    this.omrFileUrl,
+    this.omrFileName,
     this.order = 0,
     this.isEnabled = true,
   });
 
   factory TestBatchPaperModel.fromJson(Map<String, dynamic> json) {
+    final rawSubmission = json['omrSubmission'] as Map<String, dynamic>?;
+
     return TestBatchPaperModel(
       id: json['id'] as String? ?? '',
       categoryId: json['categoryId'] as String? ?? json['category_id'] as String? ?? '',
       title: json['title'] as String? ?? '',
-      fileUrl: json['fileUrl'] as String? ?? json['file_url'] as String? ?? '',
+      fileUrl: json['fileUrl'] as String? ?? json['file_url'] as String?,
       fileName: json['fileName'] as String? ?? json['file_name'] as String? ?? '',
       fileSize: json['fileSize'] as int? ?? json['file_size'] as int?,
+      unlocksAt: json['unlocksAt'] != null
+          ? DateTime.tryParse(json['unlocksAt'] as String)
+          : (json['unlocks_at'] != null ? DateTime.tryParse(json['unlocks_at'] as String) : null),
+      isLocked: json['isLocked'] as bool? ?? json['is_locked'] as bool? ?? false,
+      hasSubmittedOmr: json['hasSubmittedOmr'] as bool? ?? json['has_submitted_omr'] as bool? ?? false,
+      answerKeyAvailable: json['answerKeyAvailable'] as bool? ?? json['answer_key_available'] as bool? ?? false,
+      totalMarks: rawSubmission?['totalMarks'] as int? ?? rawSubmission?['total_marks'] as int? ?? json['totalMarks'] as int?,
+      omrFileUrl: rawSubmission?['omrFileUrl'] as String? ?? rawSubmission?['omr_file_url'] as String?,
+      omrFileName: rawSubmission?['omrFileName'] as String? ?? rawSubmission?['omr_file_name'] as String?,
       order: json['order'] as int? ?? 0,
       isEnabled: json['isEnabled'] as bool? ?? json['is_enabled'] as bool? ?? true,
     );
