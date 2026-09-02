@@ -34,39 +34,47 @@ class TestBatchesListView extends GetView<TestBatchesController> {
 
         final list = controller.testBatches;
         if (list.isEmpty) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.layers_outlined,
-                    size: 64,
-                    color: isDark
-                        ? AppColors.textSecondaryDark.withValues(alpha: 0.5)
-                        : AppColors.textSecondary.withValues(alpha: 0.5),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    AppStrings.noTestBatches,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 15,
-                      color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
-                      fontWeight: FontWeight.w500,
+          return RefreshIndicator(
+            onRefresh: () => controller.fetchTestBatches(isPullToRefresh: true),
+            color: AppColors.primary,
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Container(
+                alignment: Alignment.center,
+                height: MediaQuery.of(context).size.height * 0.75,
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.layers_outlined,
+                      size: 64,
+                      color: isDark
+                          ? AppColors.textSecondaryDark.withValues(alpha: 0.5)
+                          : AppColors.textSecondary.withValues(alpha: 0.5),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 16),
+                    Text(
+                      AppStrings.noTestBatches,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           );
         }
 
         return RefreshIndicator(
-          onRefresh: controller.fetchTestBatches,
+          onRefresh: () => controller.fetchTestBatches(isPullToRefresh: true),
           color: AppColors.primary,
           child: ListView.builder(
+            physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             itemCount: list.length,
             itemBuilder: (context, index) {

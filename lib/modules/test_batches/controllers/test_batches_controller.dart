@@ -79,8 +79,10 @@ class TestBatchesController extends GetxController {
     fetchTestBatches();
   }
 
-  Future<void> fetchTestBatches() async {
-    isLoading.value = true;
+  Future<void> fetchTestBatches({bool isPullToRefresh = false}) async {
+    if (!isPullToRefresh && testBatches.isEmpty) {
+      isLoading.value = true;
+    }
     try {
       final response = await _apiClient.dio.get(ApiConstants.testBatchesStudent);
       if (response.data != null && response.data['status'] == 'success') {

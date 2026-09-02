@@ -3,9 +3,9 @@ class AppConfig {
 
   static const baseUrl = String.fromEnvironment(
     'BASE_URL',
-     defaultValue: 'https://api-mayiliragu.sathishdev.in/api',
+    // defaultValue: 'https://api-mayiliragu.sathishdev.in/api',
    // defaultValue: 'http://192.168.31.86:5000/api',
-    // defaultValue: 'http://api-stage-mayiliragu.sathishdev.in/api',
+     defaultValue: 'http://api-stage-mayiliragu.sathishdev.in/api',
   );
 
   static const appName = String.fromEnvironment(
