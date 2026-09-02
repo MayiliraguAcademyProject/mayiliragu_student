@@ -7,6 +7,7 @@ import '../widgets/demographics_section.dart';
 import '../widgets/contact_section.dart';
 import '../widgets/address_section.dart';
 import '../widgets/education_section.dart';
+import '../widgets/batch_preference_section.dart';
 
 class ProfileOnboardingView extends StatefulWidget {
   const ProfileOnboardingView({super.key});
@@ -19,7 +20,7 @@ class _ProfileOnboardingViewState extends State<ProfileOnboardingView> {
   final ProfileController controller = Get.find<ProfileController>();
   final PageController _pageController = PageController();
   int _activeStep = 0;
-  final int _totalSteps = 4;
+  final int _totalSteps = 5;
 
   @override
   void dispose() {
@@ -41,6 +42,9 @@ class _ProfileOnboardingViewState extends State<ProfileOnboardingView> {
         break;
       case 3:
         isValid = controller.validateEducationStep();
+        break;
+      case 4:
+        isValid = controller.validateBatchPreferenceStep();
         break;
       default:
         isValid = true;
@@ -170,6 +174,10 @@ class _ProfileOnboardingViewState extends State<ProfileOnboardingView> {
                       padding: const EdgeInsets.symmetric(horizontal: 24),
                       child: EducationSection(controller: controller),
                     ),
+                    SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: BatchPreferenceSection(controller: controller),
+                    ),
                   ],
                 ),
               ),
@@ -232,6 +240,8 @@ class _ProfileOnboardingViewState extends State<ProfileOnboardingView> {
         return 'Address';
       case 3:
         return 'Education';
+      case 4:
+        return 'Batch Preference';
       default:
         return '';
     }

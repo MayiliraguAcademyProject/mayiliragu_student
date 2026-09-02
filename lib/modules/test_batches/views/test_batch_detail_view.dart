@@ -1038,16 +1038,13 @@ class TestBatchDetailView extends GetView<TestBatchesController> {
     }
   }
 
-  // 1. UPCOMING / LOCKED CARD
+  // 1. LOCKED CARD (Sequential Progression)
   Widget _buildLockedPaperCard(
     BuildContext context,
     TestBatchPaperModel paper,
     bool isDark, {
     bool isAnswerKey = false,
   }) {
-    final formattedUnlock = _formatScheduledDateTime(paper.unlocksAt);
-    final relativeUnlock = _formatRelativeTime(paper.unlocksAt);
-
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -1077,7 +1074,7 @@ class TestBatchDetailView extends GetView<TestBatchesController> {
                 child: Icon(
                   isAnswerKey
                       ? Icons.key_off_rounded
-                      : Icons.lock_clock_rounded,
+                      : Icons.lock_outline_rounded,
                   size: 20,
                   color: const Color(0xFFD97706),
                 ),
@@ -1103,7 +1100,7 @@ class TestBatchDetailView extends GetView<TestBatchesController> {
                           child: Text(
                             isAnswerKey
                                 ? 'ANSWER KEY (LOCKED)'
-                                : 'UPCOMING TEST',
+                                : 'LOCKED TEST',
                             style: const TextStyle(
                               fontSize: 9.5,
                               fontWeight: FontWeight.bold,
@@ -1112,18 +1109,6 @@ class TestBatchDetailView extends GetView<TestBatchesController> {
                             ),
                           ),
                         ),
-                        if (relativeUnlock.isNotEmpty &&
-                            paper.unlocksAt != null) ...[
-                          const SizedBox(width: 6),
-                          Text(
-                            '($relativeUnlock)',
-                            style: const TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFFD97706),
-                            ),
-                          ),
-                        ],
                       ],
                     ),
                     const SizedBox(height: 6),
@@ -1168,7 +1153,7 @@ class TestBatchDetailView extends GetView<TestBatchesController> {
                 Icon(
                   isAnswerKey
                       ? Icons.lock_outline_rounded
-                      : Icons.event_available_rounded,
+                      : Icons.lock_clock_rounded,
                   size: 14,
                   color: const Color(0xFFD97706),
                 ),
@@ -1176,11 +1161,8 @@ class TestBatchDetailView extends GetView<TestBatchesController> {
                 Expanded(
                   child: Text(
                     isAnswerKey
-                        ? (paper.unlocksAt != null &&
-                                  paper.unlocksAt!.isAfter(DateTime.now())
-                              ? 'Unlocks with schedule: $formattedUnlock'
-                              : 'Submit OMR for Question Paper to unlock Answer Key')
-                        : 'Scheduled for: $formattedUnlock',
+                        ? 'Submit OMR for Question Paper to unlock Answer Key'
+                        : 'Complete previous test and update score to unlock',
                     style: const TextStyle(
                       fontSize: 11.5,
                       fontWeight: FontWeight.w600,
@@ -2080,57 +2062,6 @@ class TestBatchDetailView extends GetView<TestBatchesController> {
   }
 
   // ================= HELPERS: DATE & SIZE FORMATTING ================= //
-  static const _monthNames = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ];
-
-  static const _dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-
-  String _formatScheduledDateTime(DateTime? dt) {
-    if (dt == null) return 'Scheduled Date';
-    final local = dt.toLocal();
-    final dayName = _dayNames[(local.weekday - 1).clamp(0, 6)];
-    final monthName = _monthNames[(local.month - 1).clamp(0, 11)];
-    final day = local.day.toString().padLeft(2, '0');
-    final year = local.year;
-
-    final hour24 = local.hour;
-    final hour12 = hour24 == 0 ? 12 : (hour24 > 12 ? hour24 - 12 : hour24);
-    final minute = local.minute.toString().padLeft(2, '0');
-    final period = hour24 >= 12 ? 'PM' : 'AM';
-
-    return '$dayName, $day $monthName $year • ${hour12.toString().padLeft(2, '0')}:$minute $period';
-  }
-
-  String _formatRelativeTime(DateTime? dt) {
-    if (dt == null) return '';
-    final now = DateTime.now();
-    final diff = dt.difference(now);
-
-    if (diff.isNegative) return 'Now';
-
-    if (diff.inDays > 0) {
-      return 'In ${diff.inDays} ${diff.inDays == 1 ? 'day' : 'days'}';
-    } else if (diff.inHours > 0) {
-      return 'In ${diff.inHours} ${diff.inHours == 1 ? 'hr' : 'hrs'}';
-    } else if (diff.inMinutes > 0) {
-      return 'In ${diff.inMinutes} mins';
-    } else {
-      return 'Soon';
-    }
-  }
-
   String _formatFileSize(int bytes) {
     final kb = bytes / 1024;
     if (kb < 1024) {

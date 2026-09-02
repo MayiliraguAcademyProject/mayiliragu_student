@@ -9,6 +9,7 @@ import '../widgets/demographics_section.dart';
 import '../widgets/contact_section.dart';
 import '../widgets/address_section.dart';
 import '../widgets/education_section.dart';
+import '../widgets/batch_preference_section.dart';
 
 class ProfileView extends GetView<ProfileController> {
   const ProfileView({super.key});
@@ -100,36 +101,75 @@ class ProfileView extends GetView<ProfileController> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withAlpha(40),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: Colors.white.withAlpha(60)),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.verified,
-                            color: Colors.greenAccent,
-                            size: 14,
+                    Wrap(
+                      alignment: WrapAlignment.center,
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
                           ),
-                          const SizedBox(width: 6),
-                          Text(
-                            '${controller.userRole.value.toUpperCase()} ACCOUNT',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 1.1,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withAlpha(40),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: Colors.white.withAlpha(60)),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.verified,
+                                color: Colors.greenAccent,
+                                size: 14,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                '${controller.userRole.value.toUpperCase()} ACCOUNT',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 1.1,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (UserRole.fromString(controller.userRole.value).isStudent)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withAlpha(40),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: Colors.white.withAlpha(60)),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.event_available_rounded,
+                                  color: Colors.amberAccent,
+                                  size: 14,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  controller.selectedBatchType.value.displayName.toUpperCase(),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 1.1,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
+                      ],
                     ),
                   ],
                 ),
@@ -181,6 +221,13 @@ class ProfileView extends GetView<ProfileController> {
                           title: 'Education & Medium',
                           icon: Icons.school_outlined,
                           children: [EducationSection(controller: controller)],
+                        ),
+                        const Divider(height: 1, indent: 56),
+                        _buildExpansionItem(
+                          context: context,
+                          title: 'Batch Preference',
+                          icon: Icons.event_note_outlined,
+                          children: [BatchPreferenceSection(controller: controller)],
                         ),
                         const SizedBox(height: 8),
                         Padding(

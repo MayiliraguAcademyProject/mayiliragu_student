@@ -1,3 +1,5 @@
+import '../../core/enums/batch_type.dart';
+
 class StudentProfileModel {
   final String id;
   final String userId;
@@ -25,6 +27,7 @@ class StudentProfileModel {
   final int? yearOfPassing;
   final double? percentage;
   final String? mediumOfEducation;
+  final BatchType batchType;
   final bool isPremium;
 
   StudentProfileModel({
@@ -54,6 +57,7 @@ class StudentProfileModel {
     this.yearOfPassing,
     this.percentage,
     this.mediumOfEducation,
+    this.batchType = BatchType.regular,
     this.isPremium = false,
   });
 
@@ -73,6 +77,8 @@ class StudentProfileModel {
     final bool calculatedIsPremium = paymentsList != null
         ? (rawIsPremium && paymentsList.isNotEmpty && totalPaid > 0)
         : rawIsPremium;
+
+    final rawBatchType = json['batchType'] ?? json['batch_type'];
 
     return StudentProfileModel(
       id: json['id'] as String,
@@ -101,6 +107,7 @@ class StudentProfileModel {
       yearOfPassing: json['yearOfPassing'] as int?,
       percentage: (json['percentage'] as num?)?.toDouble(),
       mediumOfEducation: json['mediumOfEducation'] as String?,
+      batchType: BatchType.fromString(rawBatchType?.toString()),
       isPremium: calculatedIsPremium,
     );
   }
@@ -133,6 +140,7 @@ class StudentProfileModel {
       'yearOfPassing': yearOfPassing,
       'percentage': percentage,
       'mediumOfEducation': mediumOfEducation,
+      'batchType': batchType.toApiString(),
       'isPremium': isPremium,
     };
   }

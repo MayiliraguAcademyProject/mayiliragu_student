@@ -11,6 +11,7 @@ import '../../../core/network/api_client.dart';
 import '../../../core/services/secure_storage_service.dart';
 import '../../../app/routes/app_routes.dart';
 import '../../../shared/models/student_profile_model.dart';
+import '../../../core/enums/batch_type.dart';
 import '../../../main.dart';
 
 class ProfileController extends GetxController {
@@ -54,11 +55,11 @@ class ProfileController extends GetxController {
   final yearOfPassingController = TextEditingController();
   final percentageController = TextEditingController();
 
-  // Rx values for dropdowns
   final selectedGender = ''.obs;
   final selectedCategory = 'General'.obs;
   final selectedMedium = 'English'.obs;
   final selectedState = 'Tamil Nadu'.obs;
+  final selectedBatchType = BatchType.regular.obs;
   final userId = ''.obs;
   final studentProfile = Rxn<StudentProfileModel>();
 
@@ -128,6 +129,11 @@ class ProfileController extends GetxController {
         userRole.value = data['role'] ?? '';
         userCreatedAt.value = data['createdAt'] ?? '';
         nameController.text = userName.value;
+
+        if (data['studentProfile'] != null) {
+          _populateStudentProfileData(data['studentProfile']);
+        }
+
         if (userId.value.isNotEmpty && UserRole.fromString(userRole.value).isStudent) {
           await fetchStudentProfile(userId.value);
         }
@@ -138,6 +144,52 @@ class ProfileController extends GetxController {
       AppToast.error(AppErrorHandler.getErrorMessage(e, defaultMessage: 'Failed to load profile details.'));
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  void _populateStudentProfileData(Map<String, dynamic> profileData) {
+    try {
+      final profile = StudentProfileModel.fromJson(profileData);
+      studentProfile.value = profile;
+      selectedGender.value = profile.gender ?? '';
+      if (profile.dob != null) {
+        try {
+          final parsed = DateTime.parse(profile.dob!);
+          dobController.text = "${parsed.year}-${parsed.month.toString().padLeft(2, '0')}-${parsed.day.toString().padLeft(2, '0')}";
+        } catch (_) {
+          dobController.text = profile.dob!.split('T')[0];
+        }
+      } else {
+        dobController.text = '';
+      }
+      bloodGroupController.text = profile.bloodGroup ?? '';
+      aadhaarController.text = profile.aadhaarNumber ?? '';
+      nationalityController.text = profile.nationality;
+      selectedCategory.value = profile.category ?? 'General';
+
+      mobileController.text = profile.mobileNumber ?? '';
+      whatsappController.text = profile.whatsappNumber ?? '';
+      emergencyController.text = profile.emergencyContact ?? '';
+      parentNameController.text = profile.parentName ?? '';
+      parentMobileController.text = profile.parentMobile ?? '';
+
+      currentAddressController.text = profile.currentAddress ?? '';
+      permanentAddressController.text = profile.permanentAddress ?? '';
+      cityController.text = profile.city ?? '';
+      districtController.text = profile.district ?? '';
+      selectedState.value = profile.state;
+      pinCodeController.text = profile.pinCode ?? '';
+
+      qualificationController.text = profile.highestQualification ?? '';
+      degreeController.text = profile.degree ?? '';
+      collegeController.text = profile.college ?? '';
+      yearOfPassingController.text = profile.yearOfPassing?.toString() ?? '';
+      percentageController.text = profile.percentage?.toString() ?? '';
+      selectedMedium.value = profile.mediumOfEducation ?? 'English';
+      selectedBatchType.value = profile.batchType;
+      studentProfileLoaded.value = true;
+    } catch (e) {
+      debugPrint('Error populating student profile: $e');
     }
   }
 
@@ -218,50 +270,12 @@ class ProfileController extends GetxController {
 
   Future<void> fetchStudentProfile(String uid) async {
     try {
-      studentProfileLoaded.value = false;
       final response = await _repository.getStudentProfile(uid);
       if (response.statusCode == 200) {
         final profileData = response.data['data'];
         if (profileData != null) {
-          final profile = StudentProfileModel.fromJson(profileData);
-          studentProfile.value = profile;
-          selectedGender.value = profile.gender ?? '';
-          if (profile.dob != null) {
-            try {
-              final parsed = DateTime.parse(profile.dob!);
-              dobController.text = "${parsed.year}-${parsed.month.toString().padLeft(2, '0')}-${parsed.day.toString().padLeft(2, '0')}";
-            } catch (_) {
-              dobController.text = profile.dob!.split('T')[0];
-            }
-          } else {
-            dobController.text = '';
-          }
-          bloodGroupController.text = profile.bloodGroup ?? '';
-          aadhaarController.text = profile.aadhaarNumber ?? '';
-          nationalityController.text = profile.nationality;
-          selectedCategory.value = profile.category ?? 'General';
-
-          mobileController.text = profile.mobileNumber ?? '';
-          whatsappController.text = profile.whatsappNumber ?? '';
-          emergencyController.text = profile.emergencyContact ?? '';
-          parentNameController.text = profile.parentName ?? '';
-          parentMobileController.text = profile.parentMobile ?? '';
-
-          currentAddressController.text = profile.currentAddress ?? '';
-          permanentAddressController.text = profile.permanentAddress ?? '';
-          cityController.text = profile.city ?? '';
-          districtController.text = profile.district ?? '';
-          selectedState.value = profile.state;
-          pinCodeController.text = profile.pinCode ?? '';
-
-          qualificationController.text = profile.highestQualification ?? '';
-          degreeController.text = profile.degree ?? '';
-          collegeController.text = profile.college ?? '';
-          yearOfPassingController.text = profile.yearOfPassing?.toString() ?? '';
-          percentageController.text = profile.percentage?.toString() ?? '';
-          selectedMedium.value = profile.mediumOfEducation ?? 'English';
+          _populateStudentProfileData(profileData);
         }
-        studentProfileLoaded.value = true;
       }
     } catch (e) {
       debugPrint('Error fetching student profile: $e');
@@ -424,11 +438,16 @@ class ProfileController extends GetxController {
     return true;
   }
 
+  bool validateBatchPreferenceStep() {
+    return true;
+  }
+
   bool validateAllSteps() {
     return validateDemographicsStep() &&
         validateContactStep() &&
         validateAddressStep() &&
-        validateEducationStep();
+        validateEducationStep() &&
+        validateBatchPreferenceStep();
   }
 
   Future<bool> updateStudentProfile({bool isOnboarding = false}) async {
@@ -497,6 +516,7 @@ class ProfileController extends GetxController {
         yearOfPassing: yearOfPassingController.text.isEmpty ? null : int.tryParse(yearOfPassingController.text),
         percentage: percentageController.text.isEmpty ? null : double.tryParse(percentageController.text),
         mediumOfEducation: selectedMedium.value.isEmpty ? 'English' : selectedMedium.value,
+        batchType: selectedBatchType.value,
       );
 
       final response = await _repository.updateStudentProfile(userId.value, updatedProfile.toJson());
