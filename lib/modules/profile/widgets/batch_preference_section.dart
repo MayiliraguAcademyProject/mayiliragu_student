@@ -39,6 +39,14 @@ class BatchPreferenceSection extends StatelessWidget {
         icon: Icons.nights_stay_rounded,
         accentColor: Colors.orange.shade800,
       ),
+      _BatchOption(
+        type: BatchType.testBatch,
+        title: 'Test Batch',
+        subtitle: 'Structured Test Series',
+        description: 'Students enrolled in dedicated test-series programmes with periodic OMR/online exams.',
+        icon: Icons.assignment_rounded,
+        accentColor: Colors.teal,
+      ),
     ];
 
     return Obx(() {

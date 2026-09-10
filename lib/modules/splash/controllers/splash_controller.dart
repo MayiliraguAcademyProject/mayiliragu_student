@@ -26,7 +26,7 @@ class SplashController extends GetxController {
 
   Future<void> _initializeApp() async {
     // 1. Get installed app version info
-    String installedVersion = '1.0.2';
+    String installedVersion = '1.0.3';
     try {
       final PackageInfo packageInfo = await PackageInfo.fromPlatform();
       installedVersion = packageInfo.version;

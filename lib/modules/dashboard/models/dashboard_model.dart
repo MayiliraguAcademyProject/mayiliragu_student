@@ -109,14 +109,18 @@ class BannerModel {
 
   factory BannerModel.fromJson(Map<String, dynamic> json) {
     List<String>? curriculum;
-    if (json['curriculumJson'] != null) {
+    final dynamic rawCurriculum = json['curriculumJson'];
+    if (rawCurriculum != null) {
       try {
-        final dynamic rawCurriculum = json['curriculumJson'];
-        final dynamic parsed = rawCurriculum is String 
-            ? jsonDecode(rawCurriculum) 
-            : rawCurriculum;
-        if (parsed is List) {
-          curriculum = parsed
+        if (rawCurriculum is String && rawCurriculum.trim().isNotEmpty) {
+          final dynamic parsed = jsonDecode(rawCurriculum);
+          if (parsed is List) {
+            curriculum = parsed
+                .map((e) => e is Map ? (e['title'] ?? '').toString() : e.toString())
+                .toList();
+          }
+        } else if (rawCurriculum is List) {
+          curriculum = rawCurriculum
               .map((e) => e is Map ? (e['title'] ?? '').toString() : e.toString())
               .toList();
         }
