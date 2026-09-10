@@ -4,6 +4,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/models/exam_update_model.dart';
 import '../../../core/utils/toast_helper.dart';
+import '../../../shared/widgets/image_viewer_screen.dart';
 import '../../../shared/widgets/pdf_viewer_screen.dart';
 import '../controllers/exam_updates_controller.dart';
 
@@ -76,11 +77,23 @@ class ExamUpdatesListView extends GetView<ExamUpdatesController> {
     );
   }
 
+  bool _isImage(String url) {
+    final clean = url.toLowerCase().split('?').first;
+    return clean.endsWith('.png') ||
+        clean.endsWith('.jpg') ||
+        clean.endsWith('.jpeg') ||
+        clean.endsWith('.webp') ||
+        clean.endsWith('.gif') ||
+        clean.endsWith('.svg');
+  }
+
   Widget _buildUpdateCard(
     BuildContext context,
     ExamUpdateModel update,
     bool isDark,
   ) {
+    final isImg = _isImage(update.pdfUrl);
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
@@ -98,7 +111,7 @@ class ExamUpdatesListView extends GetView<ExamUpdatesController> {
         ],
       ),
       child: InkWell(
-        onTap: () => _openPdf(update.pdfUrl, update.title),
+        onTap: () => _openAttachment(update.pdfUrl, update.title),
         borderRadius: BorderRadius.circular(20),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -109,12 +122,14 @@ class ExamUpdatesListView extends GetView<ExamUpdatesController> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
+                  color: isImg
+                      ? Colors.teal.withValues(alpha: 0.1)
+                      : AppColors.primary.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
-                  Icons.picture_as_pdf_outlined,
-                  color: AppColors.primary,
+                child: Icon(
+                  isImg ? Icons.image_outlined : Icons.picture_as_pdf_outlined,
+                  color: isImg ? Colors.teal : AppColors.primary,
                   size: 24,
                 ),
               ),
@@ -125,13 +140,36 @@ class ExamUpdatesListView extends GetView<ExamUpdatesController> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      update.title,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
-                      ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            update.title,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: isImg
+                                ? Colors.teal.withValues(alpha: 0.1)
+                                : AppColors.primary.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            isImg ? 'IMAGE' : 'PDF',
+                            style: TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold,
+                              color: isImg ? Colors.teal : AppColors.primary,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     if (update.description != null &&
                         update.description!.trim().isNotEmpty) ...[
@@ -168,18 +206,27 @@ class ExamUpdatesListView extends GetView<ExamUpdatesController> {
     );
   }
 
-  void _openPdf(String pdfUrl, String title) {
-    if (pdfUrl.trim().isEmpty) {
-      AppToast.error('PDF URL is empty.');
+  void _openAttachment(String url, String title) {
+    if (url.trim().isEmpty) {
+      AppToast.error('Attachment link is empty.');
       return;
     }
 
-    Get.to(
-      () => PdfViewerScreen(
-        pdfUrl: pdfUrl,
-        title: title,
-      ),
-    );
+    if (_isImage(url)) {
+      Get.to(
+        () => ImageViewerScreen(
+          imageUrl: url,
+          title: title,
+        ),
+      );
+    } else {
+      Get.to(
+        () => PdfViewerScreen(
+          pdfUrl: url,
+          title: title,
+        ),
+      );
+    }
   }
 
   String _formatDate(DateTime date) {
@@ -190,3 +237,4 @@ class ExamUpdatesListView extends GetView<ExamUpdatesController> {
     return '${date.day.toString().padLeft(2, '0')} ${months[date.month - 1]} ${date.year}';
   }
 }
+
